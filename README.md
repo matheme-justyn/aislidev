@@ -98,6 +98,7 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 - **簡報引擎**: Slidev
 - **容器化**: Podman（OCI 相容，也可用 Docker）
 - **版本控制**: Semantic Versioning + Conventional Commits
+- **AI 開發**: OpenCode + oh-my-opencode (Sisyphus Agent)
 
 ---
 
@@ -200,6 +201,45 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 - [Port Configuration](./docs/guides/PORT_CONFIGURATION.md) - Port 配置說明
 - [Architecture Decision Records](./docs/architecture/ADR/) - 架構決策記錄
 - [CHANGELOG](./CHANGELOG.md) - 版本變更記錄
+
+---
+
+## 🤖 AI 開發工具 | AI Development Tools
+
+本專案使用 **OpenCode** 作為主要的 AI agentic 架構，並配置了 **oh-my-opencode** 插件以提升開發效率。
+
+### OpenCode + oh-my-opencode
+
+**已安裝並配置**：
+
+- ✅ **oh-my-opencode@latest** - 強化版 OpenCode 插件
+- ✅ **Sisyphus Agent** - 主要編排者 (Claude Opus 4.6 Max)
+- ✅ **多模型支援** - Claude, GitHub Copilot, Gemini (Antigravity)
+- ✅ **背景 Agent 系統** - 並行執行多個任務
+- ✅ **進階工具** - LSP/AST-Grep, Todo Enforcer, Comment Checker
+
+**快速使用**：
+
+```bash
+# 啟動 OpenCode（已自動配置）
+opencode
+
+# 使用 ultrawork 模式（自動完成任務）
+ulw 你的任務描述
+```
+
+**配置位置**：
+
+- 全域配置：`~/.config/opencode/opencode.json`
+- 全域 oh-my-opencode：`~/.config/opencode/oh-my-opencode.json`
+- 專案配置：`AGENTS.md`（OpenCode 主要配置）
+
+**其他 AI 工具**：
+
+- Claude Code 使用者請參考：`.claude/README.md`
+- Roo Code 使用者請參考：`.roo/README.md`
+
+詳細資訊請參考 [AGENTS.md](./AGENTS.md) 和 [ADR-003: OpenCode-First AI Architecture](./docs/architecture/ADR/003-opencode-first-architecture.md)
 
 ---
 

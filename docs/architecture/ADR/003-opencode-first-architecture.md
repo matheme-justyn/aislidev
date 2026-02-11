@@ -157,11 +157,42 @@ Initially, this project was designed to support multiple AI coding assistants (C
 - **Main file**: `AGENTS.md` (project root)
   <!-- 主要檔案：AGENTS.md（專案根目錄） -->
 
+- **OpenCode plugin**: `oh-my-opencode@latest` with enhanced agent orchestration
+  <!-- OpenCode 插件：oh-my-opencode@latest 具備增強的 agent 編排 -->
+
 - **Shared context**: `.ai/context/` (ARCHITECTURE.md, CONVENTIONS.md, WORKFLOWS.md)
   <!-- 共享上下文：.ai/context/（ARCHITECTURE.md、CONVENTIONS.md、WORKFLOWS.md） -->
 
 - **Architecture decisions**: `docs/architecture/ADR/`
   <!-- 架構決策：docs/architecture/ADR/ -->
+
+### oh-my-opencode Configuration
+
+<!-- oh-my-opencode 配置 -->
+
+**Installed**: ✅ Configured with Claude Pro, GitHub Copilot, and Gemini (Antigravity)
+
+<!-- 已安裝：✅ 配置了 Claude Pro、GitHub Copilot 和 Gemini（Antigravity） -->
+
+**Configured Agents**:
+
+<!-- 已配置的 Agent： -->
+
+- Sisyphus (Claude Opus 4.6 Max) - Main orchestrator
+- Hephaestus (GPT 5.3 Codex) - Autonomous deep worker
+- Oracle (GPT 5.2) - Architecture and debugging
+- Prometheus (Claude Opus 4.6 Max) - Planner
+- Librarian (Claude Sonnet 4.5) - Documentation search
+- Explore (Claude Haiku 4.5) - Fast codebase exploration
+- Multimodal Looker (Gemini 3 Flash) - Visual engineering
+
+**Configuration files**:
+
+<!-- 配置檔案： -->
+
+- Global: `~/.config/opencode/opencode.json`
+- Global oh-my-opencode: `~/.config/opencode/oh-my-opencode.json`
+- Project: `AGENTS.md` (this file documents the setup)
 
 ### Compatibility for Other Tools
 

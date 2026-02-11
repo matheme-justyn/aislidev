@@ -111,9 +111,67 @@ OpenCode MUST consult this guide after making significant changes to determine i
 
 <!-- 使用 OpenCode 工作 -->
 
-This project is optimized for **OpenCode** as the primary AI agentic architecture.
+This project is optimized for **OpenCode** as the primary AI agentic architecture, with **oh-my-opencode** plugin installed for enhanced capabilities.
 
-<!-- 本專案以 **OpenCode** 作為主要的 AI agentic 架構進行優化。 -->
+<!-- 本專案以 **OpenCode** 作為主要的 AI agentic 架構進行優化，並安裝了 **oh-my-opencode** 插件以增強功能。 -->
+
+### oh-my-opencode Installation
+
+<!-- oh-my-opencode 安裝 -->
+
+**Status**: ✅ Installed and configured
+
+<!-- 狀態：✅ 已安裝並配置 -->
+
+This project has oh-my-opencode installed with the following configuration:
+
+<!-- 本專案已安裝 oh-my-opencode，配置如下： -->
+
+- **Version**: `oh-my-opencode@latest`
+- **Auth Plugin**: `opencode-antigravity-auth@1.4.6`
+- **Authenticated Providers**:
+  - ✅ Amazon Bedrock (Claude)
+  - ✅ GitHub Copilot
+  - ✅ Google (Gemini via Antigravity)
+
+**Configured Agents**:
+
+<!-- 已配置的 Agent： -->
+
+- **Sisyphus** (Claude Opus 4.6 Max) - Main orchestrator
+- **Hephaestus** (GPT 5.3 Codex Medium) - Autonomous deep worker
+- **Oracle** (GPT 5.2 High) - Architecture and debugging
+- **Prometheus** (Claude Opus 4.6 Max) - Planner
+- **Librarian** (Claude Sonnet 4.5) - Documentation and code search
+- **Explore** (Claude Haiku 4.5) - Fast codebase exploration
+- **Multimodal Looker** (Gemini 3 Flash) - Visual engineering
+
+**Quick Usage**:
+
+<!-- 快速使用： -->
+
+```bash
+# Use ultrawork mode (or ulw) in your prompt
+ulw <your task description>
+
+# Example: Fix all ESLint warnings
+ulw fix all ESLint warnings
+
+# Example: Create a new feature
+ulw create a user authentication system
+```
+
+**Configuration Locations**:
+
+<!-- 配置位置： -->
+
+- Global: `~/.config/opencode/opencode.json`
+- Global oh-my-opencode: `~/.config/opencode/oh-my-opencode.json`
+- Project: `AGENTS.md` (this file)
+
+See [oh-my-opencode documentation](https://github.com/code-yeongyu/oh-my-opencode) for more information.
+
+<!-- 更多資訊請參考 oh-my-opencode 文檔。 -->
 
 ### Shared Context System
 
@@ -637,6 +695,36 @@ feat(editor,preview): synchronize scroll position
 **IMPORTANT**: OpenCode analyzes commits before creation, but does NOT propose version bumps unless user requests.
 
 <!-- 重要：OpenCode 在建立提交前分析提交，但不會建議版本更新除非使用者要求。 -->
+
+**Step 0: Check Personal Notes System (Optional)**
+
+<!-- 步驟 0：檢查個人筆記系統（可選） -->
+
+Before analyzing commit, check if `.notes/docs-list.md` exists:
+
+<!-- 在分析 commit 前，檢查 `.notes/docs-list.md` 是否存在： -->
+
+1. **If `.notes/docs-list.md` exists**:
+   <!-- 如果 .notes/docs-list.md 存在： -->
+   - Read `.notes/AI_INSTRUCTIONS.md` for note-taking instructions
+   <!-- 讀取 .notes/AI_INSTRUCTIONS.md 了解筆記指令 -->
+   - Read `.notes/docs-list.md` to understand which notes to maintain
+   <!-- 讀取 .notes/docs-list.md 了解需要維護哪些筆記 -->
+   - **After Step 5 (git operations)**, update relevant notes based on commit content
+   <!-- 在步驟 5（git 操作）之後，根據 commit 內容更新相關筆記 -->
+
+2. **If `.notes/docs-list.md` does NOT exist**:
+   <!-- 如果 .notes/docs-list.md 不存在： -->
+   - Skip note-taking workflow, proceed with normal commit process
+   <!-- 跳過筆記工作流程，繼續正常的 commit 流程 -->
+
+**Note**: Personal notes in `.notes/` are git-ignored and used for personal reference and report generation.
+
+<!-- 註記：.notes/ 中的個人筆記被 git 忽略，用於個人參考和報告生成。 -->
+
+See [.notes/AI_INSTRUCTIONS.md](./.notes/AI_INSTRUCTIONS.md) for detailed note-taking instructions.
+
+<!-- 詳細的筆記指令請參考 .notes/AI_INSTRUCTIONS.md。 -->
 
 **Step 1: Analyze Changes**
 

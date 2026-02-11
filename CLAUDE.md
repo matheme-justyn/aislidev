@@ -233,6 +233,38 @@ We follow **Semantic Versioning 2.0.0**: `MAJOR.MINOR.PATCH`
 - **PATCH**: Bug fixes (backward-compatible)
 <!-- PATCH：錯誤修復（向後相容） -->
 
+### Pre-Release Stage (0.x.x)
+<!-- Pre-Release 階段（0.x.x） -->
+
+**IMPORTANT**: This project is currently in **Pre-Release (0.x.x)** stage.
+<!-- 重要：此專案目前處於 Pre-Release（0.x.x）階段。 -->
+
+**Pre-Release Rules**:
+<!-- Pre-Release 規則： -->
+
+1. **Stay in 0.x.x until POC/MVP ready**: Do not bump to 1.0.0 until the project reaches POC/MVP quality
+   <!-- 保持 0.x.x 直到 POC/MVP 準備好：在專案達到 POC/MVP 品質之前不要升級到 1.0.0 -->
+
+2. **Breaking changes are MINOR bumps**: In 0.x.x stage, even breaking changes only trigger MINOR version bumps (0.1.0 → 0.2.0), not MAJOR
+   <!-- 破壞性變更是 MINOR 更新：在 0.x.x 階段，即使是破壞性變更也只觸發 MINOR 版本更新，不是 MAJOR -->
+
+3. **Ask before 1.0.0**: Claude MUST ask the user before any 1.0.0 transition: "Are we ready to transition to 1.0.0 release stage?"
+   <!-- 在 1.0.0 前詢問：Claude 在任何 1.0.0 過渡前必須詢問使用者：「我們準備好過渡到 1.0.0 release 階段了嗎？」 -->
+
+**When to transition to 1.0.0**:
+<!-- 何時過渡到 1.0.0： -->
+
+- [ ] POC/MVP complete
+      <!-- POC/MVP 完成 -->
+- [ ] Core features stable
+      <!-- 核心功能穩定 -->
+- [ ] API surface finalized
+      <!-- API 介面確定 -->
+- [ ] Documentation complete
+      <!-- 文檔完整 -->
+- [ ] User explicitly approves transition
+      <!-- 使用者明確批准過渡 -->
+
 ### Commit Message Format
 <!-- 提交訊息格式 -->
 
@@ -342,6 +374,119 @@ feat(editor,preview): synchronize scroll position
 
 - Consider automated version bumping and changelog generation
 <!-- 考慮自動化版本更新和 changelog 生成 -->
+
+### Before Every Commit: Version Analysis
+<!-- 每次提交前：版本分析 -->
+
+**CRITICAL**: Claude MUST perform this analysis before EVERY git commit.
+<!-- 重要：Claude 必須在每次 git commit 前執行此分析。 -->
+
+**Step 1: Analyze Changes**
+<!-- 步驟 1：分析變更 -->
+
+Review all changes and categorize them:
+<!-- 檢視所有變更並分類： -->
+
+- `feat:` commits → MINOR bump (0.x.0)
+- `fix:` commits → PATCH bump (0.0.x)
+- `feat!:` or `BREAKING CHANGE:` → MINOR bump in Pre-Release (0.x.0), MAJOR bump after 1.0.0
+- `docs:`, `chore:`, `refactor:` (without breaking changes) → No version bump
+
+**Step 2: Group Logically Related Changes**
+<!-- 步驟 2：分組邏輯相關的變更 -->
+
+If the discussion covers multiple independent features or fixes:
+<!-- 如果討論涵蓋多個獨立功能或修復： -->
+
+1. Identify logical groups (e.g., "Feature A", "Feature B", "Documentation")
+   <!-- 識別邏輯群組（例如「功能 A」、「功能 B」、「文檔」） -->
+2. Each group should be a separate commit for better traceability
+   <!-- 每個群組應該是獨立的 commit 以便更好追溯 -->
+3. Determine version bump for each group
+   <!-- 確定每個群組的版本更新 -->
+
+**Step 3: Present Commit Plan to User**
+<!-- 步驟 3：向使用者呈現提交計畫 -->
+
+Claude MUST present a structured plan:
+<!-- Claude 必須呈現結構化的計畫： -->
+
+```markdown
+## 📋 提交計畫 | Commit Plan
+
+### 變更分析 | Change Analysis
+
+[Summary of all changes discussed]
+
+### 版本號判定 | Version Determination
+
+**當前版本 | Current**: v0.x.x
+**建議版本 | Proposed**: v0.y.z
+
+**原因 | Rationale**:
+- [List commit types and their version impact]
+- Pre-Release 調整: [Explain any Pre-Release specific adjustments]
+
+### 提交選項 | Commit Options
+
+**選項 A: 單一提交 (推薦)**
+<!-- Option A: Single Commit (Recommended) -->
+
+- Commit 1: [type]([scope]): [description]
+  - Files: [list]
+  - Version: v0.x.x → v0.y.z
+
+**選項 B: 多個提交**
+<!-- Option B: Multiple Commits -->
+
+- Commit 1: [type]([scope]): [description]
+  - Files: [list]
+  - Version: v0.x.x → v0.y.z
+
+- Commit 2: [type]([scope]): [description]
+  - Files: [list]
+  - Version: v0.y.z → v0.y.z+1
+
+[Add more commits as needed]
+
+### Pre-Release 檢查 | Pre-Release Check
+
+**Question**: Are we ready to transition to 1.0.0 release stage?
+<!-- 問題：我們準備好過渡到 1.0.0 release 階段了嗎？ -->
+
+- [ ] Yes - Proceed to 1.0.0
+- [ ] No - Stay in 0.x.x (Current: Stay in Pre-Release)
+
+### 建議 | Recommendation
+
+[Claude's recommendation with rationale]
+```
+
+**Step 4: Wait for User Decision**
+<!-- 步驟 4：等待使用者決定 -->
+
+Do NOT proceed with git operations until user approves:
+<!-- 在使用者批准前不要執行 git 操作： -->
+
+- Which commit option (A, B, or custom)
+  <!-- 哪個提交選項（A、B 或自訂） -->
+- Version numbers
+  <!-- 版本號 -->
+- Whether to stay in Pre-Release or transition to 1.0.0
+  <!-- 是否保持 Pre-Release 或過渡到 1.0.0 -->
+
+**Step 5: Create Release Notes (for MINOR/MAJOR only)**
+<!-- 步驟 5：建立 Release Notes（僅用於 MINOR/MAJOR） -->
+
+For MINOR or MAJOR version bumps:
+<!-- 對於 MINOR 或 MAJOR 版本更新： -->
+
+1. Use the template from `docs/guides/RELEASE_NOTE_TEMPLATE.md`
+   <!-- 使用 docs/guides/RELEASE_NOTE_TEMPLATE.md 的範本 -->
+2. Update CHANGELOG.md with release details
+   <!-- 更新 CHANGELOG.md 的發布詳情 -->
+3. Create release notes if this is a significant release
+   <!-- 如果這是重要發布則建立 release notes -->
 
 ### Release Process
 <!-- 發布流程 -->

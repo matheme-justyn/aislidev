@@ -270,6 +270,123 @@ See `.ai/context/ARCHITECTURE.md` for current v2 architecture details.
 4. **ADR (Architecture Decision Records)**: Document why, not just what
 <!-- ADR（架構決策記錄）：記錄為什麼，不只是做什麼 -->
 
+5. **Clean Root Directory**: Keep root organized with only essential files
+<!-- 乾淨的根目錄：保持根目錄整潔，只放必要檔案 -->
+
+## Root Directory Policy
+
+<!-- 根目錄政策 -->
+
+**CRITICAL: OpenCode MUST follow this policy for all file creation in project root.**
+
+<!-- 重要：OpenCode 在根目錄建立任何檔案時必須遵循此政策。 -->
+
+### Allowed Files in Root
+
+<!-- 根目錄允許的檔案 -->
+
+**Essential Documentation**:
+
+<!-- 必備文檔： -->
+
+- `README.md` - Project overview (universal standard)
+- `LICENSE` - Software license (required for open source)
+- `CHANGELOG.md` - Version history (Keep-a-Changelog convention)
+
+**AI Configuration**:
+
+<!-- AI 配置： -->
+
+- `AGENTS.md` - Primary OpenCode configuration (this file)
+
+**Technology Configuration**:
+
+<!-- 技術配置： -->
+
+- `package.json`, `package-lock.json` - Node.js (npm standard)
+- `tsconfig.json` - TypeScript configuration
+- `.gitignore`, `.dockerignore` - Ignore patterns
+- `.env.example` - Environment template
+- `.cz.toml` - Commitizen configuration
+- `.pre-commit-config.yaml` - Pre-commit hooks
+
+**Containerization** (if used):
+
+<!-- 容器化（如使用）： -->
+
+- `Containerfile` or `Dockerfile` - Container definition
+
+**Archive Documentation** (conditional):
+
+<!-- 封存文檔（條件性）： -->
+
+- `ARCHIVE_*.md` - Only for major architectural shift historical reference
+
+### NOT Allowed in Root
+
+<!-- 根目錄不允許的內容 -->
+
+**Temporary/intermediate documentation files**:
+
+<!-- 臨時/中間文檔檔案： -->
+
+- ❌ `AI_ARCHITECTURE_SUMMARY.md`
+- ❌ `AI_TOOLS_COMPATIBILITY.md`
+- ❌ `ARCHITECTURE_CORRECTION.md`
+- ❌ `DESIGN_NOTES.md`
+- ❌ `TODO.md`
+- ❌ `NOTES.md`
+
+**Where they should go instead**:
+
+<!-- 應該放在哪裡： -->
+
+- Architecture docs → `docs/architecture/` or merge into ADRs
+<!-- 架構文檔 → docs/architecture/ 或合併到 ADR -->
+
+- AI tool compatibility → Tool-specific directories (`.claude/`, `.roo/`, `.opencode/`)
+<!-- AI 工具相容性 → 工具特定目錄（.claude/、.roo/、.opencode/） -->
+
+- TODO lists → GitHub Issues or `docs/TODO.md`
+<!-- TODO 清單 → GitHub Issues 或 docs/TODO.md -->
+
+- Personal notes → Not committed to version control
+<!-- 個人筆記 → 不提交到版本控制 -->
+
+### Enforcement Rules for OpenCode
+
+<!-- OpenCode 的強制執行規則 -->
+
+**Before creating ANY file in root directory**:
+
+<!-- 在根目錄建立任何檔案前： -->
+
+1. ✅ Check if it matches the allowed list above
+<!-- 檢查是否符合上述允許清單 -->
+
+2. ✅ If not on the list, propose alternative location
+<!-- 如不在清單中，建議替代位置 -->
+
+3. ✅ Ask user for approval before creating
+<!-- 在建立前詢問使用者是否批准 -->
+
+**When encountering non-compliant files**:
+
+<!-- 遇到不符合規範的檔案時： -->
+
+- Suggest moving to appropriate location
+<!-- 建議移動到適當位置 -->
+
+- Offer to merge content into existing docs
+<!-- 提議合併內容到現有文檔 -->
+
+- Recommend deletion if obsolete
+<!-- 如已過時則建議刪除 -->
+
+**Rationale**: A clean root directory improves discoverability, reduces cognitive load, aligns with community conventions, and signals project maturity.
+
+<!-- 理由：乾淨的根目錄改善可發現性、降低認知負擔、符合社群慣例，並顯示專案成熟度。 -->
+
 ## Version Control and Releases
 
 <!-- 版本控制和發布 -->
@@ -335,9 +452,9 @@ We follow **Semantic Versioning 2.0.0**: `MAJOR.MINOR.PATCH`
 
 <!-- 提交訊息格式 -->
 
-All commits MUST follow **Conventional Commits** specification:
+All commits MUST follow **Conventional Commits** specification with **Angular convention** types:
 
-<!-- 所有提交都必須遵循 Conventional Commits 規範： -->
+<!-- 所有提交都必須遵循 Conventional Commits 規範，使用 Angular 慣例類型： -->
 
 ```
 <type>(<scope>): <subject>
@@ -347,47 +464,62 @@ All commits MUST follow **Conventional Commits** specification:
 [optional footer]
 ```
 
-**Required types**:
+**Commit types (Angular convention)**:
 
-<!-- 必需的類型： -->
+<!-- Commit 類型（Angular 慣例）： -->
 
-- `feat`: New feature → triggers MINOR bump
-<!-- feat：新功能 → 觸發 MINOR 版本更新 -->
+**Types that trigger version bumps** (when user creates a release):
 
-- `fix`: Bug fix → triggers PATCH bump
-<!-- fix：錯誤修復 → 觸發 PATCH 版本更新 -->
+<!-- 觸發版本更新的類型（當使用者建立發布時）： -->
+
+- `feat`: New feature → triggers **MINOR** bump (0.x.0)
+  <!-- feat：新功能 → 觸發 MINOR 版本更新 -->
+
+- `fix`: Bug fix → triggers **PATCH** bump (0.0.x)
+  <!-- fix：錯誤修復 → 觸發 PATCH 版本更新 -->
+
+- `feat!` or `fix!` or `BREAKING CHANGE:` → triggers **MAJOR** bump (in 1.0.0+) or **MINOR** bump (in 0.x.x Pre-Release)
+  <!-- feat! 或 fix! 或 BREAKING CHANGE: → 觸發 MAJOR 版本更新（1.0.0+ 後）或 MINOR 版本更新（0.x.x Pre-Release） -->
+
+**Types that do NOT trigger version bumps**:
+
+<!-- 不觸發版本更新的類型： -->
 
 - `docs`: Documentation changes only
-<!-- docs：僅文檔變更 -->
+  <!-- docs：僅文檔變更 -->
 
 - `style`: Code style (formatting, whitespace, etc.)
-<!-- style：程式碼風格（格式化、空白等） -->
+  <!-- style：程式碼風格（格式化、空白等） -->
 
 - `refactor`: Code refactoring without feature changes
-<!-- refactor：程式碼重構，不改變功能 -->
+  <!-- refactor：程式碼重構，不改變功能 -->
 
 - `perf`: Performance improvements
-<!-- perf：效能改善 -->
+  <!-- perf：效能改善 -->
 
 - `test`: Adding or updating tests
-<!-- test：新增或更新測試 -->
+  <!-- test：新增或更新測試 -->
 
 - `build`: Build system or dependency changes
-<!-- build：建置系統或相依性變更 -->
+  <!-- build：建置系統或相依性變更 -->
 
 - `ci`: CI/CD configuration
-<!-- ci：CI/CD 配置 -->
+  <!-- ci：CI/CD 配置 -->
 
-- `chore`: Other changes (tooling, etc.)
-<!-- chore：其他變更（工具等） -->
+- `chore`: Other changes (tooling, config, etc.)
+  <!-- chore：其他變更（工具、配置等） -->
+
+**Important**: Even `perf` does NOT trigger version bumps automatically. Performance improvements without new features or bug fixes are considered internal changes.
+
+<!-- 重要：即使 perf 也不自動觸發版本更新。效能改善若無新功能或錯誤修復，視為內部變更。 -->
 
 **Breaking changes**:
 
 <!-- 破壞性變更： -->
 
-Add `!` after type/scope OR include `BREAKING CHANGE:` in footer → triggers MAJOR bump
+Add `!` after type/scope OR include `BREAKING CHANGE:` in footer:
 
-<!-- 在 type/scope 後加 ! 或在 footer 中包含 BREAKING CHANGE: → 觸發 MAJOR 版本更新 -->
+<!-- 在 type/scope 後加 ! 或在 footer 中包含 BREAKING CHANGE:： -->
 
 **Examples**:
 
@@ -451,49 +583,97 @@ feat(editor,preview): synchronize scroll position
 - Consider automated version bumping and changelog generation
 <!-- 考慮自動化版本更新和 changelog 生成 -->
 
-### Before Every Commit: Version Analysis
+### Version Update Policy
 
-<!-- 每次提交前：版本分析 -->
+<!-- 版本更新政策 -->
 
-**CRITICAL**: OpenCode MUST perform this analysis before EVERY git commit.
+**CRITICAL**: Version numbers are updated ONLY when the user explicitly approves, not automatically on every commit.
 
-<!-- 重要：OpenCode 必須在每次 git commit 前執行此分析。 -->
+<!-- 重要：版本號只在使用者明確批准時更新，不是每次提交都自動更新。 -->
+
+**Philosophy**:
+
+<!-- 理念： -->
+
+- Commits document changes; versions mark milestones
+  <!-- Commits 記錄變更；版本標記里程碑 -->
+
+- Multiple commits can belong to the same version
+  <!-- 多個提交可以屬於同一個版本 -->
+
+- Version bump happens when user decides to create a release
+  <!-- 版本更新發生在使用者決定建立發布時 -->
+
+**When to update version**:
+
+<!-- 何時更新版本： -->
+
+1. User explicitly requests: "create a release", "bump version", "tag this version"
+   <!-- 使用者明確要求：「建立發布」、「更新版本」、「標記此版本」 -->
+
+2. Accumulation of changes warrants a release (user decides)
+   <!-- 累積的變更需要發布（使用者決定） -->
+
+3. Before deploying to production or publishing
+   <!-- 部署到生產環境或發布前 -->
+
+**When NOT to update version**:
+
+<!-- 何時不更新版本： -->
+
+- Regular development commits (even `feat:` or `fix:`)
+  <!-- 常規開發提交（即使是 feat: 或 fix:） -->
+
+- Work-in-progress features
+  <!-- 進行中的功能 -->
+
+- Documentation-only changes
+  <!-- 僅文檔變更 -->
+
+### Before Every Commit: Commit Analysis (Not Version Analysis)
+
+<!-- 每次提交前：提交分析（不是版本分析） -->
+
+**IMPORTANT**: OpenCode analyzes commits before creation, but does NOT propose version bumps unless user requests.
+
+<!-- 重要：OpenCode 在建立提交前分析提交，但不會建議版本更新除非使用者要求。 -->
 
 **Step 1: Analyze Changes**
 
 <!-- 步驟 1：分析變更 -->
 
-Review all changes and categorize them:
+Review all changes and categorize them by commit type:
 
-<!-- 檢視所有變更並分類： -->
+<!-- 檢視所有變更並按提交類型分類： -->
 
-- `feat:` commits → MINOR bump (0.x.0)
-- `fix:` commits → PATCH bump (0.0.x)
-- `feat!:` or `BREAKING CHANGE:` → MINOR bump in Pre-Release (0.x.0), MAJOR bump after 1.0.0
-- `docs:`, `chore:`, `refactor:` (without breaking changes) → No version bump
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `docs:` - Documentation only
+- `refactor:`, `style:`, `test:`, `chore:` - Other changes
+- `feat!:` or `BREAKING CHANGE:` - Breaking changes
 
 **Step 2: Group Logically Related Changes**
 
 <!-- 步驟 2：分組邏輯相關的變更 -->
 
-If the discussion covers multiple independent features or fixes:
+If the discussion covers multiple independent changes:
 
-<!-- 如果討論涵蓋多個獨立功能或修復： -->
+<!-- 如果討論涵蓋多個獨立變更： -->
 
 1. Identify logical groups (e.g., "Feature A", "Feature B", "Documentation")
    <!-- 識別邏輯群組（例如「功能 A」、「功能 B」、「文檔」） -->
 2. Each group should be a separate commit for better traceability
    <!-- 每個群組應該是獨立的 commit 以便更好追溯 -->
-3. Determine version bump for each group
-   <!-- 確定每個群組的版本更新 -->
+3. Use appropriate commit type for each group
+   <!-- 為每個群組使用適當的提交類型 -->
 
 **Step 3: Present Commit Plan to User**
 
 <!-- 步驟 3：向使用者呈現提交計畫 -->
 
-OpenCode MUST present a structured plan:
+OpenCode MUST present a structured plan WITHOUT version bump proposals:
 
-<!-- OpenCode 必須呈現結構化的計畫： -->
+<!-- OpenCode 必須呈現結構化的計畫，但不建議版本更新： -->
 
 ```markdown
 ## 📋 提交計畫 | Commit Plan
@@ -501,16 +681,6 @@ OpenCode MUST present a structured plan:
 ### 變更分析 | Change Analysis
 
 [Summary of all changes discussed]
-
-### 版本號判定 | Version Determination
-
-**當前版本 | Current**: v0.x.x
-**建議版本 | Proposed**: v0.y.z
-
-**原因 | Rationale**:
-
-- [List commit types and their version impact]
-- Pre-Release 調整: [Explain any Pre-Release specific adjustments]
 
 ### 提交選項 | Commit Options
 
@@ -520,7 +690,6 @@ OpenCode MUST present a structured plan:
 
 - Commit 1: [type]([scope]): [description]
   - Files: [list]
-  - Version: v0.x.x → v0.y.z
 
 **選項 B: 多個提交**
 
@@ -528,22 +697,11 @@ OpenCode MUST present a structured plan:
 
 - Commit 1: [type]([scope]): [description]
   - Files: [list]
-  - Version: v0.x.x → v0.y.z
 
 - Commit 2: [type]([scope]): [description]
   - Files: [list]
-  - Version: v0.y.z → v0.y.z+1
 
 [Add more commits as needed]
-
-### Pre-Release 檢查 | Pre-Release Check
-
-**Question**: Are we ready to transition to 1.0.0 release stage?
-
-<!-- 問題：我們準備好過渡到 1.0.0 release 階段了嗎？ -->
-
-- [ ] Yes - Proceed to 1.0.0
-- [ ] No - Stay in 0.x.x (Current: Stay in Pre-Release)
 
 ### 建議 | Recommendation
 
@@ -554,73 +712,197 @@ OpenCode MUST present a structured plan:
 
 <!-- 步驟 4：等待使用者決定 -->
 
-Do NOT proceed with git operations until user approves:
+Do NOT proceed with git operations until user approves which commit option to use.
 
-<!-- 在使用者批准前不要執行 git 操作： -->
+<!-- 在使用者批准使用哪個提交選項前不要執行 git 操作。 -->
 
-- Which commit option (A, B, or custom)
-  <!-- 哪個提交選項（A、B 或自訂） -->
-- Version numbers
-  <!-- 版本號 -->
-- Whether to stay in Pre-Release or transition to 1.0.0
-  <!-- 是否保持 Pre-Release 或過渡到 1.0.0 -->
+**Step 5: Execute Git Operations**
 
-**Step 5: Create Release Notes (for MINOR/MAJOR only)**
+<!-- 步驟 5：執行 Git 操作 -->
 
-<!-- 步驟 5：建立 Release Notes（僅用於 MINOR/MAJOR） -->
+After user approval, create the commits with proper conventional commit messages.
 
-For MINOR or MAJOR version bumps:
+<!-- 使用者批准後，使用適當的 conventional commit 訊息建立提交。 -->
 
-<!-- 對於 MINOR 或 MAJOR 版本更新： -->
+**Note**: Version numbers in `package.json` or other files are NOT updated during regular commits. Version updates only happen when user explicitly requests a release.
 
-1. Use the template from `docs/guides/RELEASE_NOTE_TEMPLATE.md`
-   <!-- 使用 docs/guides/RELEASE_NOTE_TEMPLATE.md 的範本 -->
-2. Update CHANGELOG.md with release details
-   <!-- 更新 CHANGELOG.md 的發布詳情 -->
-3. Create release notes if this is a significant release
-   <!-- 如果這是重要發布則建立 release notes -->
+<!-- 註記：package.json 或其他檔案中的版本號在常規提交時不更新。版本更新只在使用者明確要求發布時發生。 -->
 
 ### Release Process
 
 <!-- 發布流程 -->
 
-**Current** (manual process during v2 design phase):
+**When to create a release**:
 
-<!-- 目前（v2 設計階段的手動流程）： -->
+<!-- 何時建立發布： -->
 
-1. Ensure all commits follow conventional format
-<!-- 確保所有提交都遵循慣例格式 -->
+1. User explicitly requests: "create a release", "bump version", "publish version"
+   <!-- 使用者明確要求：「建立發布」、「更新版本」、「發布版本」 -->
 
-2. Determine version bump based on commit types since last release
-<!-- 根據上次發布以來的提交類型決定版本更新 -->
+2. Sufficient changes have accumulated (user decides)
+   <!-- 累積了足夠的變更（使用者決定） -->
 
-3. Update version in `.cz.toml` and other version files (when technology is chosen)
-<!-- 更新 .cz.toml 和其他版本檔案中的版本（當技術確定後） -->
+3. Before production deployment
+   <!-- 生產環境部署前 -->
 
-4. Update `CHANGELOG.md` manually
-<!-- 手動更新 CHANGELOG.md -->
+**Release process steps**:
 
-5. Create git tag: `git tag -a v0.0.2 -m "Release v0.0.2"`
-<!-- 建立 git tag：git tag -a v0.0.2 -m "Release v0.0.2" -->
+<!-- 發布流程步驟： -->
 
-6. Push tag: `git push origin v0.0.2`
-<!-- 推送 tag：git push origin v0.0.2 -->
+**Step 1: Analyze commits since last release**
+
+<!-- 步驟 1：分析上次發布以來的提交 -->
+
+```bash
+# Check commits since last release
+git log $(git describe --tags --abbrev=0)..HEAD --oneline
+```
+
+Categorize commits by type:
+
+<!-- 按類型分類提交： -->
+
+- `feat:` commits → triggers MINOR bump
+- `fix:` commits → triggers PATCH bump
+- `feat!:`, `fix!:`, or `BREAKING CHANGE:` → triggers MAJOR bump (or MINOR in 0.x.x)
+- All other types (`docs:`, `chore:`, `refactor:`, etc.) → included in release notes but don't affect version
+
+**Step 2: Determine version bump**
+
+<!-- 步驟 2：決定版本更新 -->
+
+Based on commit analysis:
+
+<!-- 基於提交分析： -->
+
+- If any `BREAKING CHANGE` → MAJOR bump (1.0.0+) or MINOR bump (0.x.x)
+- Else if any `feat:` → MINOR bump
+- Else if any `fix:` → PATCH bump
+- Else (only `docs:`, `chore:`, etc.) → **NO version bump, but still create release notes**
+
+**Step 3: Update CHANGELOG.md**
+
+<!-- 步驟 3：更新 CHANGELOG.md -->
+
+**IMPORTANT**: Release notes MUST include ALL commits since last release, not just `feat:` and `fix:`.
+
+<!-- 重要：Release notes 必須包含上次發布以來的所有提交，不只是 feat: 和 fix:。 -->
+
+Group changes by category:
+
+<!-- 按類別分組變更： -->
+
+```markdown
+## [0.x.y] - YYYY-MM-DD
+
+### Added
+
+- [feat: commits]
+
+### Changed
+
+- [refactor: commits that change behavior]
+
+### Fixed
+
+- [fix: commits]
+
+### Documentation
+
+- [docs: commits]
+
+### Performance
+
+- [perf: commits]
+
+### Code Quality
+
+- [refactor: commits without behavior change]
+- [style: commits]
+- [test: commits]
+
+### Build System
+
+- [build: commits]
+- [ci: commits]
+
+### Chores
+
+- [chore: commits]
+```
+
+**Step 4: Update version files**
+
+<!-- 步驟 4：更新版本檔案 -->
+
+Update version number in:
+
+<!-- 更新版本號於： -->
+
+- `package.json`
+- `.cz.toml`
+- Any other version-tracking files
+
+**Step 5: Create git tag and GitHub Release**
+
+<!-- 步驟 5：建立 git tag 和 GitHub Release -->
+
+```bash
+# Create annotated tag
+git tag -a v0.x.y -m "Release v0.x.y"
+
+# Push tag to origin
+git push origin v0.x.y
+
+# Create GitHub Release using gh CLI
+gh release create v0.x.y \
+  --title "v0.x.y" \
+  --notes-file RELEASE_NOTES.md
+```
+
+**Or manually create GitHub Release**:
+
+<!-- 或手動建立 GitHub Release： -->
+
+1. Go to GitHub repository → Releases → Draft a new release
+   <!-- 前往 GitHub 儲存庫 → Releases → Draft a new release -->
+
+2. Select tag: `v0.x.y`
+   <!-- 選擇 tag：v0.x.y -->
+
+3. Copy content from CHANGELOG.md for this version
+   <!-- 從 CHANGELOG.md 複製此版本的內容 -->
+
+4. Publish release
+   <!-- 發布 release -->
+
+**Step 6: Verify**
+
+<!-- 步驟 6：驗證 -->
+
+- [ ] Version updated in all version files
+      <!-- 所有版本檔案中的版本已更新 -->
+
+- [ ] CHANGELOG.md includes ALL commits (not just feat/fix)
+      <!-- CHANGELOG.md 包含所有提交（不只是 feat/fix） -->
+
+- [ ] Git tag created and pushed
+      <!-- Git tag 已建立並推送 -->
+
+- [ ] GitHub Release published with complete release notes
+      <!-- GitHub Release 已發布，包含完整 release notes -->
 
 **Future** (after technology stack is finalized):
 
 <!-- 未來（技術棧確定後）： -->
 
-Select and implement appropriate automation tools based on chosen technology stack.
+Consider automation tools:
 
-<!-- 根據所選技術棧選擇並實作適當的自動化工具。 -->
-
-Possible tools (decision deferred until tech stack is chosen):
-
-<!-- 可能的工具（延後到技術棧選定後再決定）： -->
+<!-- 考慮自動化工具： -->
 
 - JavaScript/TypeScript: `semantic-release`, `changesets`
 - Python: `python-semantic-release`
-- Language-agnostic: `commitizen`
+- Language-agnostic: `commitizen` + scripts
 
 See ADR-001 for rationale.
 

@@ -60,6 +60,27 @@ English content here.
 - **Single source of truth**: No need to maintain separate language versions
 <!-- 單一真相來源：不需要維護多個語言版本 -->
 
+### Documentation Maintenance
+<!-- 文檔維護 -->
+
+**IMPORTANT**: Documentation must be kept in sync with code changes.
+<!-- 重要：文檔必須與程式碼變更保持同步。 -->
+
+See [docs/guides/DOCUMENTATION_MAINTENANCE.md](./docs/guides/DOCUMENTATION_MAINTENANCE.md) for:
+<!-- 請參考 docs/guides/DOCUMENTATION_MAINTENANCE.md 了解： -->
+
+- When to update README.md
+<!-- 何時更新 README.md -->
+
+- What README.md should include
+<!-- README.md 應該包含什麼 -->
+
+- Update checklist for documentation
+<!-- 文檔更新檢查清單 -->
+
+Claude Code MUST consult this guide after making significant changes to determine if documentation updates are needed.
+<!-- Claude Code 在進行重大變更後必須查閱此指南，以確定是否需要更新文檔。 -->
+
 ## Working with Claude Code
 <!-- 使用 Claude Code 工作 -->
 

@@ -37,8 +37,10 @@ Each ADR follows this structure:
 | ADR | Title | Status |
 |-----|-------|--------|
 | [001](./001-version-control-strategy.md) | Version Control and Release Strategy | Accepted |
+| [002](./002-lightweight-containerization.md) | Lightweight Containerization Architecture | Accepted |
 <!-- ADR | 標題 | 狀態 -->
 <!-- 001 | 版本控制和發布策略 | 已接受 -->
+<!-- 002 | 輕量容器化架構 | 已接受 -->
 
 ## Creating a New ADR
 <!-- 建立新的 ADR -->

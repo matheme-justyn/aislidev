@@ -101,3 +101,9 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Test directories (temporary exploration)
+test-slidev/
+
+# Application data
+data/

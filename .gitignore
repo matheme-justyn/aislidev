@@ -107,3 +107,9 @@ test-slidev/
 
 # Application data
 data/
+
+# Personal notes (AI-generated best practices notes)
+# Only AI_INSTRUCTIONS.md and docs-list.sample.md are tracked
+.notes/*
+!.notes/AI_INSTRUCTIONS.md
+!.notes/docs-list.sample.md

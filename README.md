@@ -5,7 +5,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
-[![AI-First](https://img.shields.io/badge/development-AI--First-purple.svg)](./CLAUDE.md)
+[![AI-First](https://img.shields.io/badge/development-AI--First-purple.svg)](./AGENTS.md)
 
 ---
 
@@ -15,14 +15,17 @@
 **Current Version**: Lightweight containerization setup completed
 
 ✅ **已完成 | Completed**:
+
 - 輕量容器化架構（單一容器 + Podman）
 - 基礎 Web 伺服器和 API（Fastify + TypeScript）
 - 環境配置系統（.env 支援、自動 port 選擇）
 
 🚧 **進行中 | In Progress**:
+
 - Slidev 原生整合
 
 📅 **規劃中 | Planned**:
+
 - AI 輔助內容生成
 - 簡報管理功能
 
@@ -40,6 +43,7 @@ AISlidev 是一個智能化的 Slidev 簡報平台，目標是讓使用者能夠
 ### 為什麼重新設計？
 
 v1 版本採用複雜的多容器架構（前後端分離 + PostgreSQL + Nginx），但因為以下問題被廢棄：
+
 - ❌ Slidev iframe 整合問題
 - ❌ 過度工程化（對單用戶工具來說太複雜）
 - ❌ 除錯困難
@@ -102,6 +106,7 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 [Slidev](https://sli.dev/) 是一個基於 Markdown 的簡報工具，專為開發者設計。AISlidev 將 Slidev 與 AI 功能整合，提供更智能的簡報編輯體驗。
 
 **Slidev 主要功能**：
+
 - 📄 **Markdown 語法** - 用純文字撰寫投影片
 - 🎨 **主題系統** - 豐富的主題和客製化選項
 - 🖥️ **簡報模式** - 含演講者備註的簡報檢視
@@ -109,6 +114,7 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 - 📤 **匯出功能** - 輸出為 PDF、PNG 或 SPA
 
 **多種檢視模式**：
+
 - `/` - 一般投影片檢視
 - `/presenter` - 演講者模式（含備註和計時器）
 - `/overview` - 總覽模式（顯示所有投影片）
@@ -145,17 +151,20 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 ### 開發流程
 
 1. **Fork 並 clone 專案**
+
    ```bash
    git clone https://github.com/your-username/aislidev.git
    cd aislidev
    ```
 
 2. **建立 feature 分支**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 3. **開發並測試**
+
    ```bash
    npm install
    npm run dev
@@ -163,6 +172,7 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
    ```
 
 4. **提交變更（使用 Conventional Commits）**
+
    ```bash
    git commit -m "feat: add new feature"
    git commit -m "fix: resolve bug"
@@ -180,7 +190,7 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 - `refactor:` - 程式碼重構
 - `test:` - 測試相關
 
-詳見 [CLAUDE.md](./CLAUDE.md#version-control-and-releases)
+詳見 [AGENTS.md](./AGENTS.md#version-control-and-releases)
 
 ---
 

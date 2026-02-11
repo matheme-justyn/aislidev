@@ -3,7 +3,7 @@
 > AI-powered Slidev presentation platform
 > AI 驅動的 Slidev 簡報平台
 
-[![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![AI-First](https://img.shields.io/badge/development-AI--First-purple.svg)](./CLAUDE.md)
 
@@ -11,7 +11,7 @@
 
 ## 📋 專案狀態 | Project Status
 
-**當前版本**: `0.0.2` - 輕量容器化架構建立完成
+**當前版本**: `0.1.0` - 輕量容器化架構建立完成
 **Current Version**: Lightweight containerization setup completed
 
 ✅ **已完成 | Completed**:

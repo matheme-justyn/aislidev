@@ -8,9 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- v2 architecture design
-- Technology stack selection
-- Core feature implementation
+- Slidev native integration
+- AI-assisted content generation
+- Presentation management features
+
+---
+
+## [0.1.0] - 2026-02-11
+
+### Summary
+Lightweight containerization architecture with Fastify server implementation. This is the first functional release with a working web server and environment configuration system.
+
+### Added
+- **Lightweight containerization architecture** (single container with Podman/Docker support)
+- **Fastify-based web server** with TypeScript
+- **Environment configuration system** (.env support with dotenv)
+- **Auto port selection feature** with AUTO_PORT_SELECTION flag (default: enabled for development)
+- **RESTful API foundation** with health check endpoint
+- **Comprehensive documentation**:
+  - Port configuration guide (PORT_CONFIGURATION.md)
+  - Documentation maintenance guide (DOCUMENTATION_MAINTENANCE.md)
+  - Quick start guide (QUICKSTART.md)
+  - ADR-002: Lightweight containerization architecture
+
+### Changed
+- **Simplified README.md** to be human-friendly and concise (under 250 lines)
+- Added Slidev features explanation for users unfamiliar with Slidev
+- Simplified deployment section (Podman-focused)
+
+### Documentation
+- Created ADR-002 documenting lightweight containerization decision
+- Added comprehensive port configuration guide
+- Established documentation maintenance standards
+- Updated ADR index with new ADR-002
+
+### Technical Details
+- Node.js 20+ with ES modules
+- Fastify for web framework
+- TypeScript for type safety
+- get-port package for intelligent port management
+- Podman/Docker for containerization (OCI-compatible)
 
 ---
 

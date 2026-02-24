@@ -29,11 +29,11 @@ export class SlidevManager {
     const slidesPath = path.join(presentationDir, "slides.md");
     await fs.writeFile(slidesPath, content, "utf-8");
 
-    const port = config.port || (await getPort({ port: 3030 }));
+    const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
 
     const slidevProcess = spawn(
       "npx",
-      ["slidev", slidesPath, "--port", port.toString(), "--host", "0.0.0.0"],
+      ["slidev", slidesPath, "--port", port.toString()],
       {
         cwd: presentationDir,
         stdio: ["ignore", "pipe", "pipe"],

@@ -6,12 +6,15 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { networkInterfaces } from 'os';
 import getPort from 'get-port';
+import path from 'path';
+import { SlidevManager } from './services/SlidevManager.js';
+import presentationsRoutes from './routes/presentations.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configuration
-const PREFERRED_PORT = parseInt(process.env.PORT || '3000', 10);
+const PREFERRED_PORT = parseInt(process.env.PORT || '13000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 const AUTO_PORT_SELECTION = process.env.AUTO_PORT_SELECTION !== 'false'; // Default: true
 
@@ -26,6 +29,9 @@ const fastify = Fastify({
 await fastify.register(fastifyCors, {
   origin: true, // Allow all origins in development
 });
+
+const storageDir = path.join(__dirname, '../../storage');
+const slidevManager = new SlidevManager(storageDir);
 
 // Serve static files
 await fastify.register(fastifyStatic, {
@@ -62,6 +68,12 @@ fastify.get('/api', async () => {
   };
 });
 
+await fastify.register(presentationsRoutes, {
+  prefix: '/api',
+  slidevManager,
+  storageDir,
+});
+
 // Start server
 const start = async () => {
   try {
@@ -69,7 +81,7 @@ const start = async () => {
 
     if (AUTO_PORT_SELECTION) {
       // Development mode: Auto-select available port if preferred is taken
-      port = await getPort({ port: PREFERRED_PORT });
+      port = await getPort({ port: [13000, 13001, 13002, 13003, 13004, 13005, 13006, 13007, 13008, 13009, 13010] });
 
       // Warn if using a different port than preferred
       if (port !== PREFERRED_PORT) {
@@ -124,6 +136,7 @@ const shutdown = async (signal: string) => {
   await fastify.close();
   process.exit(0);
 };
+  await slidevManager.cleanup();
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

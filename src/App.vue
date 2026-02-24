@@ -4,37 +4,64 @@
       <h1>AISliDev Editor</h1>
       <p>AI-Powered Slidev Presentation Platform</p>
     </header>
-    <main>
-      <p>Loading editor...</p>
+    <main class="editor-container">
+      <CodeMirrorEditor v-model="content" />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import CodeMirrorEditor from './components/CodeMirrorEditor.vue';
 
+const content = ref(`---
+theme: default
+---
+
+# Welcome to AISliDev
+
+AI-Powered Slidev Editor
+
+---
+
+## Getting Started
+
+Start editing to see live preview
+`);
 </script>
 
-<style scoped>
-#aislidev-editor {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-    Cantarell, sans-serif;
-  padding: 2rem;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+html, body, #app {
+  height: 100%;
+  overflow: hidden;
+}
+
+#aislidev-app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 header {
-  text-align: center;
-  margin-bottom: 2rem;
+  background: #42b883;
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 h1 {
-  color: #42b883;
-  font-size: 2.5rem;
-  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
-p {
-  color: #666;
-  margin: 0.5rem 0;
+.editor-container {
+  flex: 1;
+  overflow: hidden;
 }
 </style>

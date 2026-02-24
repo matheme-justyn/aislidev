@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { networkInterfaces } from 'os';
 import getPort from 'get-port';
+import path from 'path';
+import { SlidevManager } from './services/SlidevManager.js';
+import presentationsRoutes from './routes/presentations.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,6 +29,9 @@ const fastify = Fastify({
 await fastify.register(fastifyCors, {
   origin: true, // Allow all origins in development
 });
+
+const storageDir = path.join(__dirname, '../../storage');
+const slidevManager = new SlidevManager(storageDir);
 
 // Serve static files
 await fastify.register(fastifyStatic, {
@@ -60,6 +66,12 @@ fastify.get('/api', async () => {
       presentations: '/api/presentations',
     },
   };
+});
+
+await fastify.register(presentationsRoutes, {
+  prefix: '/api',
+  slidevManager,
+  storageDir,
 });
 
 // Start server
@@ -124,6 +136,7 @@ const shutdown = async (signal: string) => {
   await fastify.close();
   process.exit(0);
 };
+  await slidevManager.cleanup();
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

@@ -5,15 +5,20 @@
       <p>AI-Powered Slidev Presentation Platform</p>
     </header>
     <main class="editor-container">
-      <CodeMirrorEditor v-model="content" />
+      <EditorLayout
+        :presentation-id="presentationId"
+        :content="content"
+        @update:content="onContentUpdate"
+      />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import CodeMirrorEditor from './components/CodeMirrorEditor.vue';
+import EditorLayout from './components/EditorLayout.vue';
 
+const presentationId = ref('demo-presentation');
 const content = ref(`---
 theme: default
 ---
@@ -25,9 +30,12 @@ AI-Powered Slidev Editor
 ---
 
 ## Getting Started
-
 Start editing to see live preview
 `);
+
+const onContentUpdate = (newContent: string) => {
+  content.value = newContent;
+};
 </script>
 
 <style>

@@ -36,7 +36,8 @@ export class SlidevManager {
       ["slidev", slidesPath, "--port", port.toString()],
       {
         cwd: presentationDir,
-        stdio: ["ignore", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
+        detached: false,
       },
     );
 
@@ -53,7 +54,16 @@ export class SlidevManager {
 
     slidevProcess.stdout?.on("data", (data) => {
       const output = data.toString();
+      console.log(`[Slidev ${presentationId}] stdout:`, output);
       if (output.includes("ready in") || output.includes("Local:")) {
+        processInfo.status = "running";
+      }
+    });
+
+    slidevProcess.stderr?.on("data", (data) => {
+      const output = data.toString();
+      console.log(`[Slidev ${presentationId}] stderr:`, output);
+      if (output.includes("ready in") || output.includes("Local:") || output.includes("localhost")) {
         processInfo.status = "running";
       }
     });

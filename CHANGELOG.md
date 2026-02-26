@@ -14,6 +14,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.2] - 2026-02-26
+
+### Summary
+Critical bug fix for Slidev presentation startup in container environments.
+
+### Fixed
+- **Slidev startup detection** - Fixed timeout issue preventing presentations from starting
+  - Increased `waitForReady` timeout from 10s to 30s for container environments
+  - Updated ready signal detection to match Slidev v52.11.5 output format
+  - Added detection for "public slide show" and "localhost:" patterns
+  - Enhanced monitoring of both stdout and stderr streams
+- **Error logging** - Improved error messages with detailed error.message in API responses
+  - Better debugging information when presentation fails to start
+
+### Technical Details
+- Slidev v52.11.5 outputs "public slide show   > http://localhost:PORT/" instead of "ready in" or "Local:"
+- Container environments require longer startup times compared to local development
+- Added comprehensive logging for Slidev process lifecycle events
+
+---
+
 ## [0.1.1] - 2026-02-26
 
 ### Summary

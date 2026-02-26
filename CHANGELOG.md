@@ -14,6 +14,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2026-02-26
+
+### Summary
+Infrastructure improvements: integrated my-vibe-scaffolding template, standardized project structure, and improved documentation for AI agent compatibility.
+
+### Added
+- **Scaffolding infrastructure** from my-vibe-scaffolding v1.6.0
+  - Version management system with pre-push hook
+  - GitHub templates (issue, PR, CI placeholder)
+  - Project guides (CONTRIBUTING.md, SECURITY.md)
+  - i18n system (BCP 47) for multi-language support
+  - OpenCode stability monitoring tools
+  - Documentation guidelines and reference examples
+- **Project configuration** (config.toml, opencode.json)
+
+### Changed
+- **AGENTS.md**: Simplified to English-only format (1056 → 850 lines)
+  - Removed 187 lines of Chinese HTML comments
+  - Updated language convention to English-only
+  - Rationale: AI-facing documentation works best in English
+- **ADR location**: Moved from `docs/architecture/ADR/` to standard `docs/adr/`
+  - Follows ADR community convention (Michael Nygard's proposal)
+  - Better tool support and GitHub search compatibility
+  - Updated all references across project
+- **VERSION**: Corrected from inherited 1.6.0 to 0.1.1
+- **CONTRIBUTING.md**: Rewritten for AISliDev project (was scaffolding template)
+- **SECURITY.md**: Rewritten for AISliDev project (was scaffolding template)
+
+### Project Structure
+```
+aislidev/
+├── .template/          # Scaffolding infrastructure (reference only)
+│   ├── docs/          # Documentation guides
+│   ├── i18n/          # Multi-language support
+│   ├── scripts/       # Utility scripts
+│   └── hooks/         # Git hooks
+├── docs/
+│   ├── adr/           # Architecture Decision Records (standard location)
+│   └── guides/        # Development guides
+├── AGENTS.md          # OpenCode configuration (English-only)
+├── VERSION            # 0.1.1
+└── config.toml        # Project configuration (git-ignored)
+```
+
+### Documentation
+- Standardized ADR location following industry best practices
+- Improved AGENTS.md for universal AI comprehension
+- Added comprehensive contribution guidelines
+- Added security policy and reporting procedures
+
+### References
+- [my-vibe-scaffolding](https://github.com/matheme-justyn/my-vibe-scaffolding) v1.6.0
+- [ADR community standard](https://adr.github.io/)
+
+---
+
 ## [0.1.0] - 2026-02-11
 
 ### Summary

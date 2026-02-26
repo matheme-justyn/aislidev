@@ -30,7 +30,7 @@ AISliDev is an AI-powered Slidev presentation platform that enables intelligent 
 
 - `AGENTS.md` - Main project configuration for OpenCode (this file)
 - `.ai/context/*.md` - Shared context for all AI agents
-- `docs/architecture/ADR/*.md` - Architecture Decision Records
+- `docs/adr/*.md` - Architecture Decision Records
 
 **Other documentation** (README, CHANGELOG, user-facing guides, etc.) can be written in any language as appropriate for the audience.
 
@@ -141,23 +141,23 @@ If you're using **Claude Code** or **Roo Code**, please refer to:
 ## Architecture Decisions
 
 
-All significant architectural decisions are documented in `docs/architecture/ADR/` using the Architecture Decision Records (ADR) pattern.
+All significant architectural decisions are documented in `docs/adr/` using the Architecture Decision Records (ADR) pattern.
 
 
 ### ADR Index
 
 
-See [docs/architecture/ADR/README.md](./docs/architecture/ADR/README.md) for the complete list of ADRs.
+See [docs/adr/README.md](./docs/adr/README.md) for the complete list of ADRs.
 
 
 **Current ADRs**:
 
 
-- [ADR-001: Version Control and Release Strategy](./docs/architecture/ADR/001-version-control-strategy.md)
+- [ADR-001: Version Control and Release Strategy](./docs/adr/001-version-control-strategy.md)
 
-- [ADR-002: Lightweight Containerization](./docs/architecture/ADR/002-lightweight-containerization.md)
+- [ADR-002: Lightweight Containerization](./docs/adr/002-lightweight-containerization.md)
 
-- [ADR-003: OpenCode-First AI Architecture](./docs/architecture/ADR/003-opencode-first-architecture.md)
+- [ADR-003: OpenCode-First AI Architecture](./docs/adr/003-opencode-first-architecture.md)
 
 ### Consistency Enforcement
 
@@ -165,7 +165,7 @@ See [docs/architecture/ADR/README.md](./docs/architecture/ADR/README.md) for the
 **CRITICAL: OpenCode MUST follow these rules**:
 
 
-1. **Read ADRs before making suggestions**: When discussing architecture, technology choices, or development workflows, OpenCode MUST first read relevant ADRs in `docs/architecture/ADR/` to understand existing decisions.
+1. **Read ADRs before making suggestions**: When discussing architecture, technology choices, or development workflows, OpenCode MUST first read relevant ADRs in `docs/adr/` to understand existing decisions.
 
 2. **Check for conflicts**: If user's request contradicts an accepted ADR, OpenCode MUST:
    <!-- 檢查衝突：如果使用者的請求與已接受的 ADR 衝突，OpenCode 必須： -->
@@ -329,7 +329,7 @@ See `.ai/context/ARCHITECTURE.md` for current v2 architecture details.
 ## Version Control and Releases
 
 
-See [ADR-001](./docs/architecture/ADR/001-version-control-strategy.md) for the full decision context.
+See [ADR-001](./docs/adr/001-version-control-strategy.md) for the full decision context.
 
 
 ### Versioning

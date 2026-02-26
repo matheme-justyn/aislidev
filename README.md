@@ -50,7 +50,7 @@ v1 版本採用複雜的多容器架構（前後端分離 + PostgreSQL + Nginx�
 
 **v2 採用輕量容器化設計**：單一容器、原生 Slidev 整合、更簡單的架構。
 
-詳見 [v1 設計記錄](./ARCHIVE_v1_design.md) 和 [ADR-002: 輕量容器化架構](./docs/architecture/ADR/002-lightweight-containerization.md)
+詳見 [v1 設計記錄](./ARCHIVE_v1_design.md) 和 [ADR-002: 輕量容器化架構](./docs/adr/002-lightweight-containerization.md)
 
 ---
 
@@ -199,7 +199,7 @@ podman run -d -p 3000:3000 -v ./data:/app/data:Z aislidev
 
 - [Quick Start Guide](./docs/guides/QUICKSTART.md) - 詳細的安裝和部署指南
 - [Port Configuration](./docs/guides/PORT_CONFIGURATION.md) - Port 配置說明
-- [Architecture Decision Records](./docs/architecture/ADR/) - 架構決策記錄
+- [Architecture Decision Records](./docs/adr/) - 架構決策記錄
 - [CHANGELOG](./CHANGELOG.md) - 版本變更記錄
 
 ---
@@ -239,7 +239,7 @@ ulw 你的任務描述
 - Claude Code 使用者請參考：`.claude/README.md`
 - Roo Code 使用者請參考：`.roo/README.md`
 
-詳細資訊請參考 [AGENTS.md](./AGENTS.md) 和 [ADR-003: OpenCode-First AI Architecture](./docs/architecture/ADR/003-opencode-first-architecture.md)
+詳細資訊請參考 [AGENTS.md](./AGENTS.md) 和 [ADR-003: OpenCode-First AI Architecture](./docs/adr/003-opencode-first-architecture.md)
 
 ---
 

@@ -102,7 +102,7 @@ Version bumps triggered by:
 - **MINOR**: New features (backward-compatible)
 - **PATCH**: Bug fixes (backward-compatible)
 
-See [ADR-001](./docs/architecture/ADR/001-version-control-strategy.md) for details.
+See [ADR-001](./docs/adr/001-version-control-strategy.md) for details.
 
 ## Change Categories
 

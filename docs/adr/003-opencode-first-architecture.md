@@ -163,8 +163,8 @@ Initially, this project was designed to support multiple AI coding assistants (C
 - **Shared context**: `.ai/context/` (ARCHITECTURE.md, CONVENTIONS.md, WORKFLOWS.md)
   <!-- 共享上下文：.ai/context/（ARCHITECTURE.md、CONVENTIONS.md、WORKFLOWS.md） -->
 
-- **Architecture decisions**: `docs/architecture/ADR/`
-  <!-- 架構決策：docs/architecture/ADR/ -->
+- **Architecture decisions**: `docs/adr/`
+  <!-- 架構決策：docs/adr/ -->
 
 ### oh-my-opencode Configuration
 

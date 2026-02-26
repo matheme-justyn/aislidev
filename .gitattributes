@@ -1,0 +1,17 @@
+# AISliDev .gitattributes
+# Control GitHub language statistics
+
+# Exclude build outputs from language statistics
+dist/**/*.js linguist-generated
+dist/**/*.css linguist-generated
+dist/**/*.html linguist-generated
+dist/**/*.map linguist-generated
+
+# Mark build directories as generated
+dist/** linguist-generated
+
+# Exclude vendored/third-party code (if any in future)
+# vendor/** linguist-vendored
+
+# Documentation
+*.md linguist-documentation

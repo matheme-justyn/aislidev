@@ -5,16 +5,12 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   plugins: [vue()],
   server: {
-    port: 5173,
+    // Vite is now used as middleware in Fastify, not standalone
+    // No proxy needed - API requests go directly to same server
     strictPort: false,
-    proxy: {
-      "/api": {
-        target: "http://localhost:13000",
-        changeOrigin: true,
-      },
-    },
   },
   build: {
     outDir: "dist/frontend",
+    emptyOutDir: true,
   },
 });

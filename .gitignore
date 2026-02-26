@@ -102,7 +102,6 @@
 .claude/settings.local.json
 .coverage
 .dmypy.json
-.dockerignore
 .eggs/
 .env
 .env.*.local

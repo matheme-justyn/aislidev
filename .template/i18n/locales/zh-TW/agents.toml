@@ -1,0 +1,71 @@
+# AGENTS.md translations for Traditional Chinese (Taiwan)
+# BCP 47 Language Tag: zh-TW
+
+[meta]
+language_tag = "zh-TW"
+language_name = "Traditional Chinese (Taiwan)"
+language_native = "繁體中文（台灣）"
+
+[project]
+title = "專案概述"
+description_todo = "<!-- TODO: 填寫專案描述、目標和背景資訊 -->"
+
+[tech_stack]
+title = "技術堆疊"
+list_todo = "<!-- TODO: 列出專案使用的技術、框架和工具 -->"
+
+[coding_conventions]
+title = "編碼規範"
+test_first = "**永遠先寫測試**：所有新功能和 bug 修復都必須先寫測試"
+docstring_and_types = "**所有函數要有 docstring 和型別標注**：確保程式碼可讀性和可維護性"
+avoid_overengineering = "**避免過度工程化**：保持簡單，只實作當前需要的功能"
+
+[commit_message]
+title = "Commit Message"
+description = "使用繁體中文撰寫 commit message，格式為："
+format = "type: 描述"
+types_title = "**允許的 type：**"
+type_feat = "`feat`: 新功能"
+type_fix = "`fix`: 修復 bug"
+type_docs = "`docs`: 文件更新"
+type_refactor = "`refactor`: 重構（不改變功能的程式碼改進）"
+type_test = "`test`: 測試相關"
+type_chore = "`chore`: 其他維護性工作"
+examples_title = "**範例：**"
+example_feat = "feat: 新增使用者登入功能"
+example_fix = "fix: 修正資料庫連線錯誤"
+example_docs = "docs: 更新 API 文件"
+
+[pull_request]
+title = "Pull Request"
+title_format = "### PR Title Format (Angular Style)"
+title_language = "**使用英文，格式為：**"
+title_structure = "type(scope): brief description"
+types_title = "**允許的 type：**"
+type_feat = "`feat`: 新功能 (New feature)"
+type_fix = "`fix`: 修復 bug (Bug fix)"
+type_docs = "`docs`: 文件更新 (Documentation)"
+type_style = "`style`: 程式碼風格 (Code style)"
+type_refactor = "`refactor`: 重構 (Refactoring)"
+type_test = "`test`: 測試 (Tests)"
+type_chore = "`chore`: 維護性工作 (Maintenance)"
+examples_title = "**範例：**"
+example_feat = "feat(auth): add JWT authentication"
+example_fix = "fix(api): resolve memory leak in user service"
+example_docs = "docs(readme): update installation guide"
+example_refactor = "refactor(core): simplify error handling logic"
+content_title = "### PR 內容原則"
+content_concise = "**簡潔為主**：只寫重點，避免冗長說明"
+content_bilingual = "**中英並列**：重要資訊使用中英文對照"
+content_bullets = "**條列式**：使用 bullet points，每點簡短明確"
+content_required = "**必要資訊**：What（做了什麼）、Why（為什麼）、Testing（如何測試）"
+
+[file_structure]
+title = "檔案結構"
+description_todo = "<!-- TODO: 記錄專案的目錄結構和組織方式 -->"
+
+[what_not_to_do]
+title = "不該做的事"
+no_architecture = "❌ **不要自作主張改架構**：任何架構變更都必須先討論"
+no_refactor = "❌ **不要在沒被要求的情況下重構既有程式碼**：專注在當前任務"
+no_dependencies = "❌ **不要安裝沒討論過的 dependency**：新增套件前必須先討論必要性和替代方案"

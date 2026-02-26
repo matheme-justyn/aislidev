@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# 極簡工作日誌 - 每日一檔
+
+set -euo pipefail
+
+WORKLOG_DIR=".worklog"
+TODAY=$(date +%Y-%m-%d)
+FILE="$WORKLOG_DIR/$TODAY.md"
+
+cmd=${1:-help}
+shift || true
+
+# 確保目錄存在
+mkdir -p "$WORKLOG_DIR"
+
+case $cmd in
+    start)
+        echo -e "\n## [$(date '+%H:%M')] ${1:-任務}\n" >> "$FILE"
+        echo "- $(date +%H:%M) 開始" >> "$FILE"
+        echo "✓ $FILE"
+        ;;
+    log)
+        echo "- $(date +%H:%M) ${1:-更新}" >> "$FILE"
+        echo "✓"
+        ;;
+    done)
+        echo "- $(date +%H:%M) ✅ 完成" >> "$FILE"
+        echo "✓ 完成"
+        ;;
+    view)
+        cat "$FILE" 2>/dev/null || echo "今日尚無記錄"
+        ;;
+    *)
+        echo "用法: $0 {start|log|done|view} [訊息]"
+        echo ""
+        echo "範例:"
+        echo "  $0 start '實作功能X'"
+        echo "  $0 log '完成API endpoint'"
+        echo "  $0 done"
+        echo "  $0 view"
+        echo ""
+        echo "檔案: $FILE"
+        ;;
+esac

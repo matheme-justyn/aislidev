@@ -1,6 +1,6 @@
 <template>
   <div class="editor-layout">
-    <Splitpanes horizontal>
+    <Splitpanes>
       <Pane :size="50" class="editor-pane">
         <CodeMirrorEditor
           v-model="localContent"
@@ -8,7 +8,7 @@
         />
       </Pane>
       <Pane :size="50" class="preview-pane">
-        <SlidevPreview :presentation-id="presentationId" />
+        <SlidevPreview ref="previewRef" :presentation-id="presentationId" />
       </Pane>
     </Splitpanes>
   </div>
@@ -50,13 +50,22 @@ const onContentChange = (newContent: string) => {
   }, 1000);
 };
 
+const previewRef = ref<InstanceType<typeof SlidevPreview> | null>(null);
+
 const saveContent = async (content: string) => {
   try {
-    await fetch(`/api/presentations/${props.presentationId}`, {
+    const response = await fetch(`/api/presentations/${props.presentationId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
+    
+    if (response.ok) {
+      // Wait a bit for Slidev to detect file change, then reload iframe
+      setTimeout(() => {
+        previewRef.value?.reload();
+      }, 1500);
+    }
   } catch (error) {
     console.error("Failed to save content:", error);
   }
@@ -84,13 +93,13 @@ watch(
   overflow: hidden;
 }
 
-.splitpanes.splitpanes--horizontal > .splitpanes__splitter {
+.splitpanes.splitpanes--vertical > .splitpanes__splitter {
   background-color: #2c2c2c;
-  height: 6px;
-  cursor: row-resize;
+  width: 6px;
+  cursor: col-resize;
 }
 
-.splitpanes.splitpanes--horizontal > .splitpanes__splitter:hover {
+.splitpanes.splitpanes--vertical > .splitpanes__splitter:hover {
   background-color: #42b883;
 }
 </style>

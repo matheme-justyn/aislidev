@@ -15,23 +15,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import EditorLayout from './components/EditorLayout.vue';
 
 const presentationId = ref('demo-presentation');
-const content = ref(`---
-theme: default
----
+const content = ref('Loading...');
 
-# Welcome to AISliDev
-
-AI-Powered Slidev Editor
-
----
-
-## Getting Started
-Start editing to see live preview
-`);
+// Load presentation content from API on mount
+onMounted(async () => {
+  try {
+    const response = await fetch(`/api/presentations/${presentationId.value}`);
+    const data = await response.json();
+    content.value = data.content || '';
+  } catch (error) {
+    console.error('Failed to load presentation:', error);
+    content.value = '# Error\n\nFailed to load presentation';
+  }
+});
 
 const onContentUpdate = (newContent: string) => {
   content.value = newContent;
@@ -50,7 +50,7 @@ html, body, #app {
   overflow: hidden;
 }
 
-#aislidev-app {
+#aislidev-editor {
   height: 100%;
   display: flex;
   flex-direction: column;

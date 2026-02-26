@@ -3,6 +3,7 @@
     <iframe
       v-if="previewUrl"
       :src="previewUrl"
+      :key="iframeKey"
       class="preview-frame"
       frameborder="0"
       @load="onLoad"
@@ -14,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from "vue";
+import { ref, watch, onUnmounted, defineExpose } from "vue";
 
 interface Props {
   presentationId: string;
@@ -24,6 +25,7 @@ const props = defineProps<Props>();
 
 const previewUrl = ref<string | null>(null);
 const status = ref("Initializing preview...");
+const iframeKey = ref(0);
 
 let statusCheckInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -34,7 +36,8 @@ const checkStatus = async () => {
     );
     const data = await response.json();
 
-    if (data.status === "running" && data.port) {
+    if (data.port) {
+      // If we have a port, assume it's ready and try to display
       previewUrl.value = `http://localhost:${data.port}`;
       status.value = "Preview ready";
       if (statusCheckInterval) {
@@ -72,6 +75,13 @@ const startPresentation = async () => {
 const onLoad = () => {
   status.value = "Preview loaded";
 };
+
+// Expose reload method to parent
+const reload = () => {
+  iframeKey.value++;
+};
+
+defineExpose({ reload });
 
 watch(
   () => props.presentationId,

@@ -153,7 +153,11 @@ const presentationsRoutes: FastifyPluginAsync<
 
         return processInfo;
       } catch (error) {
-        return reply.code(500).send({ error: "Failed to start presentation" });
+        fastify.log.error(error, "Failed to start presentation");
+        return reply.code(500).send({ 
+          error: "Failed to start presentation",
+          message: error instanceof Error ? error.message : String(error)
+        });
       }
     },
   );

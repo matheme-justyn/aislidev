@@ -55,7 +55,12 @@ export class SlidevManager {
     slidevProcess.stdout?.on("data", (data) => {
       const output = data.toString();
       console.log(`[Slidev ${presentationId}] stdout:`, output);
-      if (output.includes("ready in") || output.includes("Local:")) {
+      // Check for various Slidev ready signals
+      if (output.includes("ready in") || 
+          output.includes("Local:") || 
+          output.includes("public slide show") ||
+          output.includes("localhost:")) {
+        console.log(`[Slidev ${presentationId}] Detected ready signal in stdout`);
         processInfo.status = "running";
       }
     });
@@ -63,7 +68,9 @@ export class SlidevManager {
     slidevProcess.stderr?.on("data", (data) => {
       const output = data.toString();
       console.log(`[Slidev ${presentationId}] stderr:`, output);
-      if (output.includes("ready in") || output.includes("Local:") || output.includes("localhost")) {
+      // Check for various Slidev ready signals (sometimes output to stderr)
+      if (output.includes("ready in") || output.includes("Local:") || output.includes("localhost") || output.includes("public slide show")) {
+        console.log(`[Slidev ${presentationId}] Detected ready signal in stderr`);
         processInfo.status = "running";
       }
     });
@@ -81,7 +88,7 @@ export class SlidevManager {
       this.processes.delete(presentationId);
     });
 
-    await this.waitForReady(presentationId, 10000);
+    await this.waitForReady(presentationId, 30000); // Increased to 30 seconds for container environment
 
     return processInfo;
   }

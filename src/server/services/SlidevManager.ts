@@ -2,7 +2,7 @@ import { spawn, ChildProcess } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
 import getPort from "get-port";
-import type { SlidevProcess, SlidevConfig } from "../types/slidev";
+import type { SlidevProcess, SlidevConfig } from "../../types/slidev";
 
 export class SlidevManager {
   private processes: Map<string, SlidevProcess & { process: ChildProcess }> =

@@ -64,7 +64,7 @@ const presentationsRoutes: FastifyPluginAsync<
           theme: 'default',
         };
       } catch (error) {
-        reply.code(404).send({ error: "Presentation not found" });
+        return reply.code(404).send({ error: "Presentation not found" });
       }
     },
   );
@@ -117,7 +117,7 @@ const presentationsRoutes: FastifyPluginAsync<
           theme: 'default',
         };
       } catch (error) {
-        reply.code(404).send({ error: "Presentation not found" });
+        return reply.code(404).send({ error: "Presentation not found" });
       }
     },
   );
@@ -136,7 +136,7 @@ const presentationsRoutes: FastifyPluginAsync<
         await fs.rm(presentationDir, { recursive: true, force: true });
         return { success: true };
       } catch (error) {
-        reply.code(404).send({ error: "Presentation not found" });
+        return reply.code(404).send({ error: "Presentation not found" });
       }
     },
   );
@@ -153,7 +153,7 @@ const presentationsRoutes: FastifyPluginAsync<
 
         return processInfo;
       } catch (error) {
-        reply.code(500).send({ error: "Failed to start presentation" });
+        return reply.code(500).send({ error: "Failed to start presentation" });
       }
     },
   );
@@ -167,7 +167,7 @@ const presentationsRoutes: FastifyPluginAsync<
         await slidevManager.stopPresentation(id);
         return { success: true };
       } catch (error) {
-        reply.code(404).send({ error: "Presentation not running" });
+        return reply.code(404).send({ error: "Presentation not running" });
       }
     },
   );

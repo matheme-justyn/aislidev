@@ -2,7 +2,7 @@
 
 > AI-powered Slidev presentation platform
 
-[![Version](https://img.shields.io/badge/version-0.1.3-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.4-blue.svg)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![AI-First](https://img.shields.io/badge/development-AI--First-purple.svg)](./AGENTS.md)
 

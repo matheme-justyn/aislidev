@@ -8,9 +8,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Slidev native integration
 - AI-assisted content generation
-- Presentation management features
+- Advanced presentation management features
+
+---
+
+## [0.1.3] - 2026-03-03
+
+### Summary
+**Critical fix**: Resolved Slidev preview iframe rendering failure caused by missing compile-time constants in dev mode.
+
+### Fixed
+- **Slidev preview rendering** - Fixed "__DEV__ is not defined" and "__SLIDEV_HASH_ROUTE__ is not defined" errors
+  - Root cause: Vite's `define` config behaves differently in dev vs build mode
+  - In dev mode, Vite expects runtime environment to provide constants, but browser has no global variables
+  - Created custom Vite plugin (`forceSlidevConstantsPlugin`) to force-replace all Slidev constants during transform phase
+  - Plugin uses regex to replace 13 Slidev compile-time constants before code reaches browser
+  - Works in both dev and build modes, bypassing Vite's define limitations
+  - Template file: `src/server/templates/slidev-vite.config.ts` (auto-copied to each presentation directory)
+- **Port mapping** - Added Slidev port range (13030-13040) to `deploy.sh` for proper container access
+- **Build process** - Added `copy:templates` script to ensure non-TypeScript files are included in dist
+
+### Documentation
+- **ADR-004**: Created comprehensive technical documentation for Slidev Vite dev mode fix
+  - Detailed root cause analysis with Vite define mechanism explanation
+  - Complete solution implementation guide
+  - Alternative approaches evaluation (build mode, source patching)
+  - Prevention measures and debugging workflow
+  - 433 lines covering problem, solution, and lessons learned
+- Updated ADR index in `docs/adr/README.md` and `AGENTS.md`
+
+### Technical Details
+- **Problem**: Slidev subprocesses run in dev server mode (`npx slidev`)
+  - Vite's `define` config in dev mode expects runtime globals, doesn't compile constants
+  - `@slidev/client/env.ts` directly references constants like `__DEV__`, `__SLIDEV_HASH_ROUTE__`, etc.
+  - Browser has no global variables → `ReferenceError: __DEV__ is not defined`
+- **Solution**: Custom Vite plugin with transform hook
+  - Executes in `pre` enforce phase before other transforms
+  - Uses regex `\b${constant}\b` to find and replace all constant references
+  - Replaces 13 constants: `__DEV__`, `__SLIDEV_HASH_ROUTE__`, `__SLIDEV_FEATURE_*`, etc.
+  - Each presentation directory gets a copy of vite.config.ts with the plugin
+- **Verification**: Browser Console clean, preview panel renders correctly, multiple presentations work
+
+### Changed
+- **README.md**: Updated version badge from 0.1.0 to 0.1.2 (sync with package.json)
+
+### Chores
+- Added `.gitattributes` to exclude build outputs from GitHub language statistics
 
 ---
 

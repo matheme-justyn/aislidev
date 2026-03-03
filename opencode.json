@@ -12,5 +12,23 @@
         "timeout": 900000
       }
     }
+  },
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": ["bunx", "@modelcontextprotocol/server-filesystem", "."]
+    },
+    "git": {
+      "type": "local",
+      "command": ["uv", "tool", "run", "mcp-server-git", "--repository", "."]
+    },
+    "memory": {
+      "type": "local",
+      "command": ["bunx", "@modelcontextprotocol/server-memory"]
+    },
+    "github": {
+      "type": "local",
+      "command": ["bunx", "@modelcontextprotocol/server-github"]
+    }
   }
 }

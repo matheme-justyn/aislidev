@@ -4,6 +4,9 @@ import vue from "@vitejs/plugin-vue";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  define: {
+    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
+  },
   server: {
     // Vite is now used as middleware in Fastify, not standalone
     // No proxy needed - API requests go directly to same server

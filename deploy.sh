@@ -8,7 +8,7 @@ set -e
 IMAGE_NAME="aislidev"
 CONTAINER_NAME="aislidev"
 PORT="${PORT:-13000}"
-STORAGE_PATH="${STORAGE_PATH:-./storage}"
+DATA_PATH="${DATA_PATH:-./data}"
 
 # Detect container runtime
 if command -v podman &> /dev/null; then
@@ -43,14 +43,15 @@ cleanup_container() {
 run_container() {
     echo "🚀 Starting container: $CONTAINER_NAME"
     
-    # Create storage directory if it doesn't exist
-    mkdir -p "$STORAGE_PATH"
+    # Create data directory if it doesn't exist
+    mkdir -p "$DATA_PATH"
     
     # Run container
     $RUNTIME run -d \
         --name $CONTAINER_NAME \
         -p $PORT:13000 \
-        -v "$STORAGE_PATH:/app/storage:Z" \
+        -p 13030-13040:13030-13040 \
+        -v "$DATA_PATH:/app/data:Z" \
         -e NODE_ENV=production \
         -e PORT=13000 \
         -e AUTO_PORT_SELECTION=false \
@@ -61,6 +62,7 @@ run_container() {
     echo ""
     echo "📍 AISliDev is running at: http://localhost:$PORT"
     echo "📊 Health check: http://localhost:$PORT/health"
+    echo "📂 Data directory: $DATA_PATH (mounted to /app/data)"
     echo ""
     echo "📝 Useful commands:"
     echo "   View logs:    $RUNTIME logs -f $CONTAINER_NAME"

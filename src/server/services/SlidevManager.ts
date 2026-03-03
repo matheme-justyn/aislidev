@@ -1,9 +1,14 @@
 import { spawn, ChildProcess } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import getPort from "get-port";
 import type { SlidevProcess, SlidevConfig } from "../../types/slidev";
 
+// ES Module __dirname polyfill
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 export class SlidevManager {
   private processes: Map<string, SlidevProcess & { process: ChildProcess }> =
     new Map();
@@ -29,15 +34,27 @@ export class SlidevManager {
     const slidesPath = path.join(presentationDir, "slides.md");
     await fs.writeFile(slidesPath, content, "utf-8");
 
+    // Copy Vite config template to fix __DEV__ undefined error
+    const viteConfigTemplate = path.join(__dirname, "../templates/slidev-vite.config.ts");
+    const viteConfigPath = path.join(presentationDir, "vite.config.ts");
+    try {
+      await fs.copyFile(viteConfigTemplate, viteConfigPath);
+    } catch (error) {
+      console.warn(`Failed to copy vite config template: ${error}`);
+    }
     const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
 
     const slidevProcess = spawn(
       "npx",
-      ["slidev", slidesPath, "--port", port.toString()],
+      ["slidev", slidesPath, "--port", port.toString(), "--remote", "--bind", "0.0.0.0"],
       {
         cwd: presentationDir,
         stdio: ["pipe", "pipe", "pipe"],
         detached: false,
+        env: {
+          ...process.env,
+          NODE_ENV: "production",
+        },
       },
     );
 

@@ -159,6 +159,8 @@ See [docs/adr/README.md](./docs/adr/README.md) for the complete list of ADRs.
 
 - [ADR-003: OpenCode-First AI Architecture](./docs/adr/003-opencode-first-architecture.md)
 
+- [ADR-004: Slidev Vite Dev Mode Fix](./docs/adr/004-slidev-vite-dev-mode-fix.md)
+
 ### Consistency Enforcement
 
 

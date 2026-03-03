@@ -190,7 +190,7 @@ aislidev/
 ├── docs/
 │   ├── adr/           # Architecture Decision Records
 │   └── guides/        # Development guides
-├── storage/           # Presentation storage
+├── data/              # Presentation data
 └── .template/         # Scaffolding infrastructure
 ```
 

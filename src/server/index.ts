@@ -33,7 +33,7 @@ await fastify.register(fastifyCors, {
   origin: true, // Allow all origins in development
 });
 
-const storageDir = path.join(__dirname, "../../storage");
+const storageDir = path.join(__dirname, "../../data");
 const slidevManager = new SlidevManager(storageDir);
 
 // Health check endpoint

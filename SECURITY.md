@@ -95,7 +95,7 @@ AISliDev v0.1.0 is in **Pre-Release** with the following security considerations
 
 #### 3. File Storage
 
-- Presentations stored in `storage/presentations/`
+- Presentations stored in `data/`
 - No encryption at rest currently
 - File permissions rely on OS-level security
 

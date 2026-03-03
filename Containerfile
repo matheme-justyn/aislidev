@@ -33,7 +33,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 
 # Create storage directory for presentations
-RUN mkdir -p /app/storage && \
+RUN mkdir -p /app/data && \
     chown -R node:node /app
 
 # Use non-root user for security

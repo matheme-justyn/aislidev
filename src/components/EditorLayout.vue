@@ -1,10 +1,24 @@
 <template>
   <div class="editor-layout">
+    <div class="toolbar">
+      <n-button
+        size="small"
+        :type="leftPanelMode === 'explorer' ? 'primary' : 'default'"
+        @click="toggleLeftPanel"
+      >
+        {{ leftPanelMode === 'explorer' ? '✏️ Editor' : '📁 Explorer' }}
+      </n-button>
+    </div>
     <Splitpanes>
       <Pane :size="50" class="editor-pane">
         <CodeMirrorEditor
+          v-if="leftPanelMode === 'editor'"
           v-model="localContent"
           @update:modelValue="onContentChange"
+        />
+        <FileExplorer
+          v-else
+          @select="onFileSelect"
         />
       </Pane>
       <Pane :size="50" class="preview-pane">
@@ -16,10 +30,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { NButton } from 'naive-ui';
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import CodeMirrorEditor from "./CodeMirrorEditor.vue";
 import SlidevPreview from "./SlidevPreview.vue";
+import FileExplorer from "./FileExplorer.vue";
 
 interface Props {
   presentationId: string;
@@ -30,8 +46,13 @@ interface Emits {
   (e: "update:content", value: string): void;
 }
 
+type LeftPanelMode = 'editor' | 'explorer';
+
+
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+const leftPanelMode = ref<LeftPanelMode>('editor');
 
 const localContent = ref(props.content);
 
@@ -79,6 +100,18 @@ watch(
     }
   },
 );
+
+const toggleLeftPanel = () => {
+  leftPanelMode.value = leftPanelMode.value === 'editor' ? 'explorer' : 'editor';
+};
+
+const onFileSelect = (presentationId: string) => {
+  // Switch to editor mode and notify parent
+  leftPanelMode.value = 'editor';
+  // Parent (App.vue) will handle loading the selected presentation
+  window.dispatchEvent(new CustomEvent('select-presentation', { detail: { id: presentationId } }));
+};
+
 </script>
 
 <style scoped>
@@ -101,5 +134,13 @@ watch(
 
 .splitpanes.splitpanes--vertical > .splitpanes__splitter:hover {
   background-color: #42b883;
+}
+
+.toolbar {
+  padding: 8px 12px;
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #2c2c2c;
+  display: flex;
+  gap: 8px;
 }
 </style>

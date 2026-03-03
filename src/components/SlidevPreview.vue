@@ -30,6 +30,10 @@ const iframeKey = ref(0);
 let statusCheckInterval: ReturnType<typeof setInterval> | null = null;
 
 const checkStatus = async () => {
+  if (!props.presentationId) {
+    status.value = "No presentation selected";
+    return;
+  }
   try {
     const response = await fetch(
       `/api/presentations/${props.presentationId}/status`,
@@ -56,6 +60,10 @@ const checkStatus = async () => {
 };
 
 const startPresentation = async () => {
+  if (!props.presentationId) {
+    status.value = "No presentation selected";
+    return;
+  }
   try {
     const response = await fetch(
       `/api/presentations/${props.presentationId}/start`,

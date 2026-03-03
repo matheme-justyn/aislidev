@@ -18,20 +18,45 @@
 import { ref, onMounted } from 'vue';
 import EditorLayout from './components/EditorLayout.vue';
 
-const presentationId = ref('demo-presentation');
-const content = ref('Loading...');
+const presentationId = ref<string>('');
+const content = ref('');
+const presentations = ref<any[]>([]);
 
-// Load presentation content from API on mount
+// Load presentations list on mount
 onMounted(async () => {
   try {
-    const response = await fetch(`/api/presentations/${presentationId.value}`);
-    const data = await response.json();
-    content.value = data.content || '';
+    const response = await fetch('/api/presentations');
+    if (response.ok) {
+      presentations.value = await response.json();
+      // Load first presentation if available
+      if (presentations.value.length > 0) {
+        await loadPresentation(presentations.value[0].id);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load presentations:', error);
+  }
+
+  // Listen for presentation selection from FileExplorer
+  window.addEventListener('select-presentation', (event: Event) => {
+    const customEvent = event as CustomEvent;
+    loadPresentation(customEvent.detail.id);
+  });
+});
+
+const loadPresentation = async (id: string) => {
+  try {
+    const response = await fetch(`/api/presentations/${id}`);
+    if (response.ok) {
+      const data = await response.json();
+      presentationId.value = id;
+      content.value = data.content || '';
+    }
   } catch (error) {
     console.error('Failed to load presentation:', error);
     content.value = '# Error\n\nFailed to load presentation';
   }
-});
+};
 
 const onContentUpdate = (newContent: string) => {
   content.value = newContent;

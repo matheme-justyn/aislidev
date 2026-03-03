@@ -23,10 +23,8 @@ const presentationsRoutes: FastifyPluginAsync<
         const slidesPath = path.join(storageDir, dir.name, "slides.md");
         try {
           const content = await fs.readFile(slidesPath, "utf-8");
-          const lines = content.split("\n");
-          const title =
-            lines.find((l) => l.startsWith("# "))?.replace("# ", "") ||
-            dir.name;
+          // Use folder name as title for consistency and reliability
+          const title = dir.name;
 
           presentations.push({
             id: dir.name,
@@ -51,9 +49,8 @@ const presentationsRoutes: FastifyPluginAsync<
 
       try {
         const content = await fs.readFile(slidesPath, "utf-8");
-        const lines = content.split("\n");
-        const title =
-          lines.find((l) => l.startsWith("# "))?.replace("# ", "") || id;
+        // Use folder name (id) as title for consistency
+        const title = id;
 
         return {
           id,
@@ -104,9 +101,8 @@ const presentationsRoutes: FastifyPluginAsync<
 
         await slidevManager.reloadPresentation(id, content);
 
-        const lines = content.split("\n");
-        const title =
-          lines.find((l) => l.startsWith("# "))?.replace("# ", "") || id;
+        // Use folder name (id) as title for consistency
+        const title = id;
 
         return {
           id,

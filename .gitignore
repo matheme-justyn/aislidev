@@ -148,7 +148,7 @@ backend/uploads/*
 build/
 config.toml
 coverage/
-data/
+# data/ - Now tracked for presentation synchronization
 develop-eggs/
 dist/
 dmypy.json

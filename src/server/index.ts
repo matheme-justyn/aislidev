@@ -41,6 +41,159 @@ fastify.get("/health", async () => {
   return { status: "ok", timestamp: new Date().toISOString() };
 });
 
+
+
+
+// Helper function to create Vite resource proxy routes
+const createViteProxyRoute = (pathPattern: string) => {
+  return async (request: any, reply: any) => {
+    const port = parseInt(request.params.port);
+    
+    // Extract the Vite path (e.g., /@fs/..., /@vite/..., etc.)
+    let vitePath = request.url.replace(`/slidev/${port}`, '');
+    
+    // CRITICAL: Vite's @fs requires double slash for absolute paths (@fs//...)
+    // Fix single slash to double slash for absolute paths
+    if (vitePath.startsWith('/@fs/') && !vitePath.startsWith('/@fs//')) {
+      vitePath = vitePath.replace('/@fs/', '/@fs//');//
+    }
+    
+    // Include base path in target URL (Slidev uses --base /slidev/:port/)
+    const targetUrl = `http://localhost:${port}/slidev/${port}${vitePath}`;
+    
+    try {
+      const headers: Record<string, string> = {};
+      for (const [key, value] of Object.entries(request.headers)) {
+        if (!['host', 'connection'].includes(key.toLowerCase()) && typeof value === 'string') {
+          headers[key] = value;
+        }
+      }
+      
+      const response = await fetch(targetUrl, {
+        method: request.method,
+        headers,
+        body: request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined,
+      });
+      
+      // Forward response headers
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() !== 'content-length') {
+          reply.header(key, value);
+        }
+      });
+      reply.header('X-AISlidev-Vite-Proxy', pathPattern);
+      
+      const buffer = await response.arrayBuffer();
+      reply.code(response.status).send(Buffer.from(buffer));
+    } catch (error) {
+      fastify.log.error(`Vite proxy error for ${targetUrl}: ${error}`);
+      reply.code(502).send({ error: 'Vite proxy error' });
+    }
+  };
+};
+
+// Slidev root proxy route (exact match)
+fastify.all<{ Params: { port: string } }>("/slidev/:port", async (request, reply) => {
+  fastify.log.info(`[PROXY] Root route /slidev/:port for ${request.url}`);
+  const port = parseInt(request.params.port);
+  const path = request.url.replace(`/slidev/${port}`, '') || '/';
+  const targetUrl = `http://localhost:${port}${path}`;
+  
+  try {
+    const headers: Record<string, string> = {};
+    for (const [key, value] of Object.entries(request.headers)) {
+      if (!['host', 'connection'].includes(key.toLowerCase()) && typeof value === 'string') {
+        headers[key] = value;
+      }
+    }
+    
+    const response = await fetch(targetUrl, {
+      method: request.method,
+      headers,
+      body: request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined,
+    });
+    
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() !== 'content-length') {
+        reply.header(key, value);
+      }
+    });
+    reply.header('X-AISlidev-Proxy', 'root');
+    
+    const buffer = await response.arrayBuffer();
+    const contentType = response.headers.get('content-type') || '';
+    
+    // Inject base tag for HTML root
+    if (contentType.includes('text/html') && path === '/') {
+      let html = Buffer.from(buffer).toString('utf-8');
+      html = html.replace('<head>', `<head>\n  <base href="/slidev/${port}/">`);
+      reply.code(response.status).send(html);
+    } else {
+      reply.code(response.status).send(Buffer.from(buffer));
+    }
+  } catch (error) {
+    fastify.log.error(`Proxy error for ${targetUrl}: ${error}`);
+    reply.code(502).send({ error: 'Proxy error' });
+  }
+});
+
+// Register Vite special path proxies BEFORE wildcard
+// These must be registered before /slidev/:port/* to match correctly
+fastify.all<{ Params: { port: string } }>("/slidev/:port/@fs/*", createViteProxyRoute('/@fs/*'));
+fastify.all<{ Params: { port: string } }>("/slidev/:port/@vite/*", createViteProxyRoute('/@vite/*'));
+fastify.all<{ Params: { port: string } }>("/slidev/:port/@id/*", createViteProxyRoute('/@id/*'));
+fastify.all<{ Params: { port: string } }>("/slidev/:port/@slidev/*", createViteProxyRoute('/@slidev/*'));
+fastify.all<{ Params: { port: string } }>("/slidev/:port/__uno*", createViteProxyRoute('/__uno*'));
+fastify.all<{ Params: { port: string } }>("/slidev/:port/@server-reactive/*", createViteProxyRoute('/@server-reactive/*'));
+fastify.all<{ Params: { port: string } }>("/slidev/:port/slides.md__slidev_*", createViteProxyRoute('/slides.md__slidev_*'));
+
+// Wildcard route for other Slidev paths (must be registered LAST)
+fastify.all<{ Params: { port: string } }>("/slidev/:port/*", async (request, reply) => {
+  const port = parseInt(request.params.port);
+  const path = request.url.replace(`/slidev/${port}`, '');
+  const targetUrl = `http://localhost:${port}${path}`;
+  
+  fastify.log.info(`[PROXY] Wildcard route: ${request.url} → ${targetUrl}`);
+  
+  try {
+    const headers: Record<string, string> = {};
+    for (const [key, value] of Object.entries(request.headers)) {
+      if (!['host', 'connection'].includes(key.toLowerCase()) && typeof value === 'string') {
+        headers[key] = value;
+      }
+    }
+    
+    const response = await fetch(targetUrl, {
+      method: request.method,
+      headers,
+      body: request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined,
+    });
+    
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() !== 'content-length') {
+        reply.header(key, value);
+      }
+    });
+    reply.header('X-AISlidev-Proxy', 'wildcard');
+    
+    const buffer = await response.arrayBuffer();
+    const contentType = response.headers.get('content-type') || '';
+    
+    // Inject base tag for HTML (if somehow root gets here)
+    if (contentType.includes('text/html') && path === '/') {
+      let html = Buffer.from(buffer).toString('utf-8');
+      html = html.replace('<head>', `<head>\n  <base href="/slidev/${port}/">`);
+      reply.code(response.status).send(html);
+    } else {
+      reply.code(response.status).send(Buffer.from(buffer));
+    }
+  } catch (error) {
+    fastify.log.error(`Wildcard proxy error for ${targetUrl}: ${error}`);
+    reply.code(502).send({ error: 'Proxy error' });
+  }
+});
+
+
 // API routes
 await fastify.register(presentationsRoutes, {
   prefix: "/api",
@@ -80,9 +233,16 @@ if (IS_DEV) {
     prefix: "/",
   });
 
-  // SPA fallback - serve index.html for all non-API routes
+  // SPA fallback - serve index.html for non-API, non-proxy routes
   fastify.setNotFoundHandler(async (request, reply) => {
-    if (request.url.startsWith("/api/")) {
+    // Don't serve SPA for API routes or proxy routes
+    if (
+      request.url.startsWith("/api/") ||
+      request.url.startsWith("/slidev/") ||
+      request.url.startsWith("/@") ||
+      request.url.startsWith("/__") ||
+      request.url.includes("__slidev_")
+    ) {
       reply.code(404).send({ error: "Not found" });
     } else {
       reply.sendFile("index.html");

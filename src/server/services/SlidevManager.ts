@@ -46,7 +46,7 @@ export class SlidevManager {
 
     const slidevProcess = spawn(
       "npx",
-      ["slidev", slidesPath, "--port", port.toString(), "--remote", "--bind", "0.0.0.0"],
+      ["slidev", slidesPath, "--port", port.toString(), "--base", `/slidev/${port}/`],
       {
         cwd: presentationDir,
         stdio: ["pipe", "pipe", "pipe"],
@@ -54,6 +54,8 @@ export class SlidevManager {
         env: {
           ...process.env,
           NODE_ENV: "production",
+          VITE_HOST: "0.0.0.0",
+          HOST: "0.0.0.0",
         },
       },
     );

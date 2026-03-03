@@ -6,8 +6,10 @@
       :key="iframeKey"
       class="preview-frame"
       frameborder="0"
+      allow="fullscreen"
       @load="onLoad"
     ></iframe>
+    
     <div v-else class="preview-placeholder">
       <p>{{ status }}</p>
     </div>
@@ -24,14 +26,14 @@ interface Props {
 const props = defineProps<Props>();
 
 const previewUrl = ref<string | null>(null);
-const status = ref("Initializing preview...");
+const slidevPort = ref<number | null>(null);
+const status = ref("正在啟動簡報...");
 const iframeKey = ref(0);
-
 let statusCheckInterval: ReturnType<typeof setInterval> | null = null;
 
 const checkStatus = async () => {
   if (!props.presentationId) {
-    status.value = "No presentation selected";
+    status.value = "未選擇簡報";
     return;
   }
   try {
@@ -41,27 +43,27 @@ const checkStatus = async () => {
     const data = await response.json();
 
     if (data.port) {
-      // If we have a port, assume it's ready and try to display
-      previewUrl.value = `http://localhost:${data.port}`;
-      status.value = "Preview ready";
+      slidevPort.value = data.port;
+      previewUrl.value = `/slidev/${data.port}/`;
+      status.value = "簡報已就緒";
       if (statusCheckInterval) {
         clearInterval(statusCheckInterval);
         statusCheckInterval = null;
       }
     } else if (data.status === "starting") {
-      status.value = "Starting Slidev...";
+      status.value = "正在啟動 Slidev...";
     } else {
-      status.value = "Starting presentation...";
+      status.value = "正在啟動簡報...";
       startPresentation();
     }
   } catch (error) {
-    status.value = "Error checking status";
+    status.value = "狀態檢查錯誤";
   }
 };
 
 const startPresentation = async () => {
   if (!props.presentationId) {
-    status.value = "No presentation selected";
+    status.value = "未選擇簡報";
     return;
   }
   try {
@@ -70,18 +72,19 @@ const startPresentation = async () => {
       { method: "POST" },
     );
     const data = await response.json();
-
+    
     if (data.port) {
-      previewUrl.value = `http://localhost:${data.port}`;
-      status.value = "Preview ready";
+      slidevPort.value = data.port;
+      previewUrl.value = `/slidev/${data.port}/`;
+      status.value = "簡報已就緒";
     }
   } catch (error) {
-    status.value = "Failed to start presentation";
+    status.value = "啟動簡報失敗";
   }
 };
 
 const onLoad = () => {
-  status.value = "Preview loaded";
+  status.value = "預覽已載入";
 };
 
 // Expose reload method to parent

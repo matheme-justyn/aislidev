@@ -1,4 +1,4 @@
-import { defineConfig, Plugin } from "vite";
+import { defineConfig, Plugin, searchForWorkspaceRoot } from "vite";
 
 // Plugin to force replace all Slidev constants in all files
 const forceSlidevConstantsPlugin = (): Plugin => ({
@@ -45,8 +45,23 @@ const forceSlidevConstantsPlugin = (): Plugin => ({
 
 export default defineConfig({
   plugins: [forceSlidevConstantsPlugin()],
+  server: {
+    host: '0.0.0.0',
+    strictPort: true,
+    fs: {
+      // Restrict serving files from outside the project root
+      // But allow workspace root and parent directories for node_modules access
+      allow: [
+        // Search up for workspace root (handles monorepos)
+        searchForWorkspaceRoot(process.cwd()),
+        // Allow accessing parent directory (for /app/node_modules)
+        '..',
+        // Allow accessing two levels up (to reach /app from /app/data/aislidev-demo)
+        '../..',
+      ],
+    },
+  },
   define: {
-    // These are also defined for build mode
     __DEV__: false,
     __SLIDEV_CLIENT_ROOT__: '"/node_modules/@slidev/client"',
     __SLIDEV_HASH_ROUTE__: false,

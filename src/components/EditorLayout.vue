@@ -3,8 +3,9 @@
     <div class="toolbar">
       <n-button
         size="small"
-        :type="leftPanelMode === 'explorer' ? 'primary' : 'default'"
+        :type="leftPanelMode === 'explorer' ? 'primary' : 'tertiary'"
         @click="toggleLeftPanel"
+        class="panel-toggle-btn"
       >
         {{ leftPanelMode === 'explorer' ? '✏️ Editor' : '📁 Explorer' }}
       </n-button>
@@ -142,5 +143,15 @@ const onFileSelect = (presentationId: string) => {
   border-bottom: 1px solid #2c2c2c;
   display: flex;
   gap: 8px;
+}
+
+/* Ensure button is visible on dark background */
+.panel-toggle-btn :deep(.n-button__border),
+.panel-toggle-btn :deep(.n-button__state-border) {
+  border-color: #4a4a4a !important;
+}
+
+.panel-toggle-btn :deep(.n-button__content) {
+  color: #cccccc !important;
 }
 </style>

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.4] - 2026-03-03
+
+### Summary
+**Critical fix**: Resolved Slidev iframe preview display issue - right panel now correctly shows presentations through proxy routing with proper Vite @fs path handling.
+
+### Fixed
+- **Slidev iframe preview** - Fixed blank/404 errors when loading Slidev presentations in right panel
+  - Root cause: Vite's `@fs` requires double slash (`@fs//`) for absolute paths, and requests must include Slidev's `--base` path
+  - Implemented proxy routing architecture: `/slidev/:port/*` routes forward to Slidev Vite server with base path
+  - Added automatic `@fs/` → `@fs//` transformation in proxy for absolute path resolution
+  - Created `createViteProxyRoute()` helper to handle all Vite special paths (`@fs`, `@vite`, `@id`, etc.)
+  - Fixed route registration order: Vite special paths now registered before wildcard to ensure correct matching
+- **Vite file system access** - Configured `server.fs.allow` to permit cross-directory module resolution
+  - Added `searchForWorkspaceRoot()` and relative paths (`..`, `../..`) to allow list
+  - Slidev running in `/app/data/presentations/` can now access `/app/node_modules/`
+  - Updated template: `src/server/templates/slidev-vite.config.ts`
+- **Slidev base path** - Added `--base /slidev/:port/` flag to Slidev startup for correct Vue Router behavior
+  - Ensures all asset paths and routing work correctly within proxy namespace
+  - Modified `SlidevManager.ts` to include base parameter
+
+### Added
+- **Dynamic port allocation** - Added `get-port` package for automatic Slidev port assignment (13030-13040 range)
+- **Simplified preview component** - Removed overlay/buttons from `SlidevPreview.vue`, focusing on core iframe functionality
+
+### Changed
+- **Editor layout** - Adjusted panel arrangement for better preview visibility
+- **Presentation routes** - Updated API endpoints to support new proxy architecture
+
 ### Planned
 - AI-assisted content generation
 - Advanced presentation management features

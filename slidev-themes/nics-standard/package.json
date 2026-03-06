@@ -1,0 +1,43 @@
+{
+  "name": "slidev-theme-nics-standard",
+  "version": "1.0.0",
+  "description": "NICS Cybersecurity Institute Standard Presentation Theme for Slidev - Complete 23 Layouts",
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "nics",
+    "cybersecurity",
+    "presentation"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "slidev": ">=0.48.0"
+  },
+  "main": "index.ts",
+  "scripts": {
+    "dev": "slidev example.md",
+    "build": "slidev build example.md",
+    "export": "slidev export example.md"
+  },
+  "dependencies": {
+    "@slidev/types": "latest",
+    "unocss": "^0.62.0"
+  },
+  "slidev": {
+    "colorSchema": "light",
+    "highlighter": "shiki",
+    "defaults": {
+      "fonts": {
+        "sans": "Poppins, Noto Sans TC",
+        "serif": "Poppins, Noto Sans TC",
+        "mono": "Fira Code, monospace",
+        "heading": "Poppins SemiBold, Noto Sans TC SemiBold",
+        "body": "Poppins Light, Noto Sans TC Light"
+      },
+      "layout": "default",
+      "theme": "nics-standard"
+    }
+  },
+  "author": "NICS Cybersecurity Institute",
+  "license": "MIT"
+}

@@ -190,3 +190,6 @@ vendor/
 wheels/
 yarn-debug.log*
 yarn-error.log*
+
+# PPTX template files (original sources)
+*.pptx

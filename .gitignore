@@ -149,6 +149,10 @@ build/
 config.toml
 coverage/
 # data/ - Now tracked for presentation synchronization
+# But exclude runtime-generated files in presentation directories
+data/*/vite.config.ts
+data/*/node_modules/
+data/*/.vite/
 develop-eggs/
 dist/
 dmypy.json

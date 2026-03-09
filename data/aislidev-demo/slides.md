@@ -1,5 +1,5 @@
 ---
-theme: seriph
+theme: default
 background: https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=2070
 title: AISlidev 教學
 info: |

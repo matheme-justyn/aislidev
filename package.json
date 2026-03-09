@@ -43,6 +43,7 @@
     "dotenv": "^17.2.4",
     "fastify": "^5.2.0",
     "get-port": "^7.1.0",
+    "http-proxy-middleware": "^3.0.5",
     "naive-ui": "^2.43.2",
     "splitpanes": "^4.0.4",
     "vue": "^3.5.27"

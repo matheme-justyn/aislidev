@@ -1,31 +1,34 @@
 <template>
-  <div id="aislidev-editor">
-    <header>
-      <h1>AISliDev Editor</h1>
-      <p>AI-Powered Slidev Presentation Platform</p>
-    </header>
-    <main class="editor-container">
-      <EditorLayout
-        :presentation-id="presentationId"
-        :content="content"
-        @update:content="onContentUpdate"
-      />
-    </main>
-  </div>
+  <n-message-provider>
+    <div id="aislidev-editor">
+      <header>
+        <h1>AISliDev Editor</h1>
+        <p>AI-Powered Slidev Presentation Platform</p>
+      </header>
+      <main class="editor-container">
+        <EditorLayout
+          :presentation-id="presentationId"
+          :content="content"
+          @update:content="onContentUpdate"
+        />
+      </main>
+    </div>
+  </n-message-provider>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import EditorLayout from './components/EditorLayout.vue';
+import { ref, onMounted } from "vue";
+import { NMessageProvider } from "naive-ui";
+import EditorLayout from "./components/EditorLayout.vue";
 
-const presentationId = ref<string>('');
-const content = ref('');
+const presentationId = ref<string>("");
+const content = ref("");
 const presentations = ref<any[]>([]);
 
 // Load presentations list on mount
 onMounted(async () => {
   try {
-    const response = await fetch('/api/presentations');
+    const response = await fetch("/api/presentations");
     if (response.ok) {
       presentations.value = await response.json();
       // Load first presentation if available
@@ -34,11 +37,11 @@ onMounted(async () => {
       }
     }
   } catch (error) {
-    console.error('Failed to load presentations:', error);
+    console.error("Failed to load presentations:", error);
   }
 
   // Listen for presentation selection from FileExplorer
-  window.addEventListener('select-presentation', (event: Event) => {
+  window.addEventListener("select-presentation", (event: Event) => {
     const customEvent = event as CustomEvent;
     loadPresentation(customEvent.detail.id);
   });
@@ -50,11 +53,11 @@ const loadPresentation = async (id: string) => {
     if (response.ok) {
       const data = await response.json();
       presentationId.value = id;
-      content.value = data.content || '';
+      content.value = data.content || "";
     }
   } catch (error) {
-    console.error('Failed to load presentation:', error);
-    content.value = '# Error\n\nFailed to load presentation';
+    console.error("Failed to load presentation:", error);
+    content.value = "# Error\n\nFailed to load presentation";
   }
 };
 
@@ -70,7 +73,9 @@ const onContentUpdate = (newContent: string) => {
   box-sizing: border-box;
 }
 
-html, body, #app {
+html,
+body,
+#app {
   height: 100%;
   overflow: hidden;
 }
@@ -79,13 +84,14 @@ html, body, #app {
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 header {
   background: #42b883;
   color: white;
   padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 h1 {

@@ -10,6 +10,8 @@ import getPort from "get-port";
 import path from "path";
 import { SlidevManager } from "./services/SlidevManager.js";
 import presentationsRoutes from "./routes/presentations.js";
+import filesRoutes from "./routes/files.js";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -137,6 +139,9 @@ fastify.all<{ Params: { port: string } }>("/slidev/:port", async (request, reply
   }
 });
 
+// NOTE: These routes are now handled by http-proxy-middleware above (with WebSocket support)
+// Keeping them commented for reference
+/*
 // Register Vite special path proxies BEFORE wildcard
 // These must be registered before /slidev/:port/* to match correctly
 fastify.all<{ Params: { port: string } }>("/slidev/:port/@fs/*", createViteProxyRoute('/@fs/*'));
@@ -147,51 +152,11 @@ fastify.all<{ Params: { port: string } }>("/slidev/:port/__uno*", createViteProx
 fastify.all<{ Params: { port: string } }>("/slidev/:port/@server-reactive/*", createViteProxyRoute('/@server-reactive/*'));
 fastify.all<{ Params: { port: string } }>("/slidev/:port/slides.md__slidev_*", createViteProxyRoute('/slides.md__slidev_*'));
 
-// Wildcard route for other Slidev paths (must be registered LAST)
+// Wildcard route for other Slidev paths
 fastify.all<{ Params: { port: string } }>("/slidev/:port/*", async (request, reply) => {
-  const port = parseInt(request.params.port);
-  const path = request.url.replace(`/slidev/${port}`, '');
-  const targetUrl = `http://localhost:${port}${path}`;
-  
-  fastify.log.info(`[PROXY] Wildcard route: ${request.url} → ${targetUrl}`);
-  
-  try {
-    const headers: Record<string, string> = {};
-    for (const [key, value] of Object.entries(request.headers)) {
-      if (!['host', 'connection'].includes(key.toLowerCase()) && typeof value === 'string') {
-        headers[key] = value;
-      }
-    }
-    
-    const response = await fetch(targetUrl, {
-      method: request.method,
-      headers,
-      body: request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined,
-    });
-    
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() !== 'content-length') {
-        reply.header(key, value);
-      }
-    });
-    reply.header('X-AISlidev-Proxy', 'wildcard');
-    
-    const buffer = await response.arrayBuffer();
-    const contentType = response.headers.get('content-type') || '';
-    
-    // Inject base tag for HTML (if somehow root gets here)
-    if (contentType.includes('text/html') && path === '/') {
-      let html = Buffer.from(buffer).toString('utf-8');
-      html = html.replace('<head>', `<head>\n  <base href="/slidev/${port}/">`);
-      reply.code(response.status).send(html);
-    } else {
-      reply.code(response.status).send(Buffer.from(buffer));
-    }
-  } catch (error) {
-    fastify.log.error(`Wildcard proxy error for ${targetUrl}: ${error}`);
-    reply.code(502).send({ error: 'Proxy error' });
-  }
+  // ... (omitted for brevity)
 });
+*/
 
 
 // API routes
@@ -201,9 +166,59 @@ await fastify.register(presentationsRoutes, {
   storageDir,
 });
 
+await fastify.register(filesRoutes, {
+  prefix: "/api",
+  storageDir,
+});
+
 // Register middie for Express/Connect middleware support
 await fastify.register(import("@fastify/middie"));
 
+// WebSocket-aware proxy for Slidev (must be after middie)
+// Store proxy middleware instances for each port to reuse
+const slidevProxies = new Map();
+
+await fastify.use((req, res, next) => {
+  const url = req.url || '';
+  
+  // Check if this is a Slidev proxy request
+  const slidevMatch = url.match(/^\/slidev\/(\d+)(\/.*)?$/);
+  
+  if (slidevMatch) {
+    const port = parseInt(slidevMatch[1]);
+    
+    // Get or create proxy for this port (reuse to maintain WebSocket upgrade handlers)
+    if (!slidevProxies.has(port)) {
+      const proxy = createProxyMiddleware({
+        target: `http://localhost:${port}`,
+        changeOrigin: true,
+        ws: true, // Enable WebSocket proxying
+        onError: (err, req, res) => {
+          fastify.log.error(`Proxy error for port ${port}: ${err.message}`);
+          if (!res.headersSent) {
+            res.writeHead(502);
+            res.end('Proxy error');
+          }
+        },
+        logLevel: 'silent',
+      });
+      
+      slidevProxies.set(port, proxy);
+      
+      // Setup WebSocket upgrade listener for this port
+      fastify.server.on('upgrade', (req, socket, head) => {
+        const upgradeUrl = req.url || '';
+        if (upgradeUrl.startsWith(`/slidev/${port}`)) {
+          proxy.upgrade(req, socket, head);
+        }
+      });
+    }
+    
+    return slidevProxies.get(port)(req, res, next);
+  }
+  
+  next();
+});
 // Frontend integration
 if (IS_DEV) {
   // Development mode: Use Vite dev server

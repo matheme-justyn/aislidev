@@ -46,11 +46,13 @@ Each ADR follows this structure:
 | [002](./002-lightweight-containerization.md) | Lightweight Containerization Architecture | Accepted   |
 | [003](./003-opencode-first-architecture.md)  | OpenCode-First AI Architecture            | Accepted   |
 | [004](./004-slidev-vite-dev-mode-fix.md)     | Slidev Vite Dev Mode Constants Fix        | Accepted   |
+| [005](./005-websocket-proxy-for-slidev.md)   | WebSocket-Enabled Proxy for Slidev        | Accepted   |
 | <!-- ADR                                     | 標題                                      | 狀態 -->   |
 | <!-- 001                                     | 版本控制和發布策略                        | 已接受 --> |
 | <!-- 002                                     | 輕量容器化架構                            | 已接受 --> |
 | <!-- 003                                     | OpenCode 優先的 AI 架構                   | 已接受 --> |
 | <!-- 004                                     | Slidev Vite Dev Mode 編譯時常量修復       | 已接受 --> |
+| <!-- 005                                     | 支援 WebSocket 的 Slidev 代理             | 已接受 --> |
 
 ## Creating a New ADR
 

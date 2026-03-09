@@ -89,7 +89,36 @@ const onLoad = () => {
 
 // Expose reload method to parent
 const reload = () => {
-  iframeKey.value++;
+  // Get current page from iframe
+  try {
+    const iframe = document.querySelector('.preview-frame') as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      // Try to get page from iframe's location hash
+      const iframeUrl = iframe.contentWindow.location.href;
+      const currentPage = iframeUrl.match(/#\/(\d+)/) || iframeUrl.match(/[?&]page=(\d+)/);
+      
+      // Reload iframe while preserving page
+      iframeKey.value++;
+      
+      // Navigate to saved page after reload
+      if (currentPage) {
+        const pageNum = currentPage[1];
+        setTimeout(() => {
+          if (previewUrl.value) {
+            previewUrl.value = `/slidev/${slidevPort.value}/#/${pageNum}`;
+            // Force another key change to trigger navigation
+            setTimeout(() => iframeKey.value++, 100);
+          }
+        }, 500);
+      }
+    } else {
+      // Fallback: just reload
+      iframeKey.value++;
+    }
+  } catch (error) {
+    // Cross-origin or other error - just reload
+    iframeKey.value++;
+  }
 };
 
 defineExpose({ reload });

@@ -1,42 +1,65 @@
 <template>
   <div class="editor-layout">
     <div class="toolbar">
-      <n-button
-        size="small"
-        :type="leftPanelMode === 'explorer' ? 'primary' : 'tertiary'"
-        @click="toggleLeftPanel"
-        class="panel-toggle-btn"
-      >
-        {{ leftPanelMode === 'explorer' ? '✏️ Editor' : '📁 Explorer' }}
-      </n-button>
+      <div class="toolbar-left">
+        <n-button
+          size="small"
+          type="tertiary"
+          @click="showFileExplorer = true"
+          class="toolbar-btn"
+        >
+          📁 Open
+        </n-button>
+        <n-button
+          size="small"
+          type="tertiary"
+          @click="showTemplateModal = true"
+          class="toolbar-btn"
+        >
+          📄 Template
+        </n-button>
+      </div>
     </div>
     <Splitpanes>
       <Pane :size="50" class="editor-pane">
         <CodeMirrorEditor
-          v-if="leftPanelMode === 'editor'"
           v-model="localContent"
           @update:modelValue="onContentChange"
-        />
-        <FileExplorer
-          v-else
-          @select="onFileSelect"
         />
       </Pane>
       <Pane :size="50" class="preview-pane">
         <SlidevPreview ref="previewRef" :presentation-id="presentationId" />
       </Pane>
     </Splitpanes>
+    
+    <!-- File Explorer Modal -->
+    <n-modal
+      v-model:show="showFileExplorer"
+      preset="card"
+      title="Open Presentation"
+      style="width: 500px"
+      :mask-closable="true"
+    >
+      <FileExplorer @select="onFileSelect" />
+    </n-modal>
+    
+    <!-- Template Modal -->
+    <TemplateModal
+      v-model:show="showTemplateModal"
+      @created="onPresentationCreated"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { NButton } from 'naive-ui';
+import { NButton, NModal } from 'naive-ui';
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import CodeMirrorEditor from "./CodeMirrorEditor.vue";
 import SlidevPreview from "./SlidevPreview.vue";
 import FileExplorer from "./FileExplorer.vue";
+import TemplateModal from "./TemplateModal.vue";
 
 interface Props {
   presentationId: string;
@@ -47,16 +70,14 @@ interface Emits {
   (e: "update:content", value: string): void;
 }
 
-type LeftPanelMode = 'editor' | 'explorer';
-
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const leftPanelMode = ref<LeftPanelMode>('editor');
+const showFileExplorer = ref(false);
+const showTemplateModal = ref(false);
 
 const localContent = ref(props.content);
-
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const onContentChange = (newContent: string) => {
@@ -102,17 +123,15 @@ watch(
   },
 );
 
-const toggleLeftPanel = () => {
-  leftPanelMode.value = leftPanelMode.value === 'editor' ? 'explorer' : 'editor';
-};
-
 const onFileSelect = (presentationId: string) => {
-  // Switch to editor mode and notify parent
-  leftPanelMode.value = 'editor';
-  // Parent (App.vue) will handle loading the selected presentation
+  showFileExplorer.value = false;
   window.dispatchEvent(new CustomEvent('select-presentation', { detail: { id: presentationId } }));
 };
 
+const onPresentationCreated = (presentationId: string) => {
+  showTemplateModal.value = false;
+  window.dispatchEvent(new CustomEvent('select-presentation', { detail: { id: presentationId } }));
+};
 </script>
 
 <style scoped>
@@ -142,16 +161,22 @@ const onFileSelect = (presentationId: string) => {
   background-color: #1e1e1e;
   border-bottom: 1px solid #2c2c2c;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbar-left {
+  display: flex;
   gap: 8px;
 }
 
-/* Ensure button is visible on dark background */
-.panel-toggle-btn :deep(.n-button__border),
-.panel-toggle-btn :deep(.n-button__state-border) {
+/* Ensure buttons are visible on dark background */
+.toolbar-btn :deep(.n-button__border),
+.toolbar-btn :deep(.n-button__state-border) {
   border-color: #4a4a4a !important;
 }
 
-.panel-toggle-btn :deep(.n-button__content) {
+.toolbar-btn :deep(.n-button__content) {
   color: #cccccc !important;
 }
 </style>

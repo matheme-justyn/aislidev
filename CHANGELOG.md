@@ -12,17 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.5] - 2026-03-06
 
 ### Added
-- **NICS Slidev Themes** - Three professional presentation themes for NICS (National Cybersecurity Institute)
-  - **nics-lightweight** - Quick start theme with 4 essential layouts (cover, default, vertical-text, vertical-title)
-  - **nics-standard** ⭐ - Complete professional theme with 23 layouts covering all presentation needs
-  - **nics-classic** - Classic design with 23 layouts using universal Arial fonts
-  - All themes feature NICS official color scheme: primary teal (#009594), accent yellow-green (#C2C823)
+- **Guting Slidev Themes** - Three professional presentation themes for Guting (National Cybersecurity Institute)
+  - **guting-lightweight** - Quick start theme with 4 essential layouts (cover, default, vertical-text, vertical-title)
+  - **guting-standard** ⭐ - Complete professional theme with 23 layouts covering all presentation needs
+  - **guting-classic** - Classic design with 23 layouts using universal Arial fonts
+  - All themes feature Guting official color scheme: primary teal (#009594), accent yellow-green (#C2C823)
   - Total 50 Vue layout components created across three themes
   - 42 image resources (7+19+16) for backgrounds and design elements
-  - UnoCSS configuration with NICS color palette
+  - UnoCSS configuration with Guting color palette
   - Comprehensive example.md files demonstrating all layouts
-- **Template Selection** - NICS themes integrated into template picker modal
-  - Users can now choose from 5 templates (2 existing + 3 NICS themes)
+- **Template Selection** - Guting themes integrated into template picker modal
+  - Users can now choose from 5 templates (2 existing + 3 Guting themes)
   - Themes automatically load with correct layouts and styling
 
 ### Changed

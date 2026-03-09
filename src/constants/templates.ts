@@ -8,7 +8,7 @@ export interface PresentationTemplate {
 export const templates: PresentationTemplate[] = [
   {
     id: "slidev-official",
-    name: "Slidev Official Example",
+    name: "Slidev Official",
     description: "Official starter from Slidev documentation",
     content: `---
 theme: default
@@ -71,15 +71,15 @@ Write your main content here...
 Thank you!`,
   },
   {
-    id: "nics-lightweight",
-    name: "NICS Lightweight",
-    description: "NICS 輕量版主題 - 4 種基礎佈局，適合快速簡報",
+    id: "guting-lightweight",
+    name: "Guting Lightweight",
+    description: "輕量版主題 - 4 種基礎佈局，適合快速簡報",
     content: `---
-theme: ./slidev-themes/nics-lightweight
+theme: ./slidev-themes/guting-lightweight
 layout: cover
 ---
 
-# NICS 資安院簡報
+# 古亭簡報
 
 簡報人員：姓名與職稱  
 簡報單位：單位名稱  
@@ -106,15 +106,15 @@ layout: default
 `,
   },
   {
-    id: "nics-standard",
-    name: "NICS Standard ⭐",
-    description: "NICS 標準版主題 - 23 種專業佈局，適合正式簡報",
+    id: "guting-standard",
+    name: "Guting Standard ⭐",
+    description: "標準版主題 - 23 種專業佈局，適合正式簡報",
     content: `---
-theme: ./slidev-themes/nics-standard
+theme: ./slidev-themes/guting-standard
 layout: cover-public
 ---
 
-# NICS 資安院簡報
+# 古亭簡報
 
 ::meta::
 簡報人員：姓名與職稱  
@@ -160,15 +160,15 @@ layout: end
 `,
   },
   {
-    id: "nics-classic",
-    name: "NICS Classic",
-    description: "NICS 經典設計版 - 23 種佈局，Arial 通用字型",
+    id: "guting-classic",
+    name: "Guting Classic",
+    description: "經典設計版 - 23 種佈局，Arial 通用字型",
     content: `---
-theme: ./slidev-themes/nics-classic
+theme: ./slidev-themes/guting-classic
 layout: cover-public
 ---
 
-# NICS 資安院簡報
+# 古亭簡報
 
 ::meta::
 簡報人員：姓名與職稱  

@@ -2,9 +2,6 @@
   <div class="file-explorer">
     <div class="header">
       <h3>Presentations</h3>
-      <n-button type="primary" size="small" @click="showTemplateModal = true">
-        + New
-      </n-button>
     </div>
 
     <div class="file-list">
@@ -25,19 +22,13 @@
         <n-empty v-else description="No presentations yet" size="small" />
       </n-spin>
     </div>
-
-    <TemplateModal
-      v-model:show="showTemplateModal"
-      @created="onPresentationCreated"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { NButton, NList, NListItem, NIcon, NEmpty, NSpin } from "naive-ui";
+import { NList, NListItem, NIcon, NEmpty, NSpin } from "naive-ui";
 import { DocumentTextOutline } from "@vicons/ionicons5";
-import TemplateModal from "./TemplateModal.vue";
 
 interface Presentation {
   id: string;
@@ -56,7 +47,6 @@ const emit = defineEmits<Emits>();
 const presentations = ref<Presentation[]>([]);
 const loading = ref(false);
 const selectedId = ref<string | null>(null);
-const showTemplateModal = ref(false);
 
 const fetchPresentations = async () => {
   loading.value = true;
@@ -77,10 +67,6 @@ const selectPresentation = (id: string) => {
   emit("select", id);
 };
 
-const onPresentationCreated = (id: string) => {
-  fetchPresentations();
-  selectPresentation(id);
-};
 
 onMounted(() => {
   fetchPresentations();

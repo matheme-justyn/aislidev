@@ -1,17 +1,17 @@
-# NICS 資安院 Slidev 主題
+# Guting 古亭 Slidev 主題
 
-三個 NICS 資安院官方 PPTX 範本轉換為 Slidev 主題格式。
+三個 Guting 古亭官方 PPTX 範本轉換為 Slidev 主題格式。
 
 ## 📦 包含主題
 
-### 1. NICS Lightweight（輕量版）
+### 1. Guting Lightweight（輕量版）
 
-**位置**：`slidev-themes/nics-lightweight/`
+**位置**：`slidev-themes/guting-lightweight/`
 
 **特點**：
 
 - ✅ 4 個基礎佈局
-- 🎨 NICS 官方配色
+- 🎨 Guting 官方配色
 - 🔤 Poppins + Noto Sans TC 字型
 - 🖼️ 7 張圖片資源
 
@@ -26,14 +26,14 @@
 
 ---
 
-### 2. NICS Standard（標準版）⭐ 推薦
+### 2. Guting Standard（標準版）⭐ 推薦
 
-**位置**：`slidev-themes/nics-standard/`
+**位置**：`slidev-themes/guting-standard/`
 
 **特點**：
 
 - ✅ 23 個專業佈局
-- 🎨 NICS 官方配色
+- 🎨 Guting 官方配色
 - 🔤 Poppins + Noto Sans TC 字型
 - 🖼️ 19 張圖片資源
 
@@ -66,14 +66,14 @@
 
 ---
 
-### 3. NICS Classic（經典設計版）
+### 3. Guting Classic（經典設計版）
 
-**位置**：`slidev-themes/nics-classic/`
+**位置**：`slidev-themes/guting-classic/`
 
 **特點**：
 
 - ✅ 23 個專業佈局（同標準版）
-- 🎨 NICS 官方配色
+- 🎨 Guting 官方配色
 - 🔤 Arial 通用字型
 - 🖼️ 16 張圖片資源
 
@@ -91,7 +91,7 @@
 
 ```markdown
 ---
-theme: ./slidev-themes/nics-lightweight
+theme: ./slidev-themes/guting-lightweight
 layout: cover
 ---
 
@@ -103,7 +103,7 @@ layout: cover
 每個主題都包含 `example.md` 範例檔案，可以直接運行：
 
 ```bash
-cd slidev-themes/nics-standard
+cd slidev-themes/guting-standard
 npm install
 npm run dev
 ```
@@ -161,7 +161,7 @@ layout: content-image-1
 
 ## 🎨 配色方案
 
-所有主題共用 NICS 官方配色：
+所有主題共用 Guting 官方配色：
 
 | 顏色名稱 | 十六進制  | 用途           |
 | -------- | --------- | -------------- |
@@ -206,4 +206,4 @@ MIT License
 
 ---
 
-**Built with ❤️ for NICS Cybersecurity Institute**
+**Built with ❤️ for Guting Cybersecurity Institute**

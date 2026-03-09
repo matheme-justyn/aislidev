@@ -216,8 +216,8 @@ if (IS_DEV) {
   // Use vite's connect instance as middleware
   // Wrap in a function to skip API routes
   await fastify.use((req, res, next) => {
-    // Skip Vite middleware for API routes
-    if (req.url?.startsWith('/api/') || req.url === '/health') {
+    // Skip Vite middleware for API routes and Slidev proxy routes
+    if (req.url?.startsWith('/api/') || req.url === '/health' || req.url?.startsWith('/slidev/')) {
       return next();
     }
     vite.middlewares(req, res, next);

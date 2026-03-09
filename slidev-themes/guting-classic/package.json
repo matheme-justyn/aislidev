@@ -1,0 +1,44 @@
+{
+  "name": "slidev-theme-guting-classic",
+  "version": "1.0.0",
+  "description": "Guting Cybersecurity Institute Classic Design Theme for Slidev - Arial Font Variant",
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "guting",
+    "cybersecurity",
+    "presentation",
+    "classic"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "slidev": ">=0.48.0"
+  },
+  "main": "index.ts",
+  "scripts": {
+    "dev": "slidev example.md",
+    "build": "slidev build example.md",
+    "export": "slidev export example.md"
+  },
+  "dependencies": {
+    "@slidev/types": "latest",
+    "unocss": "^0.62.0"
+  },
+  "slidev": {
+    "colorSchema": "light",
+    "highlighter": "shiki",
+    "defaults": {
+      "fonts": {
+        "sans": "Arial, sans-serif",
+        "serif": "Arial, sans-serif",
+        "mono": "Courier New, monospace",
+        "heading": "Arial, sans-serif",
+        "body": "Arial, sans-serif"
+      },
+      "layout": "default",
+      "theme": "guting-classic"
+    }
+  },
+  "author": "Guting Cybersecurity Institute",
+  "license": "MIT"
+}

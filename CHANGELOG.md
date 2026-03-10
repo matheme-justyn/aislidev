@@ -9,6 +9,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-03-10
+
+### Added
+- **Server-side File Browser** - Replace local file picker with server-side file system browser
+  - Created `FileBrowser.vue` component for browsing `data/` directory structure
+  - Added `/api/files/presentations` endpoint to list presentation files
+  - Added `/api/files/templates` endpoint to list template files
+  - Users place files in `data/presentations/` or `data/templates/` directories
+  - File validation: requires valid Slidev frontmatter (starts with `---`)
+  - Helpful empty state messages when directories are empty
+  - Created `DATA_DIRECTORY.md` user guide for folder structure
+- **WebSocket-Enabled Slidev Proxy** - Fix HMR and hot reload functionality
+  - Implemented `http-proxy-middleware` for proper WebSocket upgrade handling
+  - Added WebSocket upgrade event handler on Fastify HTTP server
+  - All `/slidev/:port/*` requests now proxy both HTTP and WebSocket connections
+  - Fixes Slidev HMR (`ws://localhost:13000/slidev/:port/`) connection issues
+  - Documented in ADR-005: WebSocket Proxy for Slidev
+- **Enhanced Editor Toolbar** - Split toolbar into left and right sections
+  - Left section: 📁 Open, 🎨 Template, 💾 Save MD, ⚙️ Settings
+  - Right section: 📊 Export PPTX, 🔄 Refresh
+  - All buttons with proper icons and status indicators
+- **Settings Modal** - User-configurable auto-save interval
+  - Configure auto-save interval (default: 3 minutes)
+  - Settings persisted in localStorage
+  - Manual save always available via Save MD button
+- **Smart Refresh** - Preserve current slide page number on manual refresh
+  - Enhanced `SlidevPreview.reload()` to extract current page from iframe URL
+  - Reloads Slidev with same page number (e.g., stays on slide #3)
+- **Auto-reload After Template Change** - Preview automatically refreshes when template is selected
+  - 0.5 second delay to ensure template is applied
+  - Preserves user's current slide position
+- **Toast Notifications** - Added `NMessageProvider` wrapper for user feedback
+  - Success/error messages for save operations
+  - Loading indicators for file operations
+
+### Changed
+- **Template Selection UX** - Changed from dropdown list to file browser modal
+  - Users browse actual template files in `data/templates/` directory
+  - More intuitive file management workflow
+  - Supports unlimited custom templates
+- **Button Labels** - Save button now explicitly labeled "Save MD" (preparing for Export PPTX feature)
+- **Toolbar Layout** - Right-aligned Export PPTX and Refresh buttons for better visual hierarchy
+
+### Removed
+- **Hardcoded Template List** - Removed `constants/templates.ts` with static template definitions
+- **Old TemplateModal Component** - Removed dropdown-based `TemplateModal.vue`, replaced by `FileBrowser.vue`
+
+### Fixed
+- **WebSocket Connection Failures** - Slidev HMR and `@server-reactive` endpoints now work correctly
+  - Root cause: Previous fetch-based proxy couldn't handle WebSocket upgrade requests
+  - Solution: Implemented proper WebSocket proxy with upgrade event handling
+- **302 Redirect Loop** - Fixed infinite redirect caused by path transformation in proxy
+  - Preserve full path including `/slidev/:port/` prefix in proxy target
+- **Demo Theme** - Updated `data/aislidev-demo/slides.md` to use `theme: default` (was using removed theme)
+
+### Documentation
+- **ADR-005** - WebSocket Proxy for Slidev (architecture decision record)
+- **DATA_DIRECTORY.md** - User guide for `data/` folder structure and usage
+- **ADR Index** - Updated `docs/adr/README.md` with ADR-005 entry
+
+### Known Issues
+- Some `/@server-reactive/nav` requests return 404 (missing `/slidev/:port/` prefix)
+  - Does not affect main functionality (HMR, preview, navigation all work)
+  - Cosmetic console warning only
+- Export PPTX button exists in UI but backend endpoint not yet implemented
+
 ## [0.1.5] - 2026-03-06
 
 ### Added

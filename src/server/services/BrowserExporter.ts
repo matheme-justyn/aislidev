@@ -171,6 +171,7 @@ export class BrowserExporter {
         } else {
           // No more slides
           break;
+        }
       }
 
       return count;

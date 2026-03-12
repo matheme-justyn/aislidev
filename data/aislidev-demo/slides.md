@@ -93,10 +93,8 @@ npm run dev
 ```
 
 ---
-
 layout: two-cols
 layoutClass: gap-16
-
 ---
 
 # 核心功能
@@ -416,10 +414,8 @@ aislidev/
 </v-clicks>
 
 ---
-
 layout: two-cols
 layoutClass: gap-16
-
 ---
 
 # 常見問題

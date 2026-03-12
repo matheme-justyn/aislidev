@@ -156,9 +156,9 @@ class: text-center
 
 <span class="text-sm opacity-60">Markdown Syntax</span>
 
-<div class="grid grid-cols-2 gap-4 mt-10">
+<div class="grid grid-cols-2 gap-4 mt-10 max-h-[60vh]">
 
-<div v-click class="p-4 bg-gray-800 rounded">
+<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
 
 ### 基本語法
 
@@ -176,7 +176,7 @@ class: text-center
 
 </div>
 
-<div v-click class="p-4 bg-gray-800 rounded">
+<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
 
 ### 分頁語法
 
@@ -192,7 +192,7 @@ layout: center
 
 </div>
 
-<div v-click class="p-4 bg-gray-800 rounded">
+<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
 
 ### 程式碼區塊
 
@@ -206,7 +206,7 @@ const hello = "world";
 
 </div>
 
-<div v-click class="p-4 bg-gray-800 rounded">
+<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
 
 ### 點擊動畫
 

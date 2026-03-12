@@ -28,6 +28,9 @@
 # Node.js
 # Only AI_INSTRUCTIONS.md and docs-list.sample.md are tracked
 # OpenCode
+
+# Git worktrees (isolated workspaces for feature development)
+.worktrees/
 # OpenCode 專案級資料庫（不要 commit）
 # Operating System
 # Optional REPL history

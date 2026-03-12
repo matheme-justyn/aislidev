@@ -1,5 +1,6 @@
 <template>
   <div class="slidev-preview">
+    <NavigationHint />
     <iframe
       v-if="previewUrl"
       :src="previewUrl"
@@ -18,6 +19,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onUnmounted, defineExpose } from "vue";
+import NavigationHint from "./NavigationHint.vue";
 
 interface Props {
   presentationId: string;

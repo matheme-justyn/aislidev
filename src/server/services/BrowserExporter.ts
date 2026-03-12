@@ -138,8 +138,9 @@ export class BrowserExporter {
   private async detectSlideCount(page: Page): Promise<number> {
     try {
       // Try to find slide indicator (e.g., "1 / 10")
+      // Slidev uses format like "1 / 13" in the navigation bar
       const slideInfo = await page
-        .locator(".slidev-page-indicator, [class*=page], [class*=slide-number]")
+        .locator("text=/\\d+\\s*\\/\\s*\\d+/")
         .first()
         .textContent({ timeout: 5000 })
         .catch(() => null);
@@ -161,14 +162,15 @@ export class BrowserExporter {
         await page.waitForTimeout(500);
 
         // Check if URL changed (slide number increased)
+        // Slidev uses hash routing: http://localhost:13030/#/2
         const url = page.url();
-        const currentSlide = parseInt(url.split("/").pop() || "1", 10);
+        const hashMatch = url.match(/#\/(\d+)/);
+        const currentSlide = hashMatch ? parseInt(hashMatch[1], 10) : 1;
         if (currentSlide > count) {
           count = currentSlide;
         } else {
           // No more slides
           break;
-        }
       }
 
       return count;

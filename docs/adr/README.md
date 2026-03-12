@@ -40,19 +40,27 @@ Each ADR follows this structure:
 
 <!-- 索引 -->
 
-| ADR                                          | Title                                     | Status     |
-| -------------------------------------------- | ----------------------------------------- | ---------- |
-| [001](./001-version-control-strategy.md)     | Version Control and Release Strategy      | Accepted   |
-| [002](./002-lightweight-containerization.md) | Lightweight Containerization Architecture | Accepted   |
-| [003](./003-opencode-first-architecture.md)  | OpenCode-First AI Architecture            | Accepted   |
-| [004](./004-slidev-vite-dev-mode-fix.md)     | Slidev Vite Dev Mode Constants Fix        | Accepted   |
-| [005](./005-websocket-proxy-for-slidev.md)   | WebSocket-Enabled Proxy for Slidev        | Accepted   |
-| <!-- ADR                                     | 標題                                      | 狀態 -->   |
-| <!-- 001                                     | 版本控制和發布策略                        | 已接受 --> |
-| <!-- 002                                     | 輕量容器化架構                            | 已接受 --> |
-| <!-- 003                                     | OpenCode 優先的 AI 架構                   | 已接受 --> |
-| <!-- 004                                     | Slidev Vite Dev Mode 編譯時常量修復       | 已接受 --> |
-| <!-- 005                                     | 支援 WebSocket 的 Slidev 代理             | 已接受 --> |
+| ADR                                          | Title                                     | Status      |
+| -------------------------------------------- | ----------------------------------------- | ----------- |
+| [001](./001-version-control-strategy.md)     | Version Control and Release Strategy      | Accepted    |
+| [002](./002-lightweight-containerization.md) | Lightweight Containerization Architecture | Accepted    |
+| [003](./003-opencode-first-architecture.md)  | OpenCode-First AI Architecture            | Accepted    |
+| [004](./004-slidev-vite-dev-mode-fix.md)     | Slidev Vite Dev Mode Constants Fix        | Accepted    |
+| [005](./005-websocket-proxy-for-slidev.md)   | WebSocket-Enabled Proxy for Slidev        | Accepted    |
+| [006](./006-puppeteer-based-pptx-export.md)  | Puppeteer-Based PPTX Export               | Superseded  |
+| [007](./007-remove-slidev-base-parameter.md) | Remove Slidev Base URL Parameter          | Accepted    |
+| [008](./008-http-proxy-middleware-v3-fix.md) | http-proxy-middleware v3 Response Fix     | Accepted    |
+| [009](./009-pptx-export-via-data-directory.md) | PPTX Export via Data Directory          | Accepted    |
+| <!-- ADR                                     | 標題                                      | 狀態 -->    |
+| <!-- 001                                     | 版本控制和發布策略                        | 已接受 -->  |
+| <!-- 002                                     | 輕量容器化架構                            | 已接受 -->  |
+| <!-- 003                                     | OpenCode 優先的 AI 架構                   | 已接受 -->  |
+| <!-- 004                                     | Slidev Vite Dev Mode 編譯時常量修復       | 已接受 -->  |
+| <!-- 005                                     | 支援 WebSocket 的 Slidev 代理             | 已接受 -->  |
+| <!-- 006                                     | 基於 Puppeteer 的 PPTX 匯出               | 已取代 -->  |
+| <!-- 007                                     | 移除 Slidev Base URL 參數                 | 已接受 -->  |
+| <!-- 008                                     | http-proxy-middleware v3 回應攔截修復     | 已接受 -->  |
+| <!-- 009                                     | 透過 Data 目錄匯出 PPTX                   | 已接受 -->  |
 
 ## Creating a New ADR
 

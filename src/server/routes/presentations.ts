@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { promises as fs } from "fs";
 import path from "path";
+import { getBrowserExporter } from "../services/BrowserExporter.js";
 import type { Presentation } from "../../types/presentation";
 import type { SlidevManager } from "../services/SlidevManager";
 
@@ -32,7 +33,7 @@ const presentationsRoutes: FastifyPluginAsync<
             content,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            theme: 'default',
+            theme: "default",
           });
         } catch {}
       }
@@ -58,7 +59,7 @@ const presentationsRoutes: FastifyPluginAsync<
           content,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          theme: 'default',
+          theme: "default",
         };
       } catch (error) {
         return reply.code(404).send({ error: "Presentation not found" });
@@ -83,7 +84,7 @@ const presentationsRoutes: FastifyPluginAsync<
         content,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        theme: 'default',
+        theme: "default",
       };
     },
   );
@@ -110,7 +111,7 @@ const presentationsRoutes: FastifyPluginAsync<
           content,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          theme: 'default',
+          theme: "default",
         };
       } catch (error) {
         return reply.code(404).send({ error: "Presentation not found" });
@@ -150,9 +151,9 @@ const presentationsRoutes: FastifyPluginAsync<
         return processInfo;
       } catch (error) {
         fastify.log.error(error, "Failed to start presentation");
-        return reply.code(500).send({ 
+        return reply.code(500).send({
           error: "Failed to start presentation",
-          message: error instanceof Error ? error.message : String(error)
+          message: error instanceof Error ? error.message : String(error),
         });
       }
     },
@@ -183,6 +184,120 @@ const presentationsRoutes: FastifyPluginAsync<
       }
 
       return processInfo;
+    },
+  );
+
+  fastify.post<{ Params: { id: string } }>(
+    "/presentations/:id/export",
+    async (request, reply) => {
+      const { id } = request.params;
+      const presentationDir = path.join(storageDir, id);
+      const slidesPath = path.join(presentationDir, "slides.md");
+      const exportsDir = path.join(presentationDir, "exports");
+      const timestamp = Date.now();
+      const filename = `${id}-${timestamp}.pptx`;
+      const outputFile = path.join(exportsDir, filename);
+
+      try {
+        // Check if presentation directory exists
+        try {
+          await fs.access(slidesPath);
+        } catch {
+          return reply.code(404).send({
+            error: "Presentation not found",
+            message: `Presentation '${id}' does not exist`,
+          });
+        }
+
+        // Create exports directory if not exists
+        await fs.mkdir(exportsDir, { recursive: true });
+
+        fastify.log.info(`[Export ${id}] Starting browser-based PPTX export`);
+
+        // Get Slidev process info to obtain port
+        const processInfo = slidevManager.getProcess(id);
+        if (!processInfo || processInfo.status !== "running") {
+          return reply.code(400).send({
+            error: "Presentation not running",
+            message: `Presentation '${id}' must be running to export. Start preview first.`,
+          });
+        }
+
+        // Use BrowserExporter to automate PPTX download
+        const exporter = getBrowserExporter();
+        await exporter.initialize();
+
+        fastify.log.info(
+          `[Export ${id}] Using browser automation on port ${processInfo.port}`,
+        );
+
+        await exporter.exportPPTX(processInfo.port, outputFile, 120000); // 2 min timeout
+
+        // Verify file was created and has content
+        let stats;
+        try {
+          stats = await fs.stat(outputFile);
+        } catch {
+          throw new Error("Export completed but output file not found");
+        }
+
+        if (stats.size === 0) {
+          throw new Error("Exported file is empty");
+        }
+
+        fastify.log.info(
+          `[Export ${id}] Export successful (${stats.size} bytes)`,
+        );
+
+        // Return file info for download
+        return {
+          success: true,
+          filename,
+          size: stats.size,
+          downloadUrl: `/api/presentations/${id}/export/${filename}`,
+        };
+      } catch (error) {
+        fastify.log.error(error, "Failed to export presentation");
+        return reply.code(500).send({
+          error: "Failed to export presentation",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );
+
+  // Download exported PPTX file
+  fastify.get<{ Params: { id: string; filename: string } }>(
+    "/presentations/:id/export/:filename",
+    async (request, reply) => {
+      const { id, filename } = request.params;
+      const exportFile = path.join(storageDir, id, "exports", filename);
+
+      try {
+        // Verify file exists
+        await fs.access(exportFile);
+
+        // Get file stats
+        const stats = await fs.stat(exportFile);
+
+        // Read and send file
+        const fileBuffer = await fs.readFile(exportFile);
+
+        reply
+          .header(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          )
+          .header("Content-Disposition", `attachment; filename=\"${id}.pptx\"`)
+          .header("Content-Length", stats.size)
+          .send(fileBuffer);
+      } catch (error) {
+        fastify.log.error(error, "Failed to download export file");
+        return reply.code(404).send({
+          error: "Export file not found",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
     },
   );
 };

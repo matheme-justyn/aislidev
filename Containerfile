@@ -2,7 +2,7 @@
 # Multi-stage build for unified frontend + backend container
 # Compatible with both Podman and Docker
 
-# Build stage
+# Build stage - use Alpine for build (smaller, faster)
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -19,18 +19,25 @@ COPY . .
 # Build both backend and frontend
 RUN npm run build
 
-# Runtime stage
-FROM node:20-alpine
+# Runtime stage - use Debian slim for Playwright compatibility (glibc required)
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init and Playwright dependencies
+RUN apt-get update && apt-get install -y \
+    dumb-init \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy built application
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+
+# Install Playwright browsers to shared location
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npx playwright install chromium --with-deps && \
+    chmod -R 755 /ms-playwright
 
 # Create storage directory for presentations
 RUN mkdir -p /app/data && \

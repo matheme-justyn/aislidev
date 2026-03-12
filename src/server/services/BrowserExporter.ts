@@ -186,7 +186,7 @@ export class BrowserExporter {
 
   /**
    * Screenshot a specific slide
-   * Waits for background images to load before capturing
+   * Waits for background images to load and triggers v-click animations before capturing
    */
   private async screenshotSlide(
     page: Page,
@@ -232,7 +232,21 @@ export class BrowserExporter {
     // Additional wait for images to render
     await page.waitForTimeout(1000);
 
-    // Take screenshot
+    // Click through v-click animations
+    // Most slides have at most 6-8 v-click elements
+    // We'll click up to 20 times to ensure all content is visible
+    const clicksPerSlide = 20;
+    
+    for (let clickIndex = 0; clickIndex < clicksPerSlide; clickIndex++) {
+      // Press Space to trigger v-click (Space doesn't navigate between slides in Slidev)
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(200); // Wait for animation
+    }
+
+    // Wait a bit more for any delayed animations
+    await page.waitForTimeout(500);
+
+    // Take final screenshot with all content visible
     await page.screenshot({
       path: outputPath,
       type: "png",

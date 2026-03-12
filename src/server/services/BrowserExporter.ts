@@ -186,6 +186,7 @@ export class BrowserExporter {
 
   /**
    * Screenshot a specific slide
+   * Waits for background images to load before capturing
    */
   private async screenshotSlide(
     page: Page,
@@ -197,7 +198,38 @@ export class BrowserExporter {
     const slideUrl = `http://localhost:${port}/${slideNumber}`;
     await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
 
-    // Wait for slide to render
+    // Wait for slide to render and background images to load
+    await page.waitForTimeout(1000);
+    
+    // Wait for background images to finish loading
+    // Slidev uses background-image CSS property on .slidev-layout or main elements
+    try {
+      await page.waitForFunction(
+        () => {
+          const elements = document.querySelectorAll('[style*="background-image"]');
+          return Array.from(elements).every((el) => {
+            const style = window.getComputedStyle(el);
+            const bgImage = style.backgroundImage;
+            if (!bgImage || bgImage === 'none') return true;
+            
+            // Extract URL from background-image: url("...")
+            const urlMatch = bgImage.match(/url\(["']?(.+?)["']?\)/);
+            if (!urlMatch) return true;
+            
+            // Check if image is loaded by creating an Image object
+            const img = new Image();
+            img.src = urlMatch[1];
+            return img.complete;
+          });
+        },
+        { timeout: 5000 }
+      );
+    } catch (e) {
+      // Background images not found or timeout - continue anyway
+      console.warn(`[BrowserExporter] Background image loading timeout on slide ${slideNumber}`);
+    }
+
+    // Additional wait for images to render
     await page.waitForTimeout(1000);
 
     // Take screenshot

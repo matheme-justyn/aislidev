@@ -11,7 +11,7 @@ import path from "path";
 import { SlidevManager } from "./services/SlidevManager.js";
 import presentationsRoutes from "./routes/presentations.js";
 import filesRoutes from "./routes/files.js";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { createProxyMiddleware, responseInterceptor } from "http-proxy-middleware";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -46,53 +46,7 @@ fastify.get("/health", async () => {
 
 
 
-// Helper function to create Vite resource proxy routes
-const createViteProxyRoute = (pathPattern: string) => {
-  return async (request: any, reply: any) => {
-    const port = parseInt(request.params.port);
-    
-    // Extract the Vite path (e.g., /@fs/..., /@vite/..., etc.)
-    let vitePath = request.url.replace(`/slidev/${port}`, '');
-    
-    // CRITICAL: Vite's @fs requires double slash for absolute paths (@fs//...)
-    // Fix single slash to double slash for absolute paths
-    if (vitePath.startsWith('/@fs/') && !vitePath.startsWith('/@fs//')) {
-      vitePath = vitePath.replace('/@fs/', '/@fs//');//
-    }
-    
-    // Include base path in target URL (Slidev uses --base /slidev/:port/)
-    const targetUrl = `http://localhost:${port}/slidev/${port}${vitePath}`;
-    
-    try {
-      const headers: Record<string, string> = {};
-      for (const [key, value] of Object.entries(request.headers)) {
-        if (!['host', 'connection'].includes(key.toLowerCase()) && typeof value === 'string') {
-          headers[key] = value;
-        }
-      }
-      
-      const response = await fetch(targetUrl, {
-        method: request.method,
-        headers,
-        body: request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined,
-      });
-      
-      // Forward response headers
-      response.headers.forEach((value, key) => {
-        if (key.toLowerCase() !== 'content-length') {
-          reply.header(key, value);
-        }
-      });
-      reply.header('X-AISlidev-Vite-Proxy', pathPattern);
-      
-      const buffer = await response.arrayBuffer();
-      reply.code(response.status).send(Buffer.from(buffer));
-    } catch (error) {
-      fastify.log.error(`Vite proxy error for ${targetUrl}: ${error}`);
-      reply.code(502).send({ error: 'Vite proxy error' });
-    }
-  };
-};
+// 移除舊的自定義代理邏輯 - 現在使用 http-proxy-middleware 處理
 
 // Slidev root proxy route (exact match)
 fastify.all<{ Params: { port: string } }>("/slidev/:port", async (request, reply) => {
@@ -126,7 +80,7 @@ fastify.all<{ Params: { port: string } }>("/slidev/:port", async (request, reply
     const contentType = response.headers.get('content-type') || '';
     
     // Inject base tag for HTML root
-    if (contentType.includes('text/html') && path === '/') {
+    if (contentType.includes('text/html') && (path === '/' || path.startsWith('/?'))) {
       let html = Buffer.from(buffer).toString('utf-8');
       html = html.replace('<head>', `<head>\n  <base href="/slidev/${port}/">`);
       reply.code(response.status).send(html);
@@ -178,6 +132,50 @@ await fastify.register(import("@fastify/middie"));
 // Store proxy middleware instances for each port to reuse
 const slidevProxies = new Map();
 
+// Vite special paths proxy (/@fs/, /@vite/, etc.)
+// Extract target port from Referer header
+let lastUsedPort: number | null = null;
+
+await fastify.use((req, res, next) => {
+  const url = req.url || '';
+  
+  // Check if this is a Vite special path request (/@fs/, /@vite/, /@id/, /@slidev/, /@server-reactive/, /__*, or slides.md__slidev_*)
+  if (url.match(/^\/@(fs|vite|id|slidev|server-reactive)/) || url.startsWith('/__') || url.match(/^\/slides\.md__slidev_/)) {
+    const referer = req.headers.referer || req.headers.referrer || '';
+    console.log(`[Vite Proxy] Request: ${url}, Referer: ${referer}`);
+    
+    // Try to extract port from referer
+    const refererMatch = referer.match(/\/slidev\/(\d+)/);
+    let port: number | null = null;
+    
+    if (refererMatch) {
+      port = parseInt(refererMatch[1]);
+      lastUsedPort = port;  // Remember this port
+      console.log(`[Vite Proxy] Port from referer: ${port}`);
+    } else if (lastUsedPort) {
+      port = lastUsedPort;
+      console.log(`[Vite Proxy] Using last port: ${port}`);
+    }
+    
+    if (port) {
+      // Get or create proxy for this port
+      if (!slidevProxies.has(port)) {
+        const proxy = createProxyMiddleware({
+          target: `http://localhost:${port}`,
+          changeOrigin: true,
+          ws: false,
+        });
+        slidevProxies.set(port, proxy);
+      }
+      
+      return slidevProxies.get(port)(req, res, next);
+    } else {
+      console.log(`[Vite Proxy] No port available`);
+    }
+  }
+  
+  next();
+});
 await fastify.use((req, res, next) => {
   const url = req.url || '';
   
@@ -193,23 +191,42 @@ await fastify.use((req, res, next) => {
         target: `http://localhost:${port}`,
         changeOrigin: true,
         ws: true, // Enable WebSocket proxying
-        onError: (err, req, res) => {
-          fastify.log.error(`Proxy error for port ${port}: ${err.message}`);
-          if (!res.headersSent) {
-            res.writeHead(502);
-            res.end('Proxy error');
-          }
+        pathRewrite: {
+          [`^/slidev/${port}`]: '', // 移除 /slidev/:port/ 前綴，Slidev 看到的是 /
         },
-        logLevel: 'silent',
+        
+        // Enable response body modification (http-proxy-middleware v3 API)
+        selfHandleResponse: true,
+        
+        on: {
+          proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, _res) => {
+            const contentType = proxyRes.headers['content-type'] || '';
+            const reqPath = (req.url || '').replace(/^\/slidev\/\d+/, '');
+            
+            // Inject <base> tag for relative paths (e.g., __uno.css, @server-reactive/*)
+            // Absolute paths like /@fs/ will ignore <base> and be handled by Vite proxy
+            if (contentType.includes('text/html') && (reqPath === '/' || reqPath.startsWith('/?'))) {
+              let html = responseBuffer.toString('utf8');
+              
+              // Inject base tag only - don't rewrite /@fs/, /@vite/, etc.
+              // These absolute paths will be caught by Vite proxy middleware
+              html = html.replace('<head>', `<head>\n  <base href="/slidev/${port}/">`);
+              
+              return html;
+            }
+            
+            // Return other responses as-is
+            return responseBuffer;
+          }),
+        },
       });
-      
       slidevProxies.set(port, proxy);
       
       // Setup WebSocket upgrade listener for this port
       fastify.server.on('upgrade', (req, socket, head) => {
         const upgradeUrl = req.url || '';
         if (upgradeUrl.startsWith(`/slidev/${port}`)) {
-          proxy.upgrade(req, socket, head);
+          proxy.upgrade?.(req, socket as any, head);  // 型別斷言
         }
       });
     }
@@ -226,13 +243,28 @@ if (IS_DEV) {
   const vite = await createServer({
     server: { middlewareMode: true },
     appType: "spa",
+    optimizeDeps: {
+      exclude: ['@slidev/cli', '@slidev/client', '@slidev/parser', '@slidev/theme-default', '@slidev/theme-seriph'],
+      entries: ['src/main.ts'],
+    },
   });
 
   // Use vite's connect instance as middleware
   // Wrap in a function to skip API routes
   await fastify.use((req, res, next) => {
-    // Skip Vite middleware for API routes and Slidev proxy routes
-    if (req.url?.startsWith('/api/') || req.url === '/health' || req.url?.startsWith('/slidev/')) {
+    // Skip Vite middleware for:
+    // 1. API routes
+    // 2. Health check
+    // 3. Slidev proxy routes
+    // 4. Slidev resources (node_modules/@slidev, /@fs paths)
+    if (
+      req.url?.startsWith('/api/') ||
+      req.url === '/health' ||
+      req.url?.startsWith('/slidev/') ||
+      req.url?.includes('/@fs/') ||
+      req.url?.includes('/node_modules/@slidev/') ||
+      req.url?.includes('__slidev_')
+    ) {
       return next();
     }
     vite.middlewares(req, res, next);

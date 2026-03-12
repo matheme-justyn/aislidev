@@ -34,19 +34,23 @@ export class SlidevManager {
     const slidesPath = path.join(presentationDir, "slides.md");
     await fs.writeFile(slidesPath, content, "utf-8");
 
-    // Copy Vite config template to fix __DEV__ undefined error
+    // Allocate port first (needed for dynamic vite.config.ts generation)
+    const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
+
+    // Generate dynamic Vite config (no base path - proxy handles this)
     const viteConfigTemplate = path.join(__dirname, "../templates/slidev-vite.config.ts");
     const viteConfigPath = path.join(presentationDir, "vite.config.ts");
     try {
-      await fs.copyFile(viteConfigTemplate, viteConfigPath);
+      const templateContent = await fs.readFile(viteConfigTemplate, "utf-8");
+      // Use template as-is without base path modification
+      await fs.writeFile(viteConfigPath, templateContent, "utf-8");
     } catch (error) {
-      console.warn(`Failed to copy vite config template: ${error}`);
+      console.warn(`Failed to generate vite config: ${error}`);
     }
-    const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
 
     const slidevProcess = spawn(
       "npx",
-      ["slidev", slidesPath, "--port", port.toString(), "--base", `/slidev/${port}/`],
+      ["@slidev/cli", "slides.md", "--port", port.toString(), "--log", "info"],  // 使用官方支援的 @slidev/cli 套件名稱（npx slidev 不被支援）
       {
         cwd: presentationDir,
         stdio: ["pipe", "pipe", "pipe"],

@@ -71,6 +71,30 @@ npm run dev
 
 Server starts at `http://localhost:3000`
 
+### Testing
+
+Run the test suite:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run specific test file
+npm test tests/unit/BrowserExporter.test.ts
+
+# Run with coverage
+npm test -- --coverage
+```
+
+**Test Coverage**: 42 tests across 8 test files
+
+- ✅ Unit Tests (9 tests) - `BrowserExporter`, `SlidevManager`
+- ✅ Integration Tests (32 tests) - All API endpoints
+- ✅ E2E Tests (1 test) - Complete export flow with real browser
+
 ### Environment Variables
 
 Customize via environment variables:

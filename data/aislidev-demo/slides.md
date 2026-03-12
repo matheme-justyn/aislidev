@@ -9,6 +9,7 @@ class: text-center
 drawings:
   persist: false
 transition: slide-left
+routerMode: hash
 mdc: true
 ---
 
@@ -30,9 +31,8 @@ AI 驅動的簡報平台 <span class="text-sm opacity-60">AI-Powered Presentatio
 </div>
 
 ---
-
-## transition: fade-out
-
+transition: fade-out
+---
 # 什麼是 AISlidev？
 
 <span class="text-sm opacity-60">What is AISlidev?</span>
@@ -148,10 +148,8 @@ layoutClass: gap-16
 </v-clicks>
 
 ---
-
 layout: center
 class: text-center
-
 ---
 
 # Markdown 語法
@@ -273,10 +271,8 @@ h1 { color: #42b883; }
 </v-clicks>
 
 ---
-
 layout: center
 class: text-center
-
 ---
 
 # 進階功能
@@ -336,10 +332,8 @@ class: text-center
 </div>
 
 ---
-
 layout: center
 class: text-center
-
 ---
 
 # 技術架構
@@ -469,10 +463,8 @@ layoutClass: gap-16
 </v-clicks>
 
 ---
-
 layout: center
 class: text-center
-
 ---
 
 # 資源連結
@@ -504,10 +496,8 @@ class: text-center
 </div>
 
 ---
-
 layout: end
 class: text-center
-
 ---
 
 # 感謝觀看！

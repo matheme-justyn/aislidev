@@ -48,15 +48,19 @@ onMounted(async () => {
 });
 
 const loadPresentation = async (id: string) => {
+  console.log('[App] Loading presentation:', id);
   try {
     const response = await fetch(`/api/presentations/${id}`);
     if (response.ok) {
       const data = await response.json();
       presentationId.value = id;
       content.value = data.content || "";
+      console.log('[App] Presentation loaded successfully:', { id, contentLength: content.value.length });
+    } else {
+      console.error('[App] Failed to fetch presentation:', response.status);
     }
   } catch (error) {
-    console.error("Failed to load presentation:", error);
+    console.error("[App] Failed to load presentation:", error);
     content.value = "# Error\n\nFailed to load presentation";
   }
 };

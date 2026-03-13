@@ -26,11 +26,15 @@ export class BrowserExporter {
 
   /**
    * Initialize browser instance (reusable across exports)
+   * 
+   * Uses full Chromium binary (channel: 'chromium') instead of headless-shell
+   * to ensure proper rendering of external CSS background-images.
    */
   async initialize(): Promise<void> {
     if (this.browser) return;
 
     this.browser = await chromium.launch({
+      channel: 'chromium',  // Use full Chrome binary for proper background image rendering
       headless: true,
       args: [
         "--no-sandbox",
@@ -73,9 +77,8 @@ export class BrowserExporter {
       console.log(`[BrowserExporter] Navigating to ${slideUrl}`);
       await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 30000 });
 
-      // Wait for presentation to be ready AND for first slide background to load
-      console.log('[DEBUG] Waiting for first slide to fully load...');
-      await page.waitForTimeout(5000); // Increased from 2s to 5s for background images
+      // Wait for presentation to be ready and background images to load
+      await page.waitForTimeout(3000); // Allow time for external background images
 
       // Detect total slide count
       const slideCount = await this.detectSlideCount(page);

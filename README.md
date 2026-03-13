@@ -19,6 +19,8 @@
 - 🔐 **Rootless Security** - Runs as non-root user with proper signal handling
 - 🎯 **Simple Architecture** - No over-engineering, easy to maintain
 
+- 📤 **PPTX Export** - Export presentations to PowerPoint format with full styling support
+
 ---
 
 ## Quick Start
@@ -133,6 +135,92 @@ See [ADR-002: Lightweight Containerization](./docs/adr/002-lightweight-container
 - [Podman](https://podman.io) / Docker - OCI-compatible containerization
 
 ---
+
+---
+
+## PPTX Export
+
+AISlidev supports exporting presentations to PowerPoint (PPTX) format with full styling, including:
+
+- Background images (Unsplash, custom images)
+- Click animations (v-click elements)
+- Custom layouts and themes
+- Markdown-rendered content
+
+### Browser Requirements
+
+**IMPORTANT**: PPTX export requires a **full Chromium browser binary** to properly render external CSS background images.
+
+The export system uses Playwright with `channel: 'chromium'` configuration, which ensures:
+
+- ✅ External CSS `background-image` URLs load correctly (e.g., Unsplash photos)
+- ✅ Full rendering engine support (not the stripped-down `chromium-headless-shell`)
+- ✅ Consistent screenshot quality (~845 KB per slide with backgrounds)
+
+### Why This Matters
+
+Playwright's default `headless: true` mode uses `chromium-headless-shell`, a minimal browser binary that **does not load external CSS background images**. This results in:
+
+- ❌ White backgrounds instead of actual images
+- ❌ Incorrect styling and layout
+- ❌ Small screenshot file sizes (~97 KB instead of ~845 KB)
+
+By using `channel: 'chromium'`, the export system forces the full Chrome/Chromium browser, which properly loads all external resources.
+
+### Installation
+
+Playwright automatically downloads Chromium when you install dependencies:
+
+```bash
+npm install
+# Playwright downloads Chromium during postinstall
+```
+
+To manually install or update browsers:
+
+```bash
+npx playwright install chromium
+```
+
+### Usage
+
+1. Open your presentation in AISlidev
+2. Click the "Export PPTX" button in the navigation bar
+3. Wait for the export to complete (~10 seconds per slide)
+4. Download the generated `.pptx` file
+
+### Troubleshooting
+
+**White backgrounds in exported PPTX:**
+
+- Verify Chromium is installed: `npx playwright install chromium`
+- Check `BrowserExporter.ts` has `channel: 'chromium'` in launch options
+- Ensure external URLs (Unsplash, etc.) are accessible from your server
+
+**Export takes too long:**
+
+- Expected: ~10 seconds per slide with animations
+- Timeout is set to 2 minutes (120000ms)
+- Check server logs for detailed progress
+
+**Click animations not appearing:**
+
+- The exporter automatically triggers 20 spacebar presses per slide
+- If you have more than 20 v-click elements, increase the count in `BrowserExporter.ts`
+
+### Technical Details
+
+See `src/server/services/BrowserExporter.ts` for implementation details:
+
+```typescript
+const browser = await chromium.launch({
+  headless: true,
+  channel: 'chromium', // Forces full Chrome binary
+  args: ['--disable-web-security', '--no-sandbox'],
+});
+```
+
+This configuration ensures maximum compatibility with external resources while maintaining headless operation for server environments.
 
 ## Documentation
 

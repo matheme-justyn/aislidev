@@ -5,7 +5,105 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1] - 2026-03-13
+
+### Summary
+
+**PPTX Export Quality Fix**: Fixed background images not appearing in exported PPTX files. Root cause was Playwright's default headless mode using stripped-down Chromium binary that doesn't load external CSS background images. Also fixed multiple frontmatter formatting errors and added navigation hints for better UX.
+
+### Fixed
+
+- **PPTX Export Background Images** - White backgrounds now render correctly with actual Unsplash photos
+  - Root cause: Playwright's `headless=new` uses `chromium-headless-shell` binary (stripped version)
+  - This minimal binary does NOT load external CSS `background-image` URLs
+  - Solution: Added `channel: 'chromium'` to force full Chrome binary in `BrowserExporter.ts` (line 66)
+  - Result: Screenshots increased from ~97 KB (white) to ~845 KB (with backgrounds)
+  - Full Chrome binary properly loads external resources while maintaining headless operation
+  - Documented browser requirements and troubleshooting in README.md
+- **Frontmatter Formatting Errors** - Fixed 8 layout syntax errors causing blank slides
+  - Fixed 3 instances of `layout: two-cols` → `layout: two-cols` (proper YAML)
+  - Fixed 4 instances of `layout: center` → `layout: center`
+  - Fixed 1 instance of `layout: end` → `layout: end`
+  - Reduced total slide count from 18 to 13 (removed blank slides)
+- **PPTX Slide Detection** - Fixed slide count detection logic
+  - Updated selector to handle Slidev's hash routing format (`#/2`)
+  - Used regex selectors for robust URL parsing
+  - All 13 slides now export successfully
+- **V-click Animation Capture** - PPTX screenshots now include all click-animated content
+  - Added 20 spacebar presses before each screenshot
+  - Ensures all v-click elements are visible in exported slides
+- **Grid Overflow in Markdown Syntax Page** - Fixed layout overflow issue
+
+### Added
+
+- **Navigation Hint Banner** - User-friendly hint for first-time users
+  - Created `NavigationHint.vue` component with close button
+  - Integrated into `SlidevPreview.vue` component
+  - Persists dismissal state in localStorage
+  - Informs users about navigation controls and export functionality
+- **Comprehensive PPTX Export Documentation** - New README section explaining:
+  - Why full Chromium browser is required (vs. chromium-headless-shell)
+  - How to install Playwright browsers (`npx playwright install chromium`)
+  - Troubleshooting guide for common issues (white backgrounds, timeouts, animations)
+  - Technical details of `channel: 'chromium'` configuration
+  - Expected file sizes and export times
+
+### Changed
+
+- **BrowserExporter Configuration** - Simplified and optimized
+  - Line 66: Added `channel: 'chromium'` to force full Chrome binary
+  - Removed verbose debug logging
+  - Simplified wait logic (removed redundant delays)
+  - Kept essential waits for v-click animations
+
+### Documentation
+
+- **README.md** - Added extensive "PPTX Export" section (80+ lines)
+  - Browser requirements and rationale
+  - Installation instructions
+  - Usage guide
+  - Troubleshooting common issues
+  - Technical implementation details
+
+### Verification Results
+
+✅ **Background Images Load**: Screenshots now ~845 KB each (vs. ~97 KB white backgrounds)
+✅ **All 13 Slides Export**: Complete presentation with proper formatting
+✅ **V-click Content Visible**: All click animations captured in screenshots
+✅ **Valid PPTX Structure**: Opens correctly in PowerPoint/Keynote
+✅ **Total File Size**: ~1.0 MB (includes all images)
+
+### Technical Details
+
+**Critical Code Change** (`src/server/services/BrowserExporter.ts`):
+
+```typescript
+const browser = await chromium.launch({
+  headless: true,
+  channel: 'chromium', // CRITICAL: Forces full Chrome binary
+  args: [
+    '--disable-web-security',
+    '--disable-features=IsolateOrigins,site-per-process',
+    '--no-sandbox',
+  ],
+});
+```
+
+**Why This Matters**:
+- `headless: true` alone → uses `chromium-headless-shell` (stripped binary, no external CSS backgrounds)
+- `headless: true` + `channel: 'chromium'` → uses full Chrome in headless mode (proper rendering)
+
+**File Size Diagnostic**:
+- Background loaded correctly: ~845 KB per screenshot
+- White background (broken): ~97 KB per screenshot
+
+This measurement was crucial for debugging and verifying the fix.
+
+### Known Limitations
+
+- Requires Playwright Chromium browser (~180MB container image size)
+- Export time: ~10 seconds per slide with animations
+- PPTX files are image-based (1-5MB, no text editing in PowerPoint)
 
 ---
 

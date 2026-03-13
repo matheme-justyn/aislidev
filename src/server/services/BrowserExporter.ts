@@ -73,8 +73,9 @@ export class BrowserExporter {
       console.log(`[BrowserExporter] Navigating to ${slideUrl}`);
       await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 30000 });
 
-      // Wait for presentation to be ready
-      await page.waitForTimeout(2000);
+      // Wait for presentation to be ready AND for first slide background to load
+      console.log('[DEBUG] Waiting for first slide to fully load...');
+      await page.waitForTimeout(5000); // Increased from 2s to 5s for background images
 
       // Detect total slide count
       const slideCount = await this.detectSlideCount(page);
@@ -199,19 +200,23 @@ export class BrowserExporter {
     await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
 
     // Wait for slide to fully render
+    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 2s for render...`);
     await page.waitForTimeout(2000);
     
     // Wait for any background images to load
     // Strategy: Wait for all image requests to complete
+    console.log(`[DEBUG] Slide ${slideNumber}: Waiting for network idle...`);
     try {
       // Wait for network to be truly idle (no requests for 500ms)
       await page.waitForLoadState('networkidle', { timeout: 5000 });
+      console.log(`[DEBUG] Slide ${slideNumber}: Network idle achieved`);
     } catch (e) {
       console.warn(`[BrowserExporter] Network idle timeout on slide ${slideNumber}`);
     }
     
     // Additional wait for background images to decode and render
     // This ensures CSS background-image from Unsplash is fully visible
+    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 2s more for decode...`);
     await page.waitForTimeout(2000);
 
     // Click through v-click animations
@@ -227,6 +232,7 @@ export class BrowserExporter {
 
     // Wait a bit more for any delayed animations
     await page.waitForTimeout(500);
+    console.log(`[DEBUG] Slide ${slideNumber}: Taking screenshot now...`);
 
     // Take final screenshot with all content visible
     await page.screenshot({

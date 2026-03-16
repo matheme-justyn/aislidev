@@ -40,7 +40,6 @@ export class BrowserExporter {
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage", // Overcome limited resource problems in container
-        "--disable-gpu", // Not needed in headless mode
       ],
     });
   }
@@ -58,15 +57,22 @@ export class BrowserExporter {
     outputPath: string,
     timeout: number = 120000,
   ): Promise<string> {
-    if (!this.browser) {
-      await this.initialize();
-    }
+    // Create fresh browser instance for this export (avoid context pollution)
+    const browser = await chromium.launch({
+      channel: 'chromium',
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+      ],
+    });
 
     let page: Page | null = null;
     const tempDir = path.join(path.dirname(outputPath), ".temp-screenshots");
 
     try {
-      page = await this.browser!.newPage();
+      page = await browser.newPage();
 
       // Set viewport to standard presentation size (16:9 aspect ratio)
       await page.setViewportSize({ width: 1920, height: 1080 });
@@ -94,10 +100,18 @@ export class BrowserExporter {
       // Screenshot each slide
       const screenshotPaths: string[] = [];
       for (let i = 1; i <= slideCount; i++) {
+        // Create fresh page for each slide to avoid context pollution
+        const slidePage = await browser.newPage();
+        await slidePage.setViewportSize({ width: 1920, height: 1080 });
+        slidePage.setDefaultTimeout(timeout);
+        
         const screenshotPath = path.join(tempDir, `slide-${i}.png`);
-        await this.screenshotSlide(page, i, screenshotPath, port);
+        await this.screenshotSlide(slidePage, i, screenshotPath, port);
         screenshotPaths.push(screenshotPath);
         console.log(`[BrowserExporter] Captured slide ${i}/${slideCount}`);
+        
+        // Close page after screenshot
+        await slidePage.close();
       }
 
       // Generate PPTX from screenshots
@@ -129,10 +143,12 @@ export class BrowserExporter {
         `Failed to export PPTX: ${error instanceof Error ? error.message : String(error)}`,
       );
     } finally {
-      // Always close page to free resources
+      // Always close page and browser to free resources
       if (page) {
         await page.close();
       }
+      // Close the fresh browser instance
+      await browser.close();
     }
   }
 
@@ -200,7 +216,23 @@ export class BrowserExporter {
   ): Promise<void> {
     // Navigate to specific slide
     const slideUrl = `http://localhost:${port}/${slideNumber}`;
+    console.log(`[DEBUG] Navigating to ${slideUrl}`);
     await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
+
+    // Check if background-image is set
+    const bgImageInfo = await page.evaluate(() => {
+      const slidev = document.querySelector('.slidev-layout');
+      if (!slidev) return { found: false };
+      const style = window.getComputedStyle(slidev);
+      const bgImage = style.backgroundImage;
+      return {
+        found: true,
+        backgroundImage: bgImage,
+        hasUrl: bgImage.includes('url('),
+        isUnsplash: bgImage.includes('unsplash')
+      };
+    });
+    console.log(`[DEBUG] Slide ${slideNumber} background check:`, JSON.stringify(bgImageInfo));
 
     // Wait for slide to fully render and background images to load
     console.log(`[DEBUG] Slide ${slideNumber}: Waiting 5s for render and background...`);

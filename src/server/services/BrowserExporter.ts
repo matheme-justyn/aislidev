@@ -57,6 +57,14 @@ export class BrowserExporter {
     outputPath: string,
     timeout: number = 120000,
   ): Promise<string> {
+    // CRITICAL: Save and clean environment to match standalone script execution
+    // The service loads NODE_ENV=development from .env via dotenv/config,
+    // which affects Playwright's ability to load external CSS background images.
+    // Standalone scripts run with clean environment and work correctly (844KB screenshots).
+    // Solution: Temporarily unset NODE_ENV to restore clean environment for Playwright.
+    const originalNodeEnv = process.env.NODE_ENV;
+    delete process.env.NODE_ENV;
+
     // Create fresh browser instance for this export (avoid context pollution)
     const browser = await chromium.launch({
       channel: 'chromium',  // Use full Chrome for reliable rendering
@@ -150,6 +158,11 @@ export class BrowserExporter {
       }
       // Close the fresh browser instance
       await browser.close();
+      
+      // Restore original environment
+      if (originalNodeEnv !== undefined) {
+        process.env.NODE_ENV = originalNodeEnv;
+      }
     }
   }
 

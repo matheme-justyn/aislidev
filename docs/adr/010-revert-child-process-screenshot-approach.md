@@ -329,3 +329,146 @@ This decision emphasizes **evidence-based problem solving**: the standalone test
 The extensive debugging session (12+ approaches attempted) provided valuable negative knowledge about what DOESN'T work, making this decision more confident.
 
 <!-- 廣泛的除錯會話（嘗試了 12+ 種方法）提供了關於什麼不起作用的寶貴負面知識，使此決策更有信心。 -->
+
+---
+
+## UPDATE (2026-03-16 Session 3): Root Cause Solved
+
+<!-- 更新（2026-03-16 Session 3）：根本原因已解決 -->
+
+### True Root Cause: Environment Variable Pollution
+
+<!-- 真正的根本原因：環境變數污染 -->
+
+After reverting to inline logic, background images were STILL missing (99KB screenshots). Further investigation with `explore` agent revealed:
+
+<!-- 恢復到 inline 邏輯後，背景圖片仍然缺失（99KB 截圖）。透過 explore agent 的進一步調查揭示： -->
+
+**The problem was NOT `child_process` - it was `NODE_ENV=development` from dotenv.**
+
+<!-- 問題不是 child_process - 而是來自 dotenv 的 NODE_ENV=development。 -->
+
+#### Evidence
+
+<!-- 證據 -->
+
+| Execution Context | NODE_ENV | Screenshot Size | Background | Status |
+|-------------------|----------|-----------------|------------|--------|
+| Standalone script | (unset)  | 844KB          | ✅ Loaded  | SUCCESS |
+| Service process   | development | 99KB         | ❌ Missing | FAILURE |
+| Service + env clean | (unset during launch) | 844KB | ✅ Loaded | SUCCESS |
+| <!-- 執行環境 --> | <!-- NODE_ENV --> | <!-- 截圖大小 --> | <!-- 背景 --> | <!-- 狀態 --> |
+| <!-- 獨立腳本 --> | <!-- (未設定) --> | <!-- 844KB --> | <!-- ✅ 已載入 --> | <!-- 成功 --> |
+| <!-- 服務程序 --> | <!-- development --> | <!-- 99KB --> | <!-- ❌ 缺失 --> | <!-- 失敗 --> |
+| <!-- 服務 + 環境清理 --> | <!-- (啟動時未設定) --> | <!-- 844KB --> | <!-- ✅ 已載入 --> | <!-- 成功 --> |
+
+**Key Finding**: `src/server/index.ts` loads `dotenv/config` at line 1, which sets `NODE_ENV=development` from `.env` file. This environment variable affects Playwright's browser behavior when loading external CSS background images.
+
+<!-- 關鍵發現：src/server/index.ts 在第 1 行載入 dotenv/config，從 .env 檔案設定 NODE_ENV=development。此環境變數影響 Playwright 載入外部 CSS 背景圖片時的瀏覽器行為。 -->
+
+### Solution Implemented
+
+<!-- 實施的解決方案 -->
+
+Modified `BrowserExporter.ts` to temporarily clean environment before launching Playwright:
+
+<!-- 修改 BrowserExporter.ts 在啟動 Playwright 前暫時清理環境： -->
+
+```typescript
+async exportPPTX(port: number, outputPath: string, timeout: number = 120000): Promise<string> {
+  // CRITICAL: Save and clean environment
+  const originalNodeEnv = process.env.NODE_ENV;
+  delete process.env.NODE_ENV;  // Remove NODE_ENV for Playwright
+  
+  try {
+    const browser = await chromium.launch({ ... });
+    // ... screenshot logic ...
+    return outputPath;
+  } finally {
+    // Restore original environment
+    if (originalNodeEnv !== undefined) {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
+  }
+}
+```
+
+### Verification
+
+<!-- 驗證 -->
+
+Created `test-env-fix.mjs` to simulate service environment:
+
+<!-- 建立 test-env-fix.mjs 模擬服務環境： -->
+
+```bash
+$ node test-env-fix.mjs
+🧪 Testing environment variable fix
+📊 Current NODE_ENV: development
+✅ Environment cleaned (NODE_ENV unset for Playwright)
+✅ Environment restored (NODE_ENV: development)
+📸 Screenshot saved: /tmp/test-env-fix-slide-1.png
+📏 File size: 844 KB (864522 bytes)
+✅ SUCCESS: Background image loaded correctly!
+```
+
+**Result**: 844KB screenshot with Unsplash background, matching the successful standalone script.
+
+<!-- 結果：844KB 截圖包含 Unsplash 背景，與成功的獨立腳本相符。 -->
+
+### Why This Happened
+
+<!-- 為什麼會發生 -->
+
+1. **Service Environment**: Express server loads `dotenv/config` → sets `NODE_ENV=development`
+<!-- 服務環境：Express 伺服器載入 dotenv/config → 設定 NODE_ENV=development -->
+
+2. **Standalone Scripts**: Direct Node execution doesn't load dotenv → clean environment
+<!-- 獨立腳本：直接 Node 執行不載入 dotenv → 乾淨環境 -->
+
+3. **Playwright Behavior**: `NODE_ENV=development` changes browser launch or resource loading behavior, breaking external CSS `background-image` loading
+<!-- Playwright 行為：NODE_ENV=development 改變瀏覽器啟動或資源載入行為，破壞外部 CSS background-image 載入 -->
+
+4. **child_process.exec()**: Inherited polluted environment from parent → also failed
+<!-- child_process.exec()：從父程序繼承污染的環境 → 也失敗 -->
+
+### Updated Decision
+
+<!-- 更新的決策 -->
+
+**Final Solution**: Keep inline Playwright logic + temporarily clean `NODE_ENV` before browser launch.
+
+<!-- 最終解決方案：保留 inline Playwright 邏輯 + 在瀏覽器啟動前暫時清理 NODE_ENV。 -->
+
+**Files Modified**:
+- `src/server/services/BrowserExporter.ts` (added environment cleanup logic)
+- `test-env-fix.mjs` (verification script)
+
+<!-- 已修改的檔案：
+- src/server/services/BrowserExporter.ts（新增環境清理邏輯）
+- test-env-fix.mjs（驗證腳本）
+-->
+
+**External Script**: `scripts/screenshot-all-slides.mjs` can be removed (no longer needed).
+
+<!-- 外部腳本：scripts/screenshot-all-slides.mjs 可以移除（不再需要）。 -->
+
+### Lessons Learned
+
+<!-- 經驗教訓 -->
+
+1. **Environment matters**: Identical code behaves differently in different execution contexts
+<!-- 環境很重要：相同的程式碼在不同的執行環境中表現不同 -->
+
+2. **Investigate systematically**: Use explore/librarian agents to discover environment differences
+<!-- 系統化調查：使用 explore/librarian agents 發現環境差異 -->
+
+3. **Evidence-based debugging**: Compare working vs failing scenarios to isolate variables
+<!-- 基於證據的除錯：比較正常與失敗場景以隔離變數 -->
+
+4. **dotenv side effects**: Be aware that `dotenv/config` pollutes `process.env` globally
+<!-- dotenv 副作用：注意 dotenv/config 會全域污染 process.env -->
+
+**Final Status**: ✅ SOLVED - Background images now load correctly (844KB with Unsplash photos)
+
+<!-- 最終狀態：✅ 已解決 - 背景圖片現在正確載入（包含 Unsplash 照片的 844KB） -->

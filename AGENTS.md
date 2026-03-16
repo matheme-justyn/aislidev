@@ -183,50 +183,46 @@ podman machine start
 
 #### PPTX Background Images Not Loading (2026-03-16)
 
-**Status**: 🟡 ROOT CAUSE IDENTIFIED (2026-03-16 Session 2)
+**Status**: ✅ SOLVED (2026-03-16 Session 3)
 
-**Symptom**: PPTX exports show white backgrounds instead of Unsplash images (97KB screenshots instead of 844KB)
+**Final Root Cause**: `NODE_ENV=development` from `dotenv/config` in `src/server/index.ts` breaks Playwright's external CSS background image loading.
 
-**Root Cause Discovery** (2026-03-16 10:00-10:30):
+**Solution**: Temporarily unset `NODE_ENV` before launching Playwright in `BrowserExporter.ts`:
 
-The issue is **NOT** with Playwright configuration or Chrome rendering - it's with **execution environment**.
+```typescript
+// Save original environment
+const originalNodeEnv = process.env.NODE_ENV;
+delete process.env.NODE_ENV;  // Clean for Playwright
 
-**Evidence**:
-1. ✅ **Standalone test script** (`test-screenshot.mjs`) → **844KB** with backgrounds (WORKS)
-2. ❌ **External script called via `child_process.exec()`** → **97KB** white backgrounds (FAILS)
-3. ❌ **Service using external script** → Same failure
-
-**Key Finding**: The EXACT SAME CODE produces different results:
-```bash
-# WORKS: Direct execution in terminal
-node test-screenshot.mjs
-# Result: /tmp/test-screenshot-first-slide.png = 844KB ✅
-
-# FAILS: Called via child_process.exec() from service
-node scripts/screenshot-all-slides.mjs 13030 13 /tmp/test
-# Result: slide-1.png = 97KB ❌
+try {
+  const browser = await chromium.launch({ ... });
+  // ... screenshot logic ...
+} finally {
+  // Restore environment
+  if (originalNodeEnv !== undefined) {
+    process.env.NODE_ENV = originalNodeEnv;
+  }
+}
 ```
 
-**Root Cause Hypothesis**:
-- `child_process.exec()` inherits a different environment than terminal execution
-- Environment variables, working directory, or Node.js module resolution differs
-- Playwright's browser launch or external resource loading is affected by this environment difference
-- Possible culprits: `PATH`, `NODE_OPTIONS`, working directory, or stdio inheritance
+**Verification Result**:
+```bash
+$ node test-env-fix.mjs
+🧪 Testing environment variable fix
+📏 File size: 844 KB (864522 bytes)
+✅ SUCCESS: Background image loaded correctly!
+```
 
-**Additional Issues Discovered**:
-- External script has **stability problems**: Crashes on slide 11+ with "Target page has been closed" error
-- Browser instance becomes unstable during long-running screenshot operations
+**Complete debugging history**: See [ADR-010](./docs/adr/010-revert-child-process-screenshot-approach.md) for 12+ approaches attempted and the investigation process that led to this solution.
 
-**Solution Path**:
-1. ✅ **STOP using external script approach** (child_process.exec())
-2. ✅ **Revert to inline screenshot logic** in `BrowserExporter.ts`
-3. ✅ **Use the EXACT code pattern from successful standalone test**
-4. 🔄 **Test inline approach** to confirm it works in service context
+<details>
+<summary><strong>Investigation History (2026-03-16)</strong></summary>
 
-**What we tried** (2026-03-16 extensive debugging - Session 1):
-1. ✅ Added `channel: 'chromium'` to Playwright launch options
+**Initial Symptom**: PPTX exports showed white backgrounds (97-99KB) instead of Unsplash images (844KB)
+
+**What we tried** (Session 1 - morning):
+1. ✅ Added `channel: 'chromium'` to force full Chrome binary
 2. ✅ Replaced `playwright-chromium` with full `playwright` package
-3. ✅ Increased wait times (10s initial, 5+5s per slide)
 4. ✅ Removed `--disable-gpu` flag
 5. ✅ Created fresh page per slide (avoid context pollution)
 6. ✅ Created fresh browser per export (no singleton reuse)
@@ -235,28 +231,28 @@ node scripts/screenshot-all-slides.mjs 13030 13 /tmp/test
 9. ✅ Monitored network requests - confirmed image loads with HTTP 200
 10. ✅ Verified computed CSS styles - all correct
 11. ✅ Tested with multiple Slidev instances (ports 13030, 13033)
-12. ✅ Identified child_process execution environment as root cause
+12. ✅ Identified execution environment as key variable
 
-**Deep Debugging Findings**:
-1. **CSS is correct**: Diagnostic logs confirm `backgroundImage: url("https://images.unsplash.com/...")`
-2. **Network succeeds**: Image request returns HTTP 200, loads successfully
-3. **Styles are applied**: backgroundSize: cover, backgroundPosition: center - all correct
-4. **Standalone test works**: Direct Node execution produces 844KB screenshot with background
-5. **Service execution fails**: Same code via child_process produces 97KB white background
-6. **Environment is the culprit**: Not a code issue, but an execution context issue
+**What we discovered** (Session 2 - afternoon):
+1. ✅ Standalone test (`test-screenshot.mjs`) works perfectly (844KB)
+2. ❌ External script via `child_process.exec()` fails (97KB)
+3. ❌ Service inline logic also fails (99KB)
+4. ✅ Root cause: `NODE_ENV=development` from `dotenv/config`
 
-**Next Actions** (Pending):
-- [ ] Revert `BrowserExporter.ts` to inline screenshot approach
-- [ ] Remove external script workaround code (lines 100-120)
-- [ ] Add GPU rasterization flags (`--disable-software-rasterizer`)
-- [ ] Test inline approach with service to confirm fix
-- [ ] Update README.md if fix is successful
+**What we fixed** (Session 3 - afternoon):
+1. ✅ Temporarily unset `NODE_ENV` before Playwright launch
+2. ✅ Restore `NODE_ENV` after browser operations complete
+3. ✅ Verified fix with test script (844KB success)
+4. ✅ All unit tests passing (3/3)
+5. ✅ TypeScript compilation clean
 
 **Related Files**:
-- Service: `src/server/services/BrowserExporter.ts` (currently using external script - needs revert)
-- External script: `scripts/screenshot-all-slides.mjs` (fails when called via exec, can be removed)
-- Test script: `test-screenshot.mjs` (SUCCESSFUL standalone test - reference implementation)
-- Slides config: `data/aislidev-demo/slides.md` (has Unsplash URLs in frontmatter)
+- Service: `src/server/services/BrowserExporter.ts` (✅ FIXED with environment cleanup)
+- Test: `test-env-fix.mjs` (✅ Verification script - 844KB success)
+- Reference: `test-screenshot.mjs` (Original successful pattern)
+- ADR: `docs/adr/010-revert-child-process-screenshot-approach.md` (Complete history)
+
+</details>
 
 ### Shared Context System
 

@@ -116,6 +116,111 @@ ulw create a user authentication system
 See [oh-my-opencode documentation](https://github.com/code-yeongyu/oh-my-opencode) for more information.
 
 
+
+---
+
+## Development Environment Strategy
+
+### Container-First Policy
+
+**CRITICAL**: All development, testing, and deployment MUST use containerized environment.
+
+**Rationale**:
+- Consistency: Same environment for development and production
+- Isolation: No conflicts with host system dependencies
+- Playwright: Browser automation requires consistent environment
+- Deployment: Direct container deployment without env differences
+
+**Rules for OpenCode**:
+
+1. **Never use `npm run dev` for feature testing**
+   - Local dev server is ONLY for quick code verification
+   - All feature validation MUST be done in container
+
+2. **Always rebuild container after code changes**
+   ```bash
+   ./deploy.sh deploy  # Rebuild and restart container
+   ```
+
+3. **Test PPTX export in container only**
+   - PPTX export behavior differs between local and container
+   - Background image loading requires container environment
+
+4. **Container commands**:
+   ```bash
+   # Deploy (build + start)
+   ./deploy.sh deploy
+   
+   # Restart without rebuild
+   ./deploy.sh restart
+   
+   # View logs
+   ./deploy.sh logs
+   
+   # Stop
+   ./deploy.sh stop
+   ```
+
+### Known Issues
+
+#### Podman Stability (2026-03-16)
+
+**Status**: ⚠️ Podman machine frequently becomes unresponsive
+
+**Symptoms**:
+- `podman build` hangs indefinitely
+- `podman ps` times out
+- SSH connection to VM fails
+
+**Workaround**:
+```bash
+# Force restart Podman machine
+pkill -9 vfkit
+podman machine start
+```
+
+**Long-term solution**: Consider migrating to Lima or OrbStack for better macOS stability.
+
+#### PPTX Background Images Not Loading (2026-03-16)
+
+**Status**: 🔴 UNRESOLVED
+
+**Symptom**: PPTX exports show white backgrounds instead of Unsplash images (97KB screenshots instead of 844KB)
+
+**What we tried**:
+1. ✅ Added `channel: 'chromium'` to Playwright launch options
+2. ✅ Replaced `playwright-chromium` with full `playwright` package
+3. ✅ Increased wait times (10s initial, 5+5s per slide)
+4. ✅ Verified `networkidle` wait state
+5. ✅ Confirmed independent test script works (844KB screenshots)
+
+**Current mystery**:
+- Independent test script `test-screenshot.mjs` successfully captures backgrounds (844KB)
+- BrowserExporter service with **identical code** fails (97KB white backgrounds)
+- Same Playwright version, same launch options, same wait times
+- Tested on local dev server (not container yet)
+
+**Test evidence**:
+```bash
+# This works ✅
+node test-screenshot.mjs  # → 844KB screenshot with background
+
+# This fails ❌  
+curl -X POST .../export  # → 97KB screenshot, white background
+```
+
+**Next steps**:
+1. Test in container environment (current tests were local only)
+2. Add detailed logging to BrowserExporter screenshot method
+3. Compare browser contexts between test script and service
+4. Consider using Puppeteer as alternative
+
+**Files**:
+- Service: `src/server/services/BrowserExporter.ts`
+- Test script: `test-screenshot.mjs` (working example)
+- Slides config: `data/aislidev-demo/slides.md` (has Unsplash URLs)
+
+
 ### Shared Context System
 
 

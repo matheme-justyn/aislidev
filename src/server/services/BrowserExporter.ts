@@ -1,4 +1,4 @@
-import { chromium, Browser, Page } from "playwright-chromium";
+import { chromium, Browser, Page } from "playwright";
 import path from "path";
 import { promises as fs } from "fs";
 
@@ -78,7 +78,7 @@ export class BrowserExporter {
       await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 30000 });
 
       // Wait for presentation to be ready and background images to load
-      await page.waitForTimeout(3000); // Allow time for external background images
+      await page.waitForTimeout(10000); // Extended wait for external Unsplash backgrounds
 
       // Detect total slide count
       const slideCount = await this.detectSlideCount(page);
@@ -202,9 +202,9 @@ export class BrowserExporter {
     const slideUrl = `http://localhost:${port}/${slideNumber}`;
     await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
 
-    // Wait for slide to fully render
-    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 2s for render...`);
-    await page.waitForTimeout(2000);
+    // Wait for slide to fully render and background images to load
+    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 5s for render and background...`);
+    await page.waitForTimeout(5000);
     
     // Wait for any background images to load
     // Strategy: Wait for all image requests to complete
@@ -217,10 +217,9 @@ export class BrowserExporter {
       console.warn(`[BrowserExporter] Network idle timeout on slide ${slideNumber}`);
     }
     
-    // Additional wait for background images to decode and render
-    // This ensures CSS background-image from Unsplash is fully visible
-    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 2s more for decode...`);
-    await page.waitForTimeout(2000);
+    // Additional wait for background images to decode and render (extended for Unsplash)
+    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 5s more for image decode...`);
+    await page.waitForTimeout(5000);
 
     // Click through v-click animations
     // Most slides have at most 6-8 v-click elements

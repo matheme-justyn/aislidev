@@ -51,6 +51,7 @@ Each ADR follows this structure:
 | [007](./007-remove-slidev-base-parameter.md) | Remove Slidev Base URL Parameter          | Accepted    |
 | [008](./008-http-proxy-middleware-v3-fix.md) | http-proxy-middleware v3 Response Fix     | Accepted    |
 | [009](./009-pptx-export-via-data-directory.md) | PPTX Export via Data Directory          | Accepted    |
+| [010](./010-revert-child-process-screenshot-approach.md) | Revert child_process to Inline Screenshots | Accepted |
 | <!-- ADR                                     | 標題                                      | 狀態 -->    |
 | <!-- 001                                     | 版本控制和發布策略                        | 已接受 -->  |
 | <!-- 002                                     | 輕量容器化架構                            | 已接受 -->  |
@@ -61,6 +62,7 @@ Each ADR follows this structure:
 | <!-- 007                                     | 移除 Slidev Base URL 參數                 | 已接受 -->  |
 | <!-- 008                                     | http-proxy-middleware v3 回應攔截修復     | 已接受 -->  |
 | <!-- 009                                     | 透過 Data 目錄匯出 PPTX                   | 已接受 -->  |
+| <!-- 010                                     | 從 child_process 恢復到 inline 截圖       | 已接受 -->  |
 
 ## Creating a New ADR
 

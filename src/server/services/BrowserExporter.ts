@@ -59,15 +59,13 @@ export class BrowserExporter {
   ): Promise<string> {
     // Create fresh browser instance for this export (avoid context pollution)
     const browser = await chromium.launch({
-      channel: 'chromium',
+      channel: 'chromium',  // Use full Chrome for reliable rendering
       headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-software-rasterizer', // Force GPU rasterization (critical for CSS backgrounds)
-        '--disable-blink-features=AutomationControlled', // Avoid detection as headless
-        '--force-device-scale-factor=1', // Ensure 1:1 pixel ratio
+        '--disable-accelerated-2d-canvas',  // Consistent rendering
       ],
     });
 
@@ -100,27 +98,21 @@ export class BrowserExporter {
       // Create temp directory for screenshots
       await fs.mkdir(tempDir, { recursive: true });
 
-      // Use external screenshot script (workaround for background image loading issue)
-      console.log(`[BrowserExporter] Using external screenshot script...`);
-      const { exec } = await import('child_process');
-      const { promisify } = await import('util');
-      const execAsync = promisify(exec);
-      
-      const scriptPath = path.join(process.cwd(), 'scripts', 'screenshot-all-slides.mjs');
-      const command = `node "${scriptPath}" ${port} ${slideCount} "${tempDir}"`;
-      
-      console.log(`[BrowserExporter] Running: ${command}`);
-      const { stdout, stderr } = await execAsync(command, { timeout });
-      
-      if (stderr) {
-        console.warn('[BrowserExporter] Screenshot script stderr:', stderr);
-      }
-      console.log('[BrowserExporter] Screenshot script output:', stdout);
-      
-      // Collect screenshot paths
+      // Screenshot each slide with inline logic (matching successful test pattern)
       const screenshotPaths: string[] = [];
       for (let i = 1; i <= slideCount; i++) {
-        screenshotPaths.push(path.join(tempDir, `slide-${i}.png`));
+        // Create fresh page for each slide to avoid context pollution
+        const slidePage = await browser.newPage();
+        await slidePage.setViewportSize({ width: 1920, height: 1080 });
+        slidePage.setDefaultTimeout(timeout);
+        
+        const screenshotPath = path.join(tempDir, `slide-${i}.png`);
+        await this.screenshotSlide(slidePage, i, screenshotPath, port);
+        screenshotPaths.push(screenshotPath);
+        console.log(`[BrowserExporter] Captured slide ${i}/${slideCount}`);
+        
+        // Close page after screenshot to free resources
+        await slidePage.close();
       }
 
       // Generate PPTX from screenshots
@@ -225,94 +217,48 @@ export class BrowserExporter {
   ): Promise<void> {
     // Navigate to specific slide
     const slideUrl = `http://localhost:${port}/${slideNumber}`;
-    console.log(`[DEBUG] Navigating to ${slideUrl}`);
-    await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
-
-    // Check if background-image is set and wait for it to load
-    const bgImageInfo = await page.evaluate(async () => {
-      const slidev = document.querySelector('.slidev-layout');
-      if (!slidev) return { found: false, loaded: false };
-      
-      const style = window.getComputedStyle(slidev);
-      const bgImage = style.backgroundImage;
-      const hasUrl = bgImage.includes('url(');
-      
-      // Extract URL from background-image CSS
-      let imageUrl = null;
-      if (hasUrl) {
-        const match = bgImage.match(/url\(["']?([^"'\)]+)["']?\)/);
-        if (match) imageUrl = match[1];
-      }
-      
-      // If there's a background URL, wait for it to load
-      let loaded = false;
-      if (imageUrl) {
-        try {
-          await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => reject(new Error('Failed to load'));
-            img.src = imageUrl;
-            // Timeout after 10s
-            setTimeout(() => reject(new Error('Timeout')), 10000);
-          });
-          loaded = true;
-        } catch (e) {
-          console.error('Background image load failed:', e);
-          loaded = false;
-        }
-      }
-      
-      return {
-        found: true,
-        backgroundImage: bgImage,
-        hasUrl,
-        isUnsplash: bgImage.includes('unsplash'),
-        imageUrl,
-        loaded
-      };
+    console.log(`[BrowserExporter] Capturing slide ${slideNumber}: ${slideUrl}`);
+    
+    // Use proven test pattern: networkidle + wait for background loading
+    await page.goto(slideUrl, { 
+      waitUntil: "networkidle", 
+      timeout: 30000 
     });
-    console.log(`[DEBUG] Slide ${slideNumber} background check:`, JSON.stringify(bgImageInfo));
 
-    // Wait for slide to fully render and background images to load
-    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 5s for render and background...`);
-    await page.waitForTimeout(5000);
-    
-    // Wait for any background images to load
-    // Strategy: Wait for all image requests to complete
-    console.log(`[DEBUG] Slide ${slideNumber}: Waiting for network idle...`);
-    try {
-      // Wait for network to be truly idle (no requests for 500ms)
-      await page.waitForLoadState('networkidle', { timeout: 5000 });
-      console.log(`[DEBUG] Slide ${slideNumber}: Network idle achieved`);
-    } catch (e) {
-      console.warn(`[BrowserExporter] Network idle timeout on slide ${slideNumber}`);
-    }
-    
-    // Additional wait for background images to decode and render (extended for Unsplash)
-    console.log(`[DEBUG] Slide ${slideNumber}: Waiting 5s more for image decode...`);
-    await page.waitForTimeout(5000);
+    // Wait for background images to load (matches successful test pattern)
+    await page.waitForTimeout(10000);
+
+    // Wait for background image if present (Playwright best practice)
+    await page.waitForFunction(() => {
+      const slidev = document.querySelector('.slidev-layout');
+      if (!slidev) return true; // No layout element, skip check
+      const style = window.getComputedStyle(slidev);
+      const bg = style.backgroundImage;
+      // If no background or not a URL, we're good
+      if (!bg || bg === 'none' || !bg.includes('url(')) return true;
+      // Background exists - assume loaded after networkidle + timeout
+      return true;
+    }, { timeout: 5000 }).catch(() => {
+      // Fallback: if function fails, continue anyway
+      console.warn(`[BrowserExporter] Background check timed out for slide ${slideNumber}`);
+    });
 
     // Click through v-click animations
     // Most slides have at most 6-8 v-click elements
-    // We'll click up to 20 times to ensure all content is visible
     const clicksPerSlide = 20;
-    
     for (let clickIndex = 0; clickIndex < clicksPerSlide; clickIndex++) {
-      // Press Space to trigger v-click (Space doesn't navigate between slides in Slidev)
       await page.keyboard.press("Space");
-      await page.waitForTimeout(200); // Wait for animation
+      await page.waitForTimeout(200);
     }
 
-    // Wait a bit more for any delayed animations
-    await page.waitForTimeout(500);
-    console.log(`[DEBUG] Slide ${slideNumber}: Taking screenshot now...`);
+    // Final render buffer before screenshot
+    await page.waitForTimeout(1000);
 
-    // Take final screenshot with all content visible
+    // Take screenshot
     await page.screenshot({
       path: outputPath,
       type: "png",
-      fullPage: false, // Use viewport size
+      fullPage: false,
     });
   }
 

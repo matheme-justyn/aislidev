@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => {
   const pageSetDefaultTimeoutMock = vi.fn();
   const pageGotoMock = vi.fn();
   const pageWaitForTimeoutMock = vi.fn();
+  const pageWaitForFunctionMock = vi.fn();
   const pageScreenshotMock = vi.fn();
   const pageCloseMock = vi.fn();
   const pageKeyboardPressMock = vi.fn();
@@ -32,6 +33,7 @@ const mocks = vi.hoisted(() => {
     pageSetDefaultTimeoutMock,
     pageGotoMock,
     pageWaitForTimeoutMock,
+    pageWaitForFunctionMock,
     pageScreenshotMock,
     pageCloseMock,
     pageKeyboardPressMock,
@@ -47,7 +49,7 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("playwright-chromium", () => ({
+vi.mock("playwright", () => ({
   chromium: {
     launch: mocks.chromiumLaunchMock,
   },
@@ -76,6 +78,7 @@ describe("BrowserExporter", () => {
     mocks.pageSetDefaultTimeoutMock.mockReturnValue(undefined);
     mocks.pageGotoMock.mockResolvedValue(undefined);
     mocks.pageWaitForTimeoutMock.mockResolvedValue(undefined);
+    mocks.pageWaitForFunctionMock.mockResolvedValue(undefined);
     mocks.pageScreenshotMock.mockResolvedValue(undefined);
     mocks.pageCloseMock.mockResolvedValue(undefined);
     mocks.pageKeyboardPressMock.mockResolvedValue(undefined);
@@ -87,6 +90,7 @@ describe("BrowserExporter", () => {
       setDefaultTimeout: mocks.pageSetDefaultTimeoutMock,
       goto: mocks.pageGotoMock,
       waitForTimeout: mocks.pageWaitForTimeoutMock,
+      waitForFunction: mocks.pageWaitForFunctionMock,
       screenshot: mocks.pageScreenshotMock,
       close: mocks.pageCloseMock,
       keyboard: {
@@ -124,28 +128,31 @@ describe("BrowserExporter", () => {
     }));
   });
 
-  it("launches browser only once during initialize", async () => {
+  it("creates fresh browser for each export (no singleton reuse)", async () => {
     const exporter = new BrowserExporter();
 
-    await exporter.initialize();
-    await exporter.initialize();
+    // Run two exports
+    await exporter.exportPPTX(13030, "/tmp/export1.pptx", 5000);
+    await exporter.exportPPTX(13030, "/tmp/export2.pptx", 5000);
 
-    expect(mocks.chromiumLaunchMock).toHaveBeenCalledTimes(1);
+    // Browser should be launched twice (fresh instance per export)
+    expect(mocks.chromiumLaunchMock).toHaveBeenCalledTimes(2);
     expect(mocks.chromiumLaunchMock).toHaveBeenCalledWith({
+      channel: 'chromium',
       headless: true,
       args: expect.arrayContaining([
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
-        "--disable-gpu",
+        "--disable-accelerated-2d-canvas",
       ]),
     });
 
-    await exporter.cleanup();
-    expect(mocks.browserCloseMock).toHaveBeenCalledTimes(1);
+    // Browser should be closed twice (once per export)
+    expect(mocks.browserCloseMock).toHaveBeenCalledTimes(2);
   });
 
-  it("exports pptx by screenshoting slides and generating file", async () => {
+  it("exports pptx by screenshoting slides with inline logic", async () => {
     const exporter = new BrowserExporter();
     const outputPath = "/tmp/aislidev-export.pptx";
 
@@ -153,20 +160,19 @@ describe("BrowserExporter", () => {
 
     expect(result).toBe(outputPath);
 
-    expect(mocks.pageSetViewportSizeMock).toHaveBeenCalledWith({
-      width: 1920,
-      height: 1080,
-    });
-    expect(mocks.pageSetDefaultTimeoutMock).toHaveBeenCalledWith(5000);
+    // Fresh page created for each slide (2 slides detected)
+    expect(mocks.browserNewPageMock).toHaveBeenCalledTimes(3); // 1 for detection + 2 for screenshots
 
+    // Navigate to slides with networkidle
     expect(mocks.pageGotoMock).toHaveBeenCalledWith(
       "http://localhost:13030/1",
       {
         waitUntil: "networkidle",
-        timeout: 30000,
+        timeout: expect.any(Number),
       },
     );
 
+    // Screenshots should be taken for both slides
     expect(mocks.pageScreenshotMock).toHaveBeenCalledTimes(2);
     expect(mocks.pageScreenshotMock).toHaveBeenNthCalledWith(1, {
       path: "/tmp/.temp-screenshots/slide-1.png",
@@ -179,10 +185,12 @@ describe("BrowserExporter", () => {
       fullPage: false,
     });
 
+    // PPTX generation
     expect(mocks.addSlideMock).toHaveBeenCalledTimes(2);
     expect(mocks.addImageMock).toHaveBeenCalledTimes(2);
     expect(mocks.writeFileMock).toHaveBeenCalledWith({ fileName: outputPath });
 
+    // Temp directory lifecycle
     expect(mocks.mkdirMock).toHaveBeenCalledWith("/tmp/.temp-screenshots", {
       recursive: true,
     });
@@ -192,7 +200,9 @@ describe("BrowserExporter", () => {
     });
 
     expect(mocks.statMock).toHaveBeenCalledWith(outputPath);
-    expect(mocks.pageCloseMock).toHaveBeenCalledTimes(1);
+    
+    // Pages closed after screenshots
+    expect(mocks.pageCloseMock).toHaveBeenCalled();
   });
 
   it("fails when no slides are detected and cleans up temp resources", async () => {

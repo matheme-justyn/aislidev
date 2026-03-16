@@ -11,7 +11,7 @@ import { chromium } from "playwright";
   await page.setViewportSize({ width: 1920, height: 1080 });
 
   console.log("[TEST] Navigating to Slidev first slide...");
-  await page.goto("http://localhost:13030/1", {
+  await page.goto("http://localhost:13033/1", {
     waitUntil: "networkidle",
     timeout: 30000,
   });

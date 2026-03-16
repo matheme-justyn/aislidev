@@ -65,6 +65,9 @@ export class BrowserExporter {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
+        '--disable-software-rasterizer', // Force GPU rasterization (critical for CSS backgrounds)
+        '--disable-blink-features=AutomationControlled', // Avoid detection as headless
+        '--force-device-scale-factor=1', // Ensure 1:1 pixel ratio
       ],
     });
 
@@ -97,21 +100,27 @@ export class BrowserExporter {
       // Create temp directory for screenshots
       await fs.mkdir(tempDir, { recursive: true });
 
-      // Screenshot each slide
+      // Use external screenshot script (workaround for background image loading issue)
+      console.log(`[BrowserExporter] Using external screenshot script...`);
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execAsync = promisify(exec);
+      
+      const scriptPath = path.join(process.cwd(), 'scripts', 'screenshot-all-slides.mjs');
+      const command = `node "${scriptPath}" ${port} ${slideCount} "${tempDir}"`;
+      
+      console.log(`[BrowserExporter] Running: ${command}`);
+      const { stdout, stderr } = await execAsync(command, { timeout });
+      
+      if (stderr) {
+        console.warn('[BrowserExporter] Screenshot script stderr:', stderr);
+      }
+      console.log('[BrowserExporter] Screenshot script output:', stdout);
+      
+      // Collect screenshot paths
       const screenshotPaths: string[] = [];
       for (let i = 1; i <= slideCount; i++) {
-        // Create fresh page for each slide to avoid context pollution
-        const slidePage = await browser.newPage();
-        await slidePage.setViewportSize({ width: 1920, height: 1080 });
-        slidePage.setDefaultTimeout(timeout);
-        
-        const screenshotPath = path.join(tempDir, `slide-${i}.png`);
-        await this.screenshotSlide(slidePage, i, screenshotPath, port);
-        screenshotPaths.push(screenshotPath);
-        console.log(`[BrowserExporter] Captured slide ${i}/${slideCount}`);
-        
-        // Close page after screenshot
-        await slidePage.close();
+        screenshotPaths.push(path.join(tempDir, `slide-${i}.png`));
       }
 
       // Generate PPTX from screenshots
@@ -219,17 +228,48 @@ export class BrowserExporter {
     console.log(`[DEBUG] Navigating to ${slideUrl}`);
     await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
 
-    // Check if background-image is set
-    const bgImageInfo = await page.evaluate(() => {
+    // Check if background-image is set and wait for it to load
+    const bgImageInfo = await page.evaluate(async () => {
       const slidev = document.querySelector('.slidev-layout');
-      if (!slidev) return { found: false };
+      if (!slidev) return { found: false, loaded: false };
+      
       const style = window.getComputedStyle(slidev);
       const bgImage = style.backgroundImage;
+      const hasUrl = bgImage.includes('url(');
+      
+      // Extract URL from background-image CSS
+      let imageUrl = null;
+      if (hasUrl) {
+        const match = bgImage.match(/url\(["']?([^"'\)]+)["']?\)/);
+        if (match) imageUrl = match[1];
+      }
+      
+      // If there's a background URL, wait for it to load
+      let loaded = false;
+      if (imageUrl) {
+        try {
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => reject(new Error('Failed to load'));
+            img.src = imageUrl;
+            // Timeout after 10s
+            setTimeout(() => reject(new Error('Timeout')), 10000);
+          });
+          loaded = true;
+        } catch (e) {
+          console.error('Background image load failed:', e);
+          loaded = false;
+        }
+      }
+      
       return {
         found: true,
         backgroundImage: bgImage,
-        hasUrl: bgImage.includes('url('),
-        isUnsplash: bgImage.includes('unsplash')
+        hasUrl,
+        isUnsplash: bgImage.includes('unsplash'),
+        imageUrl,
+        loaded
       };
     });
     console.log(`[DEBUG] Slide ${slideNumber} background check:`, JSON.stringify(bgImageInfo));

@@ -187,21 +187,21 @@ const exportButtonText = computed(() => {
 const onPresentationSelect = async (filename: string) => {
   try {
     const response = await fetch(`/api/files/presentations/${filename}`);
-    
+
     if (!response.ok) {
       throw new Error('Failed to load presentation');
     }
-    
+
     const data = await response.json();
-    
+
     // Load the presentation content
     localContent.value = data.content;
     emit('update:content', data.content);
     message.success(`Presentation opened: ${filename}`);
-    
+
     // Close modal
     showFileExplorer.value = false;
-    
+
     // Auto-reload preview
     setTimeout(() => {
       previewRef.value?.reload();
@@ -216,28 +216,28 @@ const onPresentationSelect = async (filename: string) => {
 const onTemplateSelect = async (filename: string) => {
   try {
     const response = await fetch(`/api/files/templates/${filename}`);
-    
+
     if (!response.ok) {
       throw new Error('Failed to load template');
     }
-    
+
     const data = await response.json();
-    
+
     // Validate Slidev format
     const frontmatterRegex = /^---\n[\s\S]*?\n---/;
     if (!frontmatterRegex.test(data.content)) {
       message.error('Invalid Slidev template: Missing frontmatter');
       return;
     }
-    
+
     // Load the template content
     localContent.value = data.content;
     emit('update:content', data.content);
     message.success(`Template loaded: ${filename}`);
-    
+
     // Close modal
     showTemplateBrowser.value = false;
-    
+
     // Auto-reload preview
     setTimeout(() => {
       previewRef.value?.reload();
@@ -330,31 +330,39 @@ const exportPPTX = async () => {
   try {
     const response = await fetch(`/api/presentations/${props.presentationId}/export`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
     });
 
-    if (response.ok) {
-      // Download the PPTX file
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${props.presentationId}.pptx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      exportStatus.value = "exported";
-      message.success("PPTX exported successfully");
-
-      // Reset status after 2 seconds
-      setTimeout(() => {
-        exportStatus.value = "idle";
-      }, 2000);
-    } else {
-      throw new Error("Export failed");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Export failed");
     }
+
+    // Server returns JSON with downloadUrl
+    const data = await response.json();
+
+    // Download the actual PPTX file
+    const fileResponse = await fetch(data.downloadUrl);
+    if (!fileResponse.ok) {
+      throw new Error("Failed to download exported file");
+    }
+
+    const blob = await fileResponse.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${props.presentationId}.pptx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    exportStatus.value = "exported";
+    message.success("PPTX exported successfully");
+
+    // Reset status after 2 seconds
+    setTimeout(() => {
+      exportStatus.value = "idle";
+    }, 2000);
   } catch (error) {
     console.error("Failed to export PPTX:", error);
     message.error("Failed to export PPTX");

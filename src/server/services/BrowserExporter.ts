@@ -68,8 +68,8 @@ export class BrowserExporter {
       await page.setViewportSize({ width: 1920, height: 1080 });
       page.setDefaultTimeout(timeout);
 
-      // Navigate to Slidev presentation
-      const slideUrl = `http://localhost:${port}/1`;
+      // Navigate to Slidev presentation (Slidev uses --base /slidev/:port/)
+      const slideUrl = `http://localhost:${port}/slidev/${port}/1`;
       console.log(`[BrowserExporter] Navigating to ${slideUrl}`);
       await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 30000 });
 
@@ -190,8 +190,8 @@ export class BrowserExporter {
     outputPath: string,
     port: number,
   ): Promise<void> {
-    // Navigate to specific slide
-    const slideUrl = `http://localhost:${port}/${slideNumber}`;
+    // Navigate to specific slide (Slidev uses --base /slidev/:port/)
+    const slideUrl = `http://localhost:${port}/slidev/${port}/${slideNumber}`;
     await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
 
     // Wait for slide to render

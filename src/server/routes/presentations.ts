@@ -214,13 +214,12 @@ const presentationsRoutes: FastifyPluginAsync<
 
         fastify.log.info(`[Export ${id}] Starting browser-based PPTX export`);
 
-        // Get Slidev process info to obtain port
-        const processInfo = slidevManager.getProcess(id);
+        // Get Slidev process info to obtain port, auto-start if not running
+        let processInfo = slidevManager.getProcess(id);
         if (!processInfo || processInfo.status !== "running") {
-          return reply.code(400).send({
-            error: "Presentation not running",
-            message: `Presentation '${id}' must be running to export. Start preview first.`,
-          });
+          fastify.log.info(`[Export ${id}] Slidev not running, auto-starting...`);
+          const content = await fs.readFile(slidesPath, "utf-8");
+          processInfo = await slidevManager.startPresentation(id, content);
         }
 
         // Use BrowserExporter to automate PPTX download

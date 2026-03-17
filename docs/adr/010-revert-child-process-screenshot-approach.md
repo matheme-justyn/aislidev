@@ -472,3 +472,138 @@ $ node test-env-fix.mjs
 **Final Status**: ✅ SOLVED - Background images now load correctly (844KB with Unsplash photos)
 
 <!-- 最終狀態：✅ 已解決 - 背景圖片現在正確載入（包含 Unsplash 照片的 844KB） -->
+
+---
+
+## UPDATE 2 (2026-03-16 Session 4): Investigation Continues - Solution Incomplete
+
+<!-- 更新 2（2026-03-16 Session 4）：調查持續 - 解決方案不完整 -->
+
+### Additional Testing Revealed the Fix is Incomplete
+
+<!-- 額外測試揭示修復不完整 -->
+
+After implementing the environment cleanup solution, additional testing in the actual service environment revealed:
+
+<!-- 在實際服務環境中實施環境清理解決方案後，額外測試顯示： -->
+
+**Test Results:**
+
+| Test Method | NODE_ENV | Screenshot Size | Background | Status |
+|-------------|----------|-----------------|------------|--------|
+| Standalone script | (unset) | 844KB | ✅ Loaded | SUCCESS |
+| Service with env cleanup | (unset during launch) | 97KB | ❌ Missing | FAILED |
+| Service with `env: {}` param | (empty env) | 97KB | ❌ Missing | FAILED |
+| <!-- 測試方法 --> | <!-- NODE_ENV --> | <!-- 截圖大小 --> | <!-- 背景 --> | <!-- 狀態 --> |
+| <!-- 獨立腳本 --> | <!-- (未設定) --> | <!-- 844KB --> | <!-- ✅ 已載入 --> | <!-- 成功 --> |
+| <!-- 服務 + 環境清理 --> | <!-- (啟動時未設定) --> | <!-- 97KB --> | <!-- ❌ 缺失 --> | <!-- 失敗 --> |
+| <!-- 服務 + env: {} --> | <!-- (空環境) --> | <!-- 97KB --> | <!-- ❌ 缺失 --> | <!-- 失敗 --> |
+
+**Key Finding**: Environment cleanup DOES execute (confirmed via debug logs), but background images STILL don't load in service context.
+
+<!-- 關鍵發現：環境清理確實執行了（透過 debug 日誌確認），但背景圖片在服務環境中仍然無法載入。 -->
+
+**Debug Evidence:**
+```
+[BrowserExporter] 🔍 NODE_ENV before clean: development
+[BrowserExporter] ✅ NODE_ENV after clean: (unset)
+[BrowserExporter] Navigating to http://localhost:13030/1
+...
+[BrowserExporter] Export complete: .../aislidev-demo-1773641433084.pptx (1048544 bytes)
+```
+
+PPTX file image-1-1.png: **97KB** (white background) ❌
+
+### What We Tried (Session 4 Additional Attempts)
+
+<!-- 我們嘗試的方法（Session 4 額外嘗試） -->
+
+1. ✅ **Delete `process.env.NODE_ENV` before launch** - Executed but didn't fix
+2. ✅ **Pass `env: {}` to `chromium.launch()`** - Executed but didn't fix
+3. ✅ **Add debug logging** - Confirmed environment cleanup runs
+4. ✅ **Test on same Slidev port** - Standalone works (844KB), service fails (97KB)
+
+### Root Cause Still Unknown
+
+<!-- 根本原因仍未知 -->
+
+The problem is **NOT** simply `NODE_ENV` pollution. Even with confirmed environment cleanup:
+
+- ✅ Environment IS cleaned (debug logs prove it)
+- ✅ Chromium launches with clean/empty environment
+- ✅ Same port, same configuration, same wait times
+- ❌ Background images still don't load in service context
+
+**Hypothesis**: There may be a fundamental difference in how Playwright behaves when running:
+- **Standalone Node process** (works) vs
+- **Long-running Express service process** (fails)
+
+<!-- 假設：Playwright 在不同執行方式下可能有根本性差異： -->
+<!-- - 獨立 Node 程序（成功）vs -->
+<!-- - 長期運行的 Express 服務程序（失敗） -->
+
+Possible causes under investigation:
+1. Global state pollution in long-running process
+2. Playwright internal caching/initialization differences
+3. Network stack differences (service has other HTTP connections active)
+4. Browser process spawning differences from service vs standalone
+5. Resource limitations or OS-level constraints on service processes
+
+<!-- 正在調查的可能原因：
+1. 長期運行程序中的全域狀態污染
+2. Playwright 內部快取/初始化差異
+3. 網路堆疊差異（服務有其他活動的 HTTP 連接）
+4. 從服務啟動瀏覽器程序與獨立啟動的差異
+5. 服務程序的資源限制或 OS 級約束
+-->
+
+### Current Status
+
+<!-- 目前狀態 -->
+
+**Status**: 🔴 PARTIALLY SOLVED - Environment cleanup works in isolation but not in service
+
+<!-- 狀態：🔴 部分解決 - 環境清理在隔離環境中有效，但在服務中無效 -->
+
+**Deliverables**:
+- ✅ Complete investigation documented
+- ✅ Environment cleanup code implemented (verifiably executes)
+- ✅ Test scripts created (`test-env-fix.mjs`, `test-service-port.mjs`)
+- ❌ Background images still missing in actual service PPTX exports
+
+<!-- 交付物：
+- ✅ 完整調查已記錄
+- ✅ 環境清理程式碼已實施（可驗證執行）
+- ✅ 測試腳本已建立
+- ❌ 實際服務 PPTX 匯出中背景圖片仍缺失
+-->
+
+**Next Steps**:
+1. Deep investigation into Playwright service vs standalone behavior differences
+2. Consider alternative approaches:
+   - Spawn independent Node process per export (isolate from service)
+   - Use different browser automation library (Puppeteer)
+   - Pre-render slides server-side before screenshot
+   - Architecture change: Separate screenshot service from main application
+
+<!-- 後續步驟：
+1. 深入調查 Playwright 服務 vs 獨立行為差異
+2. 考慮替代方法：
+   - 每次匯出產生獨立 Node 程序（與服務隔離）
+   - 使用不同的瀏覽器自動化庫（Puppeteer）
+   - 截圖前在伺服器端預渲染投影片
+   - 架構變更：將截圖服務與主應用程式分離
+-->
+
+**Files in Current State**:
+- `src/server/services/BrowserExporter.ts` - Environment cleanup code (executes but insufficient)
+- `test-env-fix.mjs` - Verification script (844KB success in standalone)
+- `test-service-port.mjs` - Service port test (844KB success in standalone)
+- `docs/adr/010-revert-child-process-screenshot-approach.md` - Complete investigation log
+
+<!-- 目前狀態的檔案：
+- src/server/services/BrowserExporter.ts - 環境清理程式碼（執行但不足夠）
+- test-env-fix.mjs - 驗證腳本（獨立環境中 844KB 成功）
+- test-service-port.mjs - 服務 port 測試（獨立環境中 844KB 成功）
+- docs/adr/010-revert-child-process-screenshot-approach.md - 完整調查日誌
+-->

@@ -51,7 +51,7 @@ const checkStatus = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `/slidev/${data.port}/`;  // 使用 proxy 避免 CORS
+      previewUrl.value = `/slidev/${data.port}/#/`;  // 使用 hash routing
       console.log(`[Preview] Preview URL set: ${previewUrl.value}`);
       status.value = "簡報已就緒";
       if (statusCheckInterval) {
@@ -85,7 +85,7 @@ const startPresentation = async () => {
     
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `/slidev/${data.port}/?embedded=true`;  // 使用 proxy 避免 CORS
+      previewUrl.value = `/slidev/${data.port}/#/`;  // 使用 hash routing
       status.value = "簡報已就緒";
     }
   } catch (error) {

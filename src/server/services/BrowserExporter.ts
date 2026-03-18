@@ -1,4 +1,4 @@
-import { chromium, Browser, Page } from "playwright-chromium";
+import { chromium, Browser, Page } from "playwright";
 import path from "path";
 import { promises as fs } from "fs";
 

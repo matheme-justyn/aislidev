@@ -5,6 +5,76 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-03-18
+
+### Summary
+
+**PPTX Export Flow Fixes & Documentation Cleanup**: Fixed PPTX export URL routing, auto-start behavior, and frontend download flow. Contributed by @tony140407 in PR #2. Also reorganized test scripts and documentation.
+
+### Fixed
+
+- **PPTX Export URL Routing** (PR #2 by @tony140407)
+  - Fixed BrowserExporter screenshot URLs to include Slidev's `--base /slidev/{port}/` path
+  - Before: `http://localhost:{port}/1` → captured Vite error page
+  - After: `http://localhost:{port}/slidev/{port}/1` → captures actual slides
+  - Resolves: Exported PPTX showing error pages instead of slides
+  - See: [ADR-011](./docs/adr/011-fix-pptx-export-flow.md)
+- **PPTX Export Auto-Start** (PR #2 by @tony140407)
+  - Export endpoint now auto-starts Slidev if not running
+  - Before: Returned HTTP 400 "Presentation not running" error
+  - After: Automatically starts Slidev and proceeds with export
+  - UX improvement: Users don't need to manually open preview first
+- **PPTX Download Flow** (PR #2 by @tony140407)
+  - Fixed frontend to correctly handle two-step download process
+  - Before: Tried to download POST response as blob (incorrect protocol)
+  - After: Parse JSON response → fetch downloadUrl → download PPTX
+  - Removed unnecessary `Content-Type: application/json` header from empty POST body
+
+### Changed
+
+- **Test Scripts Organization**
+  - Moved `test-*.mjs` scripts from root to `scripts/tests/` directory
+  - Added `scripts/tests/README.md` with test documentation
+  - Added `test-theme-comparison.mjs` for Slidev theme testing
+  - Added `test-outputs/` to `.gitignore`
+- **Documentation Structure**
+  - Moved `ARCHIVE_v1_design.md` to `docs/archive/v1-design.md`
+  - Root directory now cleaner with only essential documentation
+
+### Documentation
+
+- **ADR-011**: Fix PPTX Export Flow with Correct URLs and Auto-Start
+  - Documents PR #2 contributions and fixes
+  - Details three issues fixed: URL routing, auto-start, download flow
+  - Acknowledges @tony140407's contribution
+  - References: [ADR-011](./docs/adr/011-fix-pptx-export-flow.md)
+- **Investigation Report**: PPTX Background Loading Issue
+  - Comprehensive 4-session debugging timeline
+  - Documents 20+ attempted solutions
+  - Root cause analysis: Playwright execution context
+  - Location: `docs/investigation/pptx-background-loading-issue.md`
+
+### Contributors
+
+Special thanks to **@tony140407** for PR #2:
+- Identified all three PPTX export issues independently
+- Provided complete, well-structured PR with clear descriptions
+- Followed Conventional Commits format
+- Included comprehensive testing instructions
+
+This contribution significantly improved the PPTX export feature!
+
+### Known Issues
+
+⚠️ **PPTX Background Images Still Show White** (ongoing investigation)
+- PR #2 fixed URL routing and UX, but background loading issue remains
+- Root cause: Playwright in Express service process cannot load external CSS `background-image`
+- Standalone test scripts work (844KB), service fails (97KB)
+- Solution: Requires architectural change (separate worker process or AI-generated images)
+- See: [ADR-010](./docs/adr/010-revert-child-process-screenshot-approach.md)
+
+---
+
 ## [0.3.1] - 2026-03-13
 
 ### Summary

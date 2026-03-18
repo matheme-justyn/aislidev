@@ -1,6 +1,6 @@
 {
   "name": "aislidev",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "AI-powered Slidev presentation platform",
   "type": "module",
   "private": true,

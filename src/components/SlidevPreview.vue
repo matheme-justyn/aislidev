@@ -51,7 +51,7 @@ const checkStatus = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `http://localhost:${data.port}/#/`;  // 直接訪問 Slidev 實例，不通過代理
+      previewUrl.value = `/slidev/${data.port}/`;  // 使用 proxy 避免 CORS
       console.log(`[Preview] Preview URL set: ${previewUrl.value}`);
       status.value = "簡報已就緒";
       if (statusCheckInterval) {

@@ -10,19 +10,14 @@
         >
           📁 Open
         </n-button>
-        <n-dropdown
-          trigger="click"
-          :options="themeOptions"
-          @select="switchTheme"
+        <n-button
+          size="small"
+          type="tertiary"
+          @click="showTemplateBrowser = true"
+          class="toolbar-btn"
         >
-          <n-button
-            size="small"
-            type="tertiary"
-            class="toolbar-btn"
-          >
-            🎨 Theme
-          </n-button>
-        </n-dropdown>
+          🎨 Template
+        </n-button>
         <n-button
           size="small"
           :type="saveStatus === 'saving' ? 'primary' : 'tertiary'"
@@ -85,6 +80,16 @@
       <FileBrowser type="presentations" @select="onPresentationSelect" />
     </n-modal>
 
+    <!-- Template Browser Modal -->
+    <n-modal
+      v-model:show="showTemplateBrowser"
+      preset="card"
+      title="Select Template"
+      style="width: 500px"
+      :mask-closable="true"
+    >
+      <FileBrowser type="templates" @select="onTemplateSelect" />
+    </n-modal>
 
     <!-- Settings Modal -->
     <n-modal
@@ -121,7 +126,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from "vue";
-import { NButton, NModal, NInputNumber, NDropdown, useMessage } from "naive-ui";
+import { NButton, NModal, NInputNumber, useMessage } from "naive-ui";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import CodeMirrorEditor from "./CodeMirrorEditor.vue";
@@ -139,21 +144,13 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
-let message: ReturnType<typeof useMessage>;
+const message = useMessage();
 
 const showFileExplorer = ref(false);
+const showTemplateBrowser = ref(false);
 const showSettings = ref(false);
 const previewRef = ref();
 const localContent = ref(props.content);
-
-// Available themes
-const themeOptions = [
-  { label: "Default", key: "default" },
-  { label: "Seriph", key: "seriph" },
-  { label: "Guting Lightweight ⚡", key: "guting-lightweight" },
-  { label: "Guting Standard ⭐ (Recommended)", key: "guting-standard" },
-  { label: "Guting Classic", key: "guting-classic" },
-];
 
 // Auto-save state
 const autoSaveInterval = ref(3); // minutes
@@ -190,21 +187,21 @@ const exportButtonText = computed(() => {
 const onPresentationSelect = async (filename: string) => {
   try {
     const response = await fetch(`/api/files/presentations/${filename}`);
-    
+
     if (!response.ok) {
       throw new Error('Failed to load presentation');
     }
-    
+
     const data = await response.json();
-    
+
     // Load the presentation content
     localContent.value = data.content;
     emit('update:content', data.content);
     message.success(`Presentation opened: ${filename}`);
-    
+
     // Close modal
     showFileExplorer.value = false;
-    
+
     // Auto-reload preview
     setTimeout(() => {
       previewRef.value?.reload();
@@ -215,41 +212,40 @@ const onPresentationSelect = async (filename: string) => {
   }
 };
 
-// Switch theme in frontmatter
-const switchTheme = (themeKey: string) => {
-  const content = localContent.value;
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---/;
-  const match = content.match(frontmatterRegex);
-  
-  if (!match) {
-    message.error('No frontmatter found in current file');
-    return;
+// Select template from server
+const onTemplateSelect = async (filename: string) => {
+  try {
+    const response = await fetch(`/api/files/templates/${filename}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to load template');
+    }
+
+    const data = await response.json();
+
+    // Validate Slidev format
+    const frontmatterRegex = /^---\n[\s\S]*?\n---/;
+    if (!frontmatterRegex.test(data.content)) {
+      message.error('Invalid Slidev template: Missing frontmatter');
+      return;
+    }
+
+    // Load the template content
+    localContent.value = data.content;
+    emit('update:content', data.content);
+    message.success(`Template loaded: ${filename}`);
+
+    // Close modal
+    showTemplateBrowser.value = false;
+
+    // Auto-reload preview
+    setTimeout(() => {
+      previewRef.value?.reload();
+    }, 500);
+  } catch (error) {
+    console.error('Failed to load template:', error);
+    message.error('Failed to load template');
   }
-  
-  const frontmatter = match[1];
-  const themeLineRegex = /^theme:\s*.*/m;
-  
-  let newFrontmatter: string;
-  if (themeLineRegex.test(frontmatter)) {
-    // Replace existing theme line
-    newFrontmatter = frontmatter.replace(themeLineRegex, `theme: ${themeKey}`);
-  } else {
-    // Add theme line after first line (usually 'title:')
-    const lines = frontmatter.split('\n');
-    lines.splice(1, 0, `theme: ${themeKey}`);
-    newFrontmatter = lines.join('\n');
-  }
-  
-  const newContent = content.replace(frontmatterRegex, `---\n${newFrontmatter}\n---`);
-  localContent.value = newContent;
-  emit('update:content', newContent);
-  
-  message.success(`Theme switched to: ${themeKey}`);
-  
-  // Auto-reload preview after a short delay
-  setTimeout(() => {
-    previewRef.value?.reload();
-  }, 500);
 };
 
 const onContentChange = (newContent: string) => {
@@ -261,12 +257,9 @@ const onContentChange = (newContent: string) => {
     clearTimeout(saveTimeout);
   }
 
-  console.log(`[AutoSave] Content changed, scheduling auto-save in ${autoSaveInterval.value} minutes`);
-
   // Schedule auto-save
   saveTimeout = setTimeout(
     async () => {
-      console.log('[AutoSave] Timer triggered, performing auto-save...');
       await performSave();
     },
     autoSaveInterval.value * 60 * 1000,
@@ -279,12 +272,8 @@ const onContentChange = (newContent: string) => {
 };
 
 const performSave = async () => {
-  if (!props.presentationId) {
-    console.log('[Save] No presentation ID, skipping save');
-    return;
-  }
+  if (!props.presentationId) return;
 
-  console.log(`[Save] Status: ${saveStatus.value} -> saving`);
   saveStatus.value = "saving";
 
   try {
@@ -295,7 +284,6 @@ const performSave = async () => {
     });
 
     if (response.ok) {
-      console.log('[Save] Success! Status: saving -> saved');
       saveStatus.value = "saved";
 
       // Wait for Slidev to detect file change, then reload iframe
@@ -306,7 +294,6 @@ const performSave = async () => {
       // Reset to idle after 2 seconds
       setTimeout(() => {
         if (saveStatus.value === "saved") {
-          console.log('[Save] Status: saved -> idle');
           saveStatus.value = "idle";
         }
       }, 2000);
@@ -314,7 +301,7 @@ const performSave = async () => {
       throw new Error("Save failed");
     }
   } catch (error) {
-    console.error("[Save] Failed to save content:", error);
+    console.error("Failed to save content:", error);
     message.error("Failed to save");
     saveStatus.value = "idle";
   }
@@ -341,31 +328,25 @@ const exportPPTX = async () => {
   message.info("Exporting to PPTX...");
 
   try {
-    // Step 1: Trigger export
-    const exportResponse = await fetch(`/api/presentations/${props.presentationId}/export`, {
+    const response = await fetch(`/api/presentations/${props.presentationId}/export`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
     });
 
-    if (!exportResponse.ok) {
-      throw new Error("Export failed");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Export failed");
     }
 
-    const exportData = await exportResponse.json();
-    
-    if (!exportData.success || !exportData.downloadUrl) {
-      throw new Error("Export response missing download URL");
-    }
+    // Server returns JSON with downloadUrl
+    const data = await response.json();
 
-    // Step 2: Download the exported file
-    const downloadResponse = await fetch(exportData.downloadUrl);
-    
-    if (!downloadResponse.ok) {
+    // Download the actual PPTX file
+    const fileResponse = await fetch(data.downloadUrl);
+    if (!fileResponse.ok) {
       throw new Error("Failed to download exported file");
     }
 
-    const blob = await downloadResponse.blob();
+    const blob = await fileResponse.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -409,16 +390,11 @@ const startAutoSaveTimer = () => {
     clearInterval(autoSaveTimer);
   }
 
-  console.log(`[AutoSave] Starting periodic auto-save timer (every ${autoSaveInterval.value} minutes)`);
-
   // Set up periodic auto-save
   autoSaveTimer = setInterval(
     async () => {
-      console.log('[AutoSave] Periodic timer triggered');
       if (saveStatus.value !== "saving") {
         await performSave();
-      } else {
-        console.log('[AutoSave] Already saving, skipping periodic save');
       }
     },
     autoSaveInterval.value * 60 * 1000,
@@ -437,13 +413,9 @@ watch(
 
 // Load settings on mount
 onMounted(() => {
-  message = useMessage();  // Initialize message after provider is ready
   const saved = localStorage.getItem("aislidev-autosave-interval");
   if (saved) {
     autoSaveInterval.value = parseInt(saved);
-    console.log(`[AutoSave] Loaded saved interval from localStorage: ${autoSaveInterval.value} minutes`);
-  } else {
-    console.log(`[AutoSave] Using default interval: ${autoSaveInterval.value} minutes`);
   }
   startAutoSaveTimer();
 });

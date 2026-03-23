@@ -16,7 +16,15 @@
           @click="showTemplateBrowser = true"
           class="toolbar-btn"
         >
-          🎨 Template
+          📄 Template
+        </n-button>
+        <n-button
+          size="small"
+          type="tertiary"
+          @click="showThemeSwitcher = true"
+          class="toolbar-btn"
+        >
+          🎨 Theme
         </n-button>
         <n-button
           size="small"
@@ -153,6 +161,41 @@
         </div>
       </template>
     </n-modal>
+
+    <!-- Theme Switcher Modal -->
+    <n-modal
+      v-model:show="showThemeSwitcher"
+      preset="card"
+      title="Switch Theme"
+      style="width: 600px"
+      :mask-closable="true"
+    >
+      <div class="theme-switcher-content">
+        <p class="theme-hint">
+          Choose a theme to change the visual style. Your content will remain unchanged.
+        </p>
+        <div class="theme-grid">
+          <div
+            v-for="theme in availableThemes"
+            :key="theme.name"
+            class="theme-card"
+            :class="{ active: currentTheme === theme.name }"
+            @click="selectTheme(theme.name)"
+          >
+            <div class="theme-card-header">
+              <h3>{{ theme.display }}</h3>
+              <span v-if="currentTheme === theme.name" class="active-badge">✓</span>
+            </div>
+            <p class="theme-description">{{ theme.description }}</p>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button @click="showThemeSwitcher = false">Close</n-button>
+        </div>
+      </template>
+    </n-modal>
   </div>
 </template>
 
@@ -164,6 +207,7 @@ import "splitpanes/dist/splitpanes.css";
 import CodeMirrorEditor from "./CodeMirrorEditor.vue";
 import SlidevPreview from "./SlidevPreview.vue";
 import FileBrowser from "./FileBrowser.vue";
+import { ThemeSwitcher } from "../client/services/ThemeSwitcher";
 
 interface Props {
   presentationId: string;
@@ -181,6 +225,7 @@ const message = useMessage();
 const showFileExplorer = ref(false);
 const showTemplateBrowser = ref(false);
 const showSettings = ref(false);
+const showThemeSwitcher = ref(false);
 const previewRef = ref();
 const localContent = ref(props.content);
 
@@ -194,6 +239,10 @@ let autoSaveTimer: ReturnType<typeof setInterval> | null = null;
 const exportStatus = ref<"idle" | "exporting" | "exported">("idle");
 const showExportOptions = ref(false);
 const separateVClicks = ref(false);
+
+// Theme Switcher state
+const availableThemes = ThemeSwitcher.getAvailableThemes();
+const currentTheme = computed(() => ThemeSwitcher.getCurrentTheme(localContent.value));
 
 const saveButtonText = computed(() => {
   switch (saveStatus.value) {
@@ -282,6 +331,34 @@ const onTemplateSelect = async (filename: string) => {
   } catch (error) {
     console.error('Failed to load template:', error);
     message.error('Failed to load template');
+  }
+};
+
+// Select theme and apply to current content
+const selectTheme = async (themeName: string) => {
+  try {
+    // Apply theme to current markdown (only changes theme in frontmatter)
+    const newContent = ThemeSwitcher.applyTheme(localContent.value, themeName);
+    
+    // Update local content
+    localContent.value = newContent;
+    emit('update:content', newContent);
+    
+    // Save immediately
+    await performSave();
+    
+    message.success(`Theme changed to: ${themeName.split('/').pop()}`);
+    
+    // Close modal
+    showThemeSwitcher.value = false;
+    
+    // Wait for Slidev to recompile with new theme
+    setTimeout(() => {
+      previewRef.value?.reload();
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to switch theme:', error);
+    message.error('Failed to switch theme');
   }
 };
 
@@ -576,5 +653,72 @@ onUnmounted(() => {
   margin: 0;
   font-size: 14px;
   color: #555;
+}
+
+/* Theme Switcher Modal */
+.theme-switcher-content {
+  padding: 12px 0;
+}
+
+.theme-hint {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.theme-card {
+  padding: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9f9f9;
+}
+
+.theme-card:hover {
+  border-color: #18a058;
+  background: #f0f9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-card.active {
+  border-color: #18a058;
+  background: #e6f4ea;
+  box-shadow: 0 2px 8px rgba(24, 160, 88, 0.2);
+}
+
+.theme-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.theme-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.active-badge {
+  color: #18a058;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.theme-description {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
 }
 </style>

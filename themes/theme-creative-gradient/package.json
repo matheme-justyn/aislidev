@@ -1,0 +1,20 @@
+{
+  "name": "@aislidev/theme-creative-gradient",
+  "version": "0.1.0",
+  "description": "Creative gradient theme for Slidev",
+  "keywords": [
+    "slidev-theme",
+    "slidev"
+  ],
+  "slidev": {
+    "colorSchema": "light",
+    "highlighter": "shiki",
+    "defaults": {
+      "fonts": {
+        "sans": "Poppins, Montserrat, system-ui, -apple-system, sans-serif",
+        "serif": "Georgia, Cambria, Times New Roman, Times, serif",
+        "mono": "Fira Code, Cascadia Code, Menlo, Monaco, Courier New, monospace"
+      }
+    }
+  }
+}

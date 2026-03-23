@@ -1,0 +1,20 @@
+{
+  "name": "@aislidev/theme-minimal-clean",
+  "version": "0.1.0",
+  "description": "Minimal clean theme for Slidev",
+  "keywords": [
+    "slidev-theme",
+    "slidev"
+  ],
+  "slidev": {
+    "colorSchema": "light",
+    "highlighter": "shiki",
+    "defaults": {
+      "fonts": {
+        "sans": "SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
+        "serif": "Georgia, Cambria, Times New Roman, Times, serif",
+        "mono": "SF Mono, Monaco, Menlo, Courier New, monospace"
+      }
+    }
+  }
+}

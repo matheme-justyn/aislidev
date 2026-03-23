@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-03-23
+
+### Added
+
+- **Theme Switcher System**
+  - Created 3 custom Slidev themes as separate packages:
+    - `theme-professional-dark` - Professional dark theme with blue-gray gradients
+    - `theme-creative-gradient` - Creative gradient theme with vibrant colors
+    - `theme-minimal-clean` - Minimal clean theme with large typography
+  - Implemented `ThemeSwitcher` service for content-preserving theme changes:
+    - `applyTheme()` - Modifies only the `theme:` field in frontmatter
+    - `getCurrentTheme()` - Extracts current theme from markdown
+    - `getAvailableThemes()` - Lists all available themes (default, seriph, 3 custom)
+  - Added Theme Switcher UI in EditorLayout:
+    - "🎨 Theme" button in toolbar
+    - Theme selection modal with grid layout
+    - Active theme indicator (✓ badge)
+    - Success message on theme change
+  - Themes use relative paths from presentation directory: `../../themes/theme-xxx`
+  - **Content and style separation**: Changing themes preserves all slide content
+
+### Changed
+
+- **Template vs Theme Clarification**
+  - Template Browser remains for creating new presentations from templates
+  - Theme Switcher is for changing visual style of existing presentations
+  - Templates replace entire content, themes only change styling
+
 ## [0.4.0] - 2026-03-23
 
 ### Added

@@ -13,14 +13,6 @@
         <n-button
           size="small"
           type="tertiary"
-          @click="showTemplateBrowser = true"
-          class="toolbar-btn"
-        >
-          📄 Template
-        </n-button>
-        <n-button
-          size="small"
-          type="tertiary"
           @click="showThemeSwitcher = true"
           class="toolbar-btn"
         >
@@ -88,16 +80,6 @@
       <FileBrowser type="presentations" @select="onPresentationSelect" />
     </n-modal>
 
-    <!-- Template Browser Modal -->
-    <n-modal
-      v-model:show="showTemplateBrowser"
-      preset="card"
-      title="Select Template"
-      style="width: 500px"
-      :mask-closable="true"
-    >
-      <FileBrowser type="templates" @select="onTemplateSelect" />
-    </n-modal>
 
     <!-- Settings Modal -->
     <n-modal
@@ -223,7 +205,6 @@ const emit = defineEmits<Emits>();
 const message = useMessage();
 
 const showFileExplorer = ref(false);
-const showTemplateBrowser = ref(false);
 const showSettings = ref(false);
 const showThemeSwitcher = ref(false);
 const previewRef = ref();
@@ -296,43 +277,6 @@ const onPresentationSelect = async (filename: string) => {
 };
 
 // Select template from server
-const onTemplateSelect = async (filename: string) => {
-  try {
-    const response = await fetch(`/api/files/templates/${filename}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to load template');
-    }
-
-    const data = await response.json();
-
-    // Validate Slidev format
-    const frontmatterRegex = /^---\n[\s\S]*?\n---/;
-    if (!frontmatterRegex.test(data.content)) {
-      message.error('Invalid Slidev template: Missing frontmatter');
-      return;
-    }
-
-    // Load the template content
-    localContent.value = data.content;
-    emit('update:content', data.content);
-    message.success(`Template loaded: ${filename}`);
-
-    // Close modal
-    showTemplateBrowser.value = false;
-
-    // Save immediately to persist changes
-    await performSave();
-
-    // Wait for Slidev to detect file change and recompile
-    setTimeout(() => {
-      previewRef.value?.reload();
-    }, 2000);  // Increased timeout to allow Slidev to recompile
-  } catch (error) {
-    console.error('Failed to load template:', error);
-    message.error('Failed to load template');
-  }
-};
 
 // Select theme and apply to current content
 const selectTheme = async (themeName: string) => {

@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2026-03-23
+
+### Fixed
+
+- **PPTX Export v-clicks Support** ([#issue](https://github.com/yourusername/aislidev/issues/xxx))
+  - Fixed v-click animations not appearing in exported PPTX files
+  - Use Slidev's internal API (`window.__slidev__.nav.clicks`, `nav.clicksTotal`) for accurate click state tracking
+  - Added safety check to prevent over-clicking beyond total clicks
+  - Prevents duplicate/misplaced slides in export (previous bug: 13 slides → 13+ pages with repeated content)
+  - Verified with aislidev-demo (13 slides, all v-clicks revealed) and bg-test-2 (3 slides, no regression)
+
+### Changed
+
+- **PPTX Export Click Detection**
+  - Replaced unreliable opacity-based detection with Slidev API
+  - More accurate click advancement using Vue reactivity state
+  - Improved export logging to show click progress per slide
+
+## [0.3.4] - 2026-03-23
+
+### Fixed
+
+- **PPTX Export Background Images and Dark Theme**
+  - Fixed background images not loading in exported PPTX (required `layout: cover`)
+  - Fixed dark theme screenshots appearing as white backgrounds
+  - Added `prefers-color-scheme: dark` media emulation in Playwright
+  - Updated README with "Background Images Requirements" section
+
+### Documentation
+
+- **README Updates**
+  - Added comprehensive PPTX export documentation
+  - Documented browser requirements (full Chromium binary via `channel: 'chromium'`)
+  - Added background image usage guide with `layout: cover` requirement
+  - Added troubleshooting section for common export issues
+
+
 ## [0.3.3] - 2026-03-23
 
 ### Summary

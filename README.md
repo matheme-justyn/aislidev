@@ -174,11 +174,38 @@ npx playwright install chromium
 
 ### Usage
 
+#### Basic Export
+
 1. Open your presentation in AISlidev
 2. Click the "Export PPTX" button in the navigation bar
 3. Wait for the export to complete (~10 seconds per slide)
 4. Download the generated `.pptx` file
 
+#### Background Images Requirements
+
+**IMPORTANT**: To use background images in your slides, you **must** specify `layout: cover` (or other layout that supports backgrounds) in the slide's frontmatter.
+
+**Correct usage:**
+
+```markdown
+---
+layout: cover
+background: https://images.unsplash.com/photo-xxx
+---
+
+# Your Slide Title
+
+Content here
+```
+
+**Without `layout: cover`, background images will NOT be applied** (slides will use the default theme background).
+
+**Supported layouts with background:**
+- `cover` - Full-screen background with centered content
+- `intro` - Introduction slide with background
+- `image` - Image-focused layout
+
+See [Slidev Layouts Documentation](https://sli.dev/builtin/layouts.html) for more layout options.
 ### Troubleshooting
 
 **White backgrounds in exported PPTX:**

@@ -47,14 +47,16 @@ Each ADR follows this structure:
 | [003](./003-opencode-first-architecture.md)  | OpenCode-First AI Architecture            | Accepted    |
 | [004](./004-slidev-vite-dev-mode-fix.md)     | Slidev Vite Dev Mode Constants Fix        | Accepted    |
 | [005](./005-websocket-proxy-for-slidev.md)   | WebSocket-Enabled Proxy for Slidev        | Accepted    |
-| [012](./012-fix-slidev-preview-routing-and-vue-plugin.md) | Fix Slidev Preview Routing and Vue Plugin | Accepted |
 | [006](./006-puppeteer-based-pptx-export.md)  | Puppeteer-Based PPTX Export               | Superseded  |
 | [007](./007-remove-slidev-base-parameter.md) | Remove Slidev Base URL Parameter          | Accepted    |
 | [008](./008-http-proxy-middleware-v3-fix.md) | http-proxy-middleware v3 Response Fix     | Accepted    |
 | [009](./009-pptx-export-via-data-directory.md) | PPTX Export via Data Directory          | Accepted    |
 | [010](./010-revert-child-process-screenshot-approach.md) | Revert child_process to Inline Screenshots | Accepted |
 | [011](./011-fix-pptx-export-flow.md) | Fix PPTX Export Flow with Correct URLs and Auto-Start | Accepted |
+| [012](./012-fix-slidev-preview-routing-and-vue-plugin.md) | Fix Slidev Preview Routing and Vue Plugin | Accepted |
 | [013](./013-migrate-to-docker-colima.md) | Migration from Podman to Docker + Colima | Accepted |
+| [014](./014-slidev-direct-access-and-playwright-fix.md) | Slidev Direct Access & Playwright Export Fix | Accepted |
+| [015](./015-pptx-background-image-rendering-fix.md) | PPTX Export Background Image Rendering Fix | Accepted |
 | <!-- ADR                                     | 標題                                      | 狀態 -->    |
 | <!-- 001                                     | 版本控制和發布策略                        | 已接受 -->  |
 | <!-- 002                                     | 輕量容器化架構                            | 已接受 -->  |

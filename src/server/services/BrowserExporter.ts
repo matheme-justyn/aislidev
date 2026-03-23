@@ -23,6 +23,7 @@ import { promises as fs } from "fs";
  */
 export class BrowserExporter {
   private browser: Browser | null = null;
+  private originalNodeEnv: string | undefined;
 
   /**
    * Initialize browser instance (reusable across exports)
@@ -30,21 +31,35 @@ export class BrowserExporter {
   async initialize(): Promise<void> {
     if (this.browser) return;
 
-    this.browser = await chromium.launch({
-      headless: true,
-      channel: "chromium",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
+    // CRITICAL FIX: NODE_ENV=development breaks Playwright's external CSS background image loading
+    // Save and temporarily unset NODE_ENV before launching browser
+    // See: docs/adr/010-revert-child-process-screenshot-approach.md for full investigation
+    this.originalNodeEnv = process.env.NODE_ENV;
+    delete process.env.NODE_ENV;
+
+    try {
+      this.browser = await chromium.launch({
+        headless: true,
+        channel: "chromium",
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+        ],
+      });
+    } finally {
+      // Restore NODE_ENV after browser launch
+      if (this.originalNodeEnv !== undefined) {
+        process.env.NODE_ENV = this.originalNodeEnv;
+      }
+    }
   }
 
   /**
    * Export presentation to PPTX using screenshot-based generation
    *
    * @param port - Slidev instance port
+   * @param slidesPath - Path to slides.md file for counting slides
    * @param outputPath - Full path where PPTX should be saved
    * @param timeout - Maximum wait time in milliseconds (default: 120000)
    * @returns Path to exported PPTX file
@@ -62,24 +77,31 @@ export class BrowserExporter {
     const tempDir = path.join(path.dirname(outputPath), ".temp-screenshots");
 
     try {
-      page = await this.browser!.newPage();
+      // Create page with dark color scheme to match Slidev's default theme
+      page = await this.browser!.newPage({
+        colorScheme: 'dark'  // Force dark mode for Slidev theme
+      });
 
       // Set viewport to standard presentation size (16:9 aspect ratio)
       await page.setViewportSize({ width: 1920, height: 1080 });
       page.setDefaultTimeout(timeout);
 
-      // Navigate to Slidev presentation (Slidev uses --base /slidev/:port/)
-      const slideUrl = `http://localhost:${port}/slidev/${port}/1`;
+      // Navigate to Slidev presentation (direct access, no proxy path)
+      const slideUrl = `http://localhost:${port}/1`;
       console.log(`[BrowserExporter] Navigating to ${slideUrl}`);
-      await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 30000 });
+      await this.gotoWithCleanEnv(page, slideUrl, { waitUntil: "networkidle", timeout: 30000 });
 
-      // Wait for presentation to be ready
+      // Wait for Vue app and theme CSS to load
+      await page.waitForSelector('#app', { state: 'attached' });
+      await page.waitForSelector('.slidev-layout', { state: 'visible' });
       await page.waitForTimeout(2000);
 
-      // Detect total slide count
-      const slideCount = await this.detectSlideCount(page);
-      console.log(`[BrowserExporter] Detected ${slideCount} slides`);
-
+      // Get slide count from Slidev's API (most reliable)
+      const slideCount = await page.evaluate(() => {
+        const slidev = (window as any).__slidev__;
+        return slidev?.nav?.total || 0;
+      });
+      console.log(`[BrowserExporter] Detected ${slideCount} slides from Slidev API`);
       if (slideCount === 0) {
         throw new Error("No slides detected in presentation");
       }
@@ -87,15 +109,15 @@ export class BrowserExporter {
       // Create temp directory for screenshots
       await fs.mkdir(tempDir, { recursive: true });
 
-      // Screenshot each slide
+      // Screenshot each slide by navigating to each URL directly
+      // This ensures proper theme CSS and background image loading
       const screenshotPaths: string[] = [];
       for (let i = 1; i <= slideCount; i++) {
         const screenshotPath = path.join(tempDir, `slide-${i}.png`);
-        await this.screenshotSlide(page, i, screenshotPath, port);
+        await this.screenshotSlideByUrl(page, port, i, screenshotPath, timeout);
         screenshotPaths.push(screenshotPath);
         console.log(`[BrowserExporter] Captured slide ${i}/${slideCount}`);
       }
-
       // Generate PPTX from screenshots
       console.log(
         `[BrowserExporter] Generating PPTX from ${screenshotPaths.length} screenshots`,
@@ -132,78 +154,144 @@ export class BrowserExporter {
     }
   }
 
+
   /**
-   * Detect total slide count from Slidev presentation
+   * Navigate to URL with NODE_ENV workaround
+   * CRITICAL: NODE_ENV=development breaks Playwright's CSS background-image loading
    */
-  private async detectSlideCount(page: Page): Promise<number> {
+  private async gotoWithCleanEnv(
+    page: Page,
+    url: string,
+    options?: { waitUntil?: "load" | "domcontentloaded" | "networkidle"; timeout?: number },
+  ): Promise<void> {
+    // Save and temporarily unset NODE_ENV
+    const originalNodeEnv = process.env.NODE_ENV;
+    delete process.env.NODE_ENV;
+
     try {
-      // Try to find slide indicator (e.g., "1 / 10")
-      const slideInfo = await page
-        .locator(".slidev-page-indicator, [class*=page], [class*=slide-number]")
-        .first()
-        .textContent({ timeout: 5000 })
-        .catch(() => null);
-
-      if (slideInfo) {
-        const match = slideInfo.match(/(\d+)\s*\/\s*(\d+)/);
-        if (match) {
-          return parseInt(match[2], 10);
-        }
+      await page.goto(url, options);
+    } finally {
+      // Restore NODE_ENV
+      if (originalNodeEnv !== undefined) {
+        process.env.NODE_ENV = originalNodeEnv;
       }
-
-      // Fallback: try to navigate forward until we can't anymore
-      let count = 1;
-      const maxSlides = 100; // Safety limit
-
-      for (let i = 0; i < maxSlides; i++) {
-        // Try to go to next slide
-        await page.keyboard.press("ArrowRight");
-        await page.waitForTimeout(500);
-
-        // Check if URL changed (slide number increased)
-        const url = page.url();
-        const currentSlide = parseInt(url.split("/").pop() || "1", 10);
-        if (currentSlide > count) {
-          count = currentSlide;
-        } else {
-          // No more slides
-          break;
-        }
-      }
-
-      return count;
-    } catch (error) {
-      console.warn(
-        `[BrowserExporter] Failed to detect slide count, assuming 1:`,
-        error,
-      );
-      return 1;
     }
   }
 
+
+
   /**
-   * Screenshot a specific slide
+   * Screenshot a slide by navigating to its URL
+   * Each slide gets a fresh page load to ensure proper CSS and background loading
    */
-  private async screenshotSlide(
+  private async screenshotSlideByUrl(
     page: Page,
+    port: number,
     slideNumber: number,
     outputPath: string,
-    port: number,
+    timeout: number,
   ): Promise<void> {
-    // Navigate to specific slide (Slidev uses --base /slidev/:port/)
-    const slideUrl = `http://localhost:${port}/slidev/${port}/${slideNumber}`;
-    await page.goto(slideUrl, { waitUntil: "networkidle", timeout: 10000 });
-
-    // Wait for slide to render
-    await page.waitForTimeout(1000);
-
+    const slideUrl = `http://localhost:${port}/${slideNumber}`;
+    console.log(`[BrowserExporter] Loading slide ${slideNumber}: ${slideUrl}`);
+    
+    // Navigate to slide URL with clean environment
+    await this.gotoWithCleanEnv(page, slideUrl, { 
+      waitUntil: "networkidle", 
+      timeout: timeout 
+    });
+    
+    // Wait for Vue app and theme CSS to load
+    await page.waitForSelector('#app', { state: 'attached', timeout: 10000 });
+    
+    // Wait for Slidev theme CSS to be fully applied
+    // Check for computed background color to ensure theme is loaded
+    await page.waitForFunction(() => {
+      const app = document.querySelector('#app');
+      if (!app) return false;
+      
+      const bgColor = window.getComputedStyle(app).backgroundColor;
+      // Theme is loaded when background color is not transparent/default
+      return bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== '';
+    }, { timeout: 5000 }).catch(() => {
+      console.warn('[BrowserExporter] Theme CSS timeout - proceeding anyway');
+    });
+    
+    // Additional wait for UnoCSS and animations
+    await page.waitForTimeout(2000);
+    
+    // Check if slide has background image (check multiple possible elements)
+    const bgInfo = await page.evaluate(() => {
+      // Try multiple selectors for background detection
+      const selectors = [
+        '.slidev-layout',
+        '.slidev-page',
+        '#slide-content',
+        '.cover'
+      ];
+      
+      let bgImage = 'none';
+      let foundElement = null;
+      
+      for (const selector of selectors) {
+        const element = document.querySelector(selector) as HTMLElement;
+        if (element) {
+          const bg = window.getComputedStyle(element).backgroundImage;
+          if (bg !== 'none' && bg !== '') {
+            bgImage = bg;
+            foundElement = selector;
+            break;
+          }
+        }
+      }
+      
+      const hasBackground = bgImage !== 'none' && bgImage !== '';
+      
+      return { hasBackground, bgImage, foundElement };
+    });
+    
+    console.log(`[BrowserExporter] Slide ${slideNumber} background:`, bgInfo.hasBackground ? `Yes (${bgInfo.foundElement})` : 'No');
+    
+    // Wait for background image to fully load if present
+    if (bgInfo.hasBackground) {
+      // Extract URL from background-image CSS (handles both linear-gradient and url)
+      const urlMatches = bgInfo.bgImage.match(/url\(["']?([^"')]+)["']?\)/g);
+      if (urlMatches && urlMatches.length > 0) {
+        // Get the last URL (in case of linear-gradient + url)
+        const lastUrlMatch = urlMatches[urlMatches.length - 1].match(/url\(["']?([^"')]+)["']?\)/);
+        if (lastUrlMatch && lastUrlMatch[1]) {
+          const imageUrl = lastUrlMatch[1];
+          console.log(`[BrowserExporter] Waiting for image: ${imageUrl}`);
+          
+          // Wait for the image to load by checking if it's in browser cache
+          await page.evaluate((url) => {
+            return new Promise<void>((resolve) => {
+              const img = new Image();
+              img.onload = () => resolve();
+              img.onerror = () => resolve(); // Still resolve to avoid blocking
+              img.src = url;
+              
+              // If image loads from cache, onload fires immediately
+              if (img.complete) resolve();
+            });
+          }, imageUrl);
+        }
+      }
+      
+      // Additional wait for rendering
+      await page.waitForTimeout(2000);
+    } else {
+      // No background, just wait for layout stability
+      await page.waitForTimeout(1000);
+    }
+    
     // Take screenshot
     await page.screenshot({
       path: outputPath,
       type: "png",
-      fullPage: false, // Use viewport size
+      fullPage: false,
     });
   }
+
 
   /**
    * Generate PPTX file from screenshot images

@@ -284,6 +284,46 @@ export class BrowserExporter {
       await page.waitForTimeout(1000);
     }
     
+    // Trigger all v-click animations to reveal all content
+    // Use Slidev's internal API to check click state
+    const clickInfo = await page.evaluate(() => {
+      const slidev = (window as any).__slidev__;
+      if (!slidev || !slidev.nav) return { total: 0, current: 0 };
+      
+      // Slidev tracks clicks per slide
+      // clicks: current position (0-based)
+      // clicksTotal: total number of clicks available
+      return {
+        total: slidev.nav.clicksTotal || 0,
+        current: slidev.nav.clicks || 0
+      };
+    });
+    
+    const clicksNeeded = clickInfo.total - clickInfo.current;
+    
+    if (clicksNeeded > 0) {
+      console.log(`[BrowserExporter] Slide ${slideNumber}: Revealing ${clicksNeeded} clicks (${clickInfo.current}/${clickInfo.total})`);
+      
+      // Press Space to trigger each remaining click
+      for (let i = 0; i < clicksNeeded; i++) {
+        await page.keyboard.press('Space');
+        await page.waitForTimeout(300);  // Wait for animation
+        
+        // Verify click was advanced (safety check to prevent over-clicking)
+        const currentClicks = await page.evaluate(() => {
+          return (window as any).__slidev__?.nav?.clicks || 0;
+        });
+        
+        // If we've reached the total, stop (prevents advancing to next slide)
+        if (currentClicks >= clickInfo.total) {
+          console.log(`[BrowserExporter] All clicks revealed (${currentClicks}/${clickInfo.total})`);
+          break;
+        }
+      }
+      
+      // Wait for final animations to complete
+      await page.waitForTimeout(500);
+    }
     // Take screenshot
     await page.screenshot({
       path: outputPath,

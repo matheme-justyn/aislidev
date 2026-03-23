@@ -272,10 +272,13 @@ const onTemplateSelect = async (filename: string) => {
     // Close modal
     showTemplateBrowser.value = false;
 
-    // Auto-reload preview
+    // Save immediately to persist changes
+    await performSave();
+
+    // Wait for Slidev to detect file change and recompile
     setTimeout(() => {
       previewRef.value?.reload();
-    }, 500);
+    }, 2000);  // Increased timeout to allow Slidev to recompile
   } catch (error) {
     console.error('Failed to load template:', error);
     message.error('Failed to load template');

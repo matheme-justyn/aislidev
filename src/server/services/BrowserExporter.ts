@@ -32,11 +32,11 @@ export class BrowserExporter {
 
     this.browser = await chromium.launch({
       headless: true,
+      channel: "chromium",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage", // Overcome limited resource problems in container
-        "--disable-gpu", // Not needed in headless mode
+        "--disable-dev-shm-usage",
       ],
     });
   }

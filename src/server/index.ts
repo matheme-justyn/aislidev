@@ -11,7 +11,7 @@ import path from "path";
 import { SlidevManager } from "./services/SlidevManager.js";
 import presentationsRoutes from "./routes/presentations.js";
 import filesRoutes from "./routes/files.js";
-import { createProxyMiddleware, responseInterceptor } from "http-proxy-middleware";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -139,25 +139,20 @@ let lastUsedPort: number | null = null;
 await fastify.use((req, res, next) => {
   const url = req.url || '';
   
-  // Check if this is a Vite special path request (/@fs/, /@vite/, /@id/, /@slidev/, /@server-reactive/, /__*, or slides.md__slidev_*)
-  if (url.match(/^\/@(fs|vite|id|slidev|server-reactive)/) || url.startsWith('/__') || url.match(/^\/slides\.md__slidev_/)) {
+  // Check if this is a Vite special path request for Slidev
+  // ONLY proxy if referer contains /slidev/ to avoid capturing main app's Vite resources
+  if (url.match(/^\/@(fs|vite|id|slidev|server-reactive)/) || url.includes('__slidev_') || url.match(/^\/slides\.md__slidev_/)) {
     const referer = req.headers.referer || req.headers.referrer || '';
     console.log(`[Vite Proxy] Request: ${url}, Referer: ${referer}`);
     
-    // Try to extract port from referer
+    // Only proxy if referer is from Slidev (contains /slidev/)
     const refererMatch = referer.match(/\/slidev\/(\d+)/);
-    let port: number | null = null;
     
     if (refererMatch) {
-      port = parseInt(refererMatch[1]);
+      const port = parseInt(refererMatch[1]);
       lastUsedPort = port;  // Remember this port
-      console.log(`[Vite Proxy] Port from referer: ${port}`);
-    } else if (lastUsedPort) {
-      port = lastUsedPort;
-      console.log(`[Vite Proxy] Using last port: ${port}`);
-    }
-    
-    if (port) {
+      console.log(`[Vite Proxy] Proxying to port ${port}`);
+      
       // Get or create proxy for this port
       if (!slidevProxies.has(port)) {
         const proxy = createProxyMiddleware({
@@ -170,7 +165,8 @@ await fastify.use((req, res, next) => {
       
       return slidevProxies.get(port)(req, res, next);
     } else {
-      console.log(`[Vite Proxy] No port available`);
+      // No Slidev referer - let main Vite handle it
+      console.log(`[Vite Proxy] No Slidev referer, passing to main Vite`);
     }
   }
   
@@ -191,34 +187,7 @@ await fastify.use((req, res, next) => {
         target: `http://localhost:${port}`,
         changeOrigin: true,
         ws: true, // Enable WebSocket proxying
-        pathRewrite: {
-          [`^/slidev/${port}`]: '', // 移除 /slidev/:port/ 前綴，Slidev 看到的是 /
-        },
         
-        // Enable response body modification (http-proxy-middleware v3 API)
-        selfHandleResponse: true,
-        
-        on: {
-          proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, _res) => {
-            const contentType = proxyRes.headers['content-type'] || '';
-            const reqPath = (req.url || '').replace(/^\/slidev\/\d+/, '');
-            
-            // Inject <base> tag for relative paths (e.g., __uno.css, @server-reactive/*)
-            // Absolute paths like /@fs/ will ignore <base> and be handled by Vite proxy
-            if (contentType.includes('text/html') && (reqPath === '/' || reqPath.startsWith('/?'))) {
-              let html = responseBuffer.toString('utf8');
-              
-              // Inject base tag only - don't rewrite /@fs/, /@vite/, etc.
-              // These absolute paths will be caught by Vite proxy middleware
-              html = html.replace('<head>', `<head>\n  <base href="/slidev/${port}/">`);
-              
-              return html;
-            }
-            
-            // Return other responses as-is
-            return responseBuffer;
-          }),
-        },
       });
       slidevProxies.set(port, proxy);
       
@@ -241,12 +210,10 @@ if (IS_DEV) {
   // Development mode: Use Vite dev server
   const { createServer } = await import("vite");
   const vite = await createServer({
+    // 讀取 vite.config.ts 而不是內聯配置
+    configFile: join(__dirname, "../../vite.config.ts"),
     server: { middlewareMode: true },
     appType: "spa",
-    optimizeDeps: {
-      exclude: ['@slidev/cli', '@slidev/client', '@slidev/parser', '@slidev/theme-default', '@slidev/theme-seriph'],
-      entries: ['src/main.ts'],
-    },
   });
 
   // Use vite's connect instance as middleware

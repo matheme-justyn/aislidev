@@ -18,13 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Frontend modal with Naive UI components (NCheckbox, NModal)
 
 - **Slidev Templates**
-  - Created 3 ready-to-use Slidev templates in `data/templates/`:
-    - `seriph-template.md` - Elegant presentation with Seriph theme
-    - `apple-basic-template.md` - Minimalist design inspired by Apple
-    - `minimal-template.md` - Clean, distraction-free template
-  - All templates include proper frontmatter, layouts, and v-click examples
+  - Created 3 visually distinct Slidev templates in `data/templates/`:
+    - `professional-dark-template.md` - Dark theme with custom colors, line numbers, business-focused
+    - `creative-gradient-template.md` - Vibrant gradient backgrounds, colorful styling, emoji-rich
+    - `minimal-clean-template.md` - Ultra-clean typography, whitespace-focused, distraction-free
+  - Each template has **unique visual style**: different color schemes, typography, and layouts
+  - All templates use CSS variables and scoped styles for customization
   - Templates accessible via existing template browser in UI
-
 ### Changed
 
 - **BrowserExporter API**

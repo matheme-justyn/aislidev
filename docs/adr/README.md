@@ -40,35 +40,29 @@ Each ADR follows this structure:
 
 <!-- 索引 -->
 
-| ADR                                          | Title                                     | Status      |
-| -------------------------------------------- | ----------------------------------------- | ----------- |
-| [001](./001-version-control-strategy.md)     | Version Control and Release Strategy      | Accepted    |
-| [002](./002-lightweight-containerization.md) | Lightweight Containerization Architecture | Accepted    |
-| [003](./003-opencode-first-architecture.md)  | OpenCode-First AI Architecture            | Accepted    |
-| [004](./004-slidev-vite-dev-mode-fix.md)     | Slidev Vite Dev Mode Constants Fix        | Accepted    |
-| [005](./005-websocket-proxy-for-slidev.md)   | WebSocket-Enabled Proxy for Slidev        | Accepted    |
-| [006](./006-puppeteer-based-pptx-export.md)  | Puppeteer-Based PPTX Export               | Superseded  |
-| [007](./007-remove-slidev-base-parameter.md) | Remove Slidev Base URL Parameter          | Accepted    |
-| [008](./008-http-proxy-middleware-v3-fix.md) | http-proxy-middleware v3 Response Fix     | Accepted    |
-| [009](./009-pptx-export-via-data-directory.md) | PPTX Export via Data Directory          | Accepted    |
-| [010](./010-revert-child-process-screenshot-approach.md) | Revert child_process to Inline Screenshots | Accepted |
-| [011](./011-fix-pptx-export-flow.md) | Fix PPTX Export Flow with Correct URLs and Auto-Start | Accepted |
-| [012](./012-fix-slidev-preview-routing-and-vue-plugin.md) | Fix Slidev Preview Routing and Vue Plugin | Accepted |
-| [013](./013-migrate-to-docker-colima.md) | Migration from Podman to Docker + Colima | Accepted |
-| [014](./014-slidev-direct-access-and-playwright-fix.md) | Slidev Direct Access & Playwright Export Fix | Accepted |
-| [015](./015-pptx-background-image-rendering-fix.md) | PPTX Export Background Image Rendering Fix | Accepted |
-| <!-- ADR                                     | 標題                                      | 狀態 -->    |
-| <!-- 001                                     | 版本控制和發布策略                        | 已接受 -->  |
-| <!-- 002                                     | 輕量容器化架構                            | 已接受 -->  |
-| <!-- 003                                     | OpenCode 優先的 AI 架構                   | 已接受 -->  |
-| <!-- 004                                     | Slidev Vite Dev Mode 編譯時常量修復       | 已接受 -->  |
-| <!-- 005                                     | 支援 WebSocket 的 Slidev 代理             | 已接受 -->  |
-| <!-- 006                                     | 基於 Puppeteer 的 PPTX 匯出               | 已取代 -->  |
-| <!-- 007                                     | 移除 Slidev Base URL 參數                 | 已接受 -->  |
-| <!-- 008                                     | http-proxy-middleware v3 回應攔截修復     | 已接受 -->  |
-| <!-- 009                                     | 透過 Data 目錄匯出 PPTX                   | 已接受 -->  |
-| <!-- 010                                     | 從 child_process 恢復到 inline 截圖       | 已接受 -->  |
-| <!-- 011                                     | 修復 PPTX 匯出流程的 URL 和自動啟動       | 已接受 -->  |
+### Active ADRs
+
+<!-- 當前 ADR -->
+
+| ADR | Title | Status | Supersedes |
+| --- | ----- | ------ | ---------- |
+| [001](./001-project-foundation.md) | Project Foundation (Versioning & AI) | Accepted | Original 001, 003 |
+| [002](./002-containerization.md) | Containerization Strategy | Accepted | Original 002, 013 |
+| [003](./003-slidev-integration.md) | Slidev Preview Integration | Accepted | 004, 005, 007, 008, 012 |
+| [004](./004-pptx-export.md) | PPTX Export Evolution | Accepted | 006, 009, 010, 011, 014, 015 |
+
+### Archived ADRs (Consolidated)
+
+<!-- 已整合的 ADR -->
+
+Historical ADRs consolidated into above documents (retained in git history):
+
+<!-- 以下 ADR 已整合到上述文件中（保留在 git 歷史記錄中）： -->
+
+- **Foundation**: 001 (Version Control), 003 (AI Architecture)
+- **Container**: 002 (Lightweight), 013 (Docker Migration)
+- **Slidev**: 004 (Vite Fix), 005 (WebSocket), 007 (Base URL), 008 (Proxy v3), 012 (Routing)
+- **PPTX**: 006 (Puppeteer), 009 (Data Dir), 010 (NODE_ENV), 011 (Flow Fix), 014 (Playwright), 015 (Background)
 
 ## Creating a New ADR
 
@@ -77,8 +71,8 @@ Each ADR follows this structure:
 1. Copy the template from the most recent ADR
 <!-- 從最近的 ADR 複製範本 -->
 
-2. Use sequential numbering (e.g., 002, 003)
-<!-- 使用順序編號（例如 002、003） -->
+2. Use sequential numbering (e.g., 005, 006)
+<!-- 使用順序編號（例如 005、006） -->
 
 3. Use kebab-case for filenames: `NNN-brief-description.md`
 <!-- 檔案名稱使用 kebab-case：NNN-簡要描述.md -->
@@ -88,3 +82,22 @@ Each ADR follows this structure:
 
 5. Follow the English + Chinese comment format as per AGENTS.md
 <!-- 遵循 AGENTS.md 規定的英文 + 中文註解格式 -->
+
+## Consolidation History
+
+<!-- 整合歷史 -->
+
+**2026-03-23**: Consolidated 15 ADRs → 4 core documents
+<!-- 2026-03-23：將 15 個 ADR 整合為 4 個核心文件 -->
+
+- Reduced from ~169 KB to ~60 KB (~64% reduction)
+<!-- 從約 169 KB 減少到約 60 KB（減少約 64%） -->
+
+- Grouped by functional domain (Foundation, Container, Slidev, PPTX)
+<!-- 按功能領域分組（基礎、容器、Slidev、PPTX） -->
+
+- Preserved all technical decisions and rationale
+<!-- 保留所有技術決策和理由 -->
+
+- Old files retained in git history for reference
+<!-- 舊文件保留在 git 歷史記錄中供參考 -->

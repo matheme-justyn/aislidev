@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-03-23
+
+### Summary
+
+**Infrastructure Migration**: Migrated from Podman to Docker + Colima for better macOS stability and developer experience. Updated deployment scripts, documentation, and created ADR-013 to document this architectural decision.
+
+### Changed
+
+- **Container Runtime** ([ADR-013](./docs/adr/013-migrate-to-docker-colima.md))
+  - Migrated from Podman to Docker + Colima as primary container runtime
+  - Reason: Podman VM stability issues on macOS (frequent freezes, build hangs)
+  - `deploy.sh` now prefers Docker over Podman
+  - Created `Dockerfile` (renamed from `Containerfile`)
+  - Kept `Containerfile` for backward compatibility
+- **Documentation Updates**
+  - Updated `README.md` and `README.zh-TW.md` to recommend Docker + Colima
+  - Added Colima installation instructions for macOS
+  - Updated ADR index with ADR-013
+
+### Fixed
+
+- **Vite Cache Conflicts**
+  - Separated Vite cache directories for main server and Slidev
+  - Main server: `node_modules/.vite-main`
+  - Slidev: `node_modules/.vite` (default)
+  - Fixed "504 (Outdated Optimize Dep)" errors
+- **Slidev Configuration**
+  - Removed custom `vite.config.ts` generation for Slidev instances
+  - Changed `NODE_ENV` from `production` to `development` for Slidev
+  - Allows Slidev CLI to auto-load default plugins (UnoCSS, Vue, themes)
+
+
 ## [0.3.2] - 2026-03-18
 
 ### Summary

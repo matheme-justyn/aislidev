@@ -15,7 +15,7 @@
 - 📝 **AI 輔助內容** - 智能建議投影片內容和結構
 - 🎨 **智能排版** - AI 驅動的版面設計和樣式建議
 - ⚡️ **Slidev 整合** - 基於 [Slidev](https://sli.dev/) - 為開發者設計的 Markdown 簡報工具
-- 🐳 **單一容器** - 使用 Podman 或 Docker 輕量部署
+- 🐳 **單一容器** - 使用 Docker (在 macOS 上透過 Colima)輕量部署
 - 🔐 **Rootless 安全** - 以非 root 使用者執行，正確處理訊號
 - 🎯 **簡單架構** - 不過度設計，易於維護
 
@@ -26,39 +26,29 @@
 ### 前置需求
 
 - [Node.js 20+](https://nodejs.org/)（本地開發用）
-- [Podman](https://podman.io) 或 [Docker](https://docker.com)（容器化部署用）
+- [Docker](https://docker.com) + [Colima](https://github.com/abiosoft/colima)（macOS 容器化部署用）
 
 ### 容器化部署（推薦）
 
 ```bash
+# macOS 使用者：安裝 Colima + Docker
+brew install colima docker
+colima start
+
 # 建置映像檔
-podman build -t aislidev .
+docker build -t aislidev .
 
 # 執行容器
-podman run -d \
-  --name aislidev \
-  -p 13000:13000 \
-  -v ./data:/app/data:Z \
-  aislidev
-
-# 或使用部署腳本
-./deploy.sh
-```
-
-<details>
-<summary>使用 Docker 而非 Podman</summary>
-
-```bash
-docker build -t aislidev .
 docker run -d \
   --name aislidev \
   -p 13000:13000 \
   -v ./data:/app/data \
   aislidev
+
+# 或使用部署腳本（自動偵測 Docker/Podman）
+./deploy.sh
 ```
 
-注意：Docker 不需要 `:Z` 標記（SELinux）。
-</details>
 
 **訪問應用程式**：http://localhost:13000
 

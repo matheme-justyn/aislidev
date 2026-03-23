@@ -9,7 +9,7 @@ class: text-center
 drawings:
   persist: false
 transition: slide-left
-routerMode: hash
+routerMode: history
 mdc: true
 ---
 

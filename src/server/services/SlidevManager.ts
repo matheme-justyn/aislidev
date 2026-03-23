@@ -1,14 +1,9 @@
 import { spawn, ChildProcess } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 import getPort from "get-port";
 import type { SlidevProcess, SlidevConfig } from "../../types/slidev";
 
-// ES Module __dirname polyfill
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 export class SlidevManager {
   private processes: Map<string, SlidevProcess & { process: ChildProcess }> =
     new Map();
@@ -37,27 +32,20 @@ export class SlidevManager {
     // Allocate port first (needed for dynamic vite.config.ts generation)
     const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
 
-    // Generate dynamic Vite config (no base path - proxy handles this)
-    const viteConfigTemplate = path.join(__dirname, "../templates/slidev-vite.config.ts");
-    const viteConfigPath = path.join(presentationDir, "vite.config.ts");
-    try {
-      const templateContent = await fs.readFile(viteConfigTemplate, "utf-8");
-      // Use template as-is without base path modification
-      await fs.writeFile(viteConfigPath, templateContent, "utf-8");
-    } catch (error) {
-      console.warn(`Failed to generate vite config: ${error}`);
-    }
+    // Don't generate custom vite.config.ts - let Slidev use its default config
+    // This ensures UnoCSS and theme plugins are properly loaded
+    // The Slidev CLI will auto-detect and use its internal vite configuration
 
     const slidevProcess = spawn(
       "npx",
-      ["@slidev/cli", "slides.md", "--port", port.toString(), "--log", "info"],  // 使用官方支援的 @slidev/cli 套件名稱（npx slidev 不被支援）
+      ["@slidev/cli", "slides.md", "--port", port.toString(), "--base", `/slidev/${port}/`, "--log", "info"],  // 使用官方支援的 @slidev/cli 套件名稱（npx slidev 不被支援）
       {
         cwd: presentationDir,
         stdio: ["pipe", "pipe", "pipe"],
         detached: false,
         env: {
           ...process.env,
-          NODE_ENV: "production",
+          NODE_ENV: "development",  // Use development mode to enable full theme loading
           VITE_HOST: "0.0.0.0",
           HOST: "0.0.0.0",
         },

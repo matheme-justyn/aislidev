@@ -1,6 +1,6 @@
 #!/bin/bash
 # AISliDev Deployment Script
-# Supports both Podman and Docker
+# Optimized for Docker + Colima on macOS
 
 set -e
 
@@ -10,13 +10,16 @@ CONTAINER_NAME="aislidev"
 PORT="${PORT:-13000}"
 DATA_PATH="${DATA_PATH:-./data}"
 
-# Detect container runtime
-if command -v podman &> /dev/null; then
-    RUNTIME="podman"
-elif command -v docker &> /dev/null; then
+# Detect container runtime (prefer Docker for Colima)
+if command -v docker &> /dev/null; then
     RUNTIME="docker"
+elif command -v podman &> /dev/null; then
+    RUNTIME="podman"
 else
-    echo "❌ Error: Neither Podman nor Docker found. Please install one of them."
+    echo "❌ Error: Neither Docker nor Podman found."
+    echo "📝 For macOS users: Install Colima + Docker CLI:"
+    echo "    brew install colima docker"
+    echo "    colima start"
     exit 1
 fi
 
@@ -25,7 +28,7 @@ echo "🔧 Using container runtime: $RUNTIME"
 # Function to build image
 build_image() {
     echo "🏗️  Building image: $IMAGE_NAME"
-    $RUNTIME build -t $IMAGE_NAME -f Containerfile .
+    $RUNTIME build -t $IMAGE_NAME -f Dockerfile .
     echo "✅ Image built successfully"
 }
 
@@ -46,12 +49,19 @@ run_container() {
     # Create data directory if it doesn't exist
     mkdir -p "$DATA_PATH"
     
-    # Run container
+    # Determine volume mount flag (Docker uses standard, Podman may use :Z for SELinux)
+    if [ "$RUNTIME" = "podman" ]; then
+        VOLUME_FLAG="-v $DATA_PATH:/app/data:Z"
+    else
+        VOLUME_FLAG="-v $DATA_PATH:/app/data"
+    fi
+    
+    # Run container (Colima uses standard Docker volume mounts)
     $RUNTIME run -d \
         --name $CONTAINER_NAME \
         -p $PORT:13000 \
         -p 13030-13040:13030-13040 \
-        -v "$DATA_PATH:/app/data:Z" \
+        $VOLUME_FLAG \
         -e NODE_ENV=production \
         -e PORT=13000 \
         -e AUTO_PORT_SELECTION=false \

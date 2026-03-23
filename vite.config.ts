@@ -7,6 +7,8 @@ export default defineConfig({
   define: {
     __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
   },
+  // Separate cache directory from Slidev to avoid dependency optimization conflicts
+  cacheDir: 'node_modules/.vite-main',
   optimizeDeps: {
     exclude: ['@slidev/cli', '@slidev/client', '@slidev/parser', '@slidev/theme-default', '@slidev/theme-seriph'],
   },

@@ -15,7 +15,7 @@
 - 📝 **AI-Assisted Content** - Smart suggestions for slide content and structure
 - 🎨 **Intelligent Layout** - AI-powered design and style recommendations
 - ⚡️ **Slidev Integration** - Built on [Slidev](https://sli.dev/) - Markdown-based presentations for developers
-- 🐳 **Single Container** - Lightweight deployment with Podman or Docker
+- 🐳 **Single Container** - Lightweight deployment with Docker (Colima on macOS)
 - 🔐 **Rootless Security** - Runs as non-root user with proper signal handling
 - 🎯 **Simple Architecture** - No over-engineering, easy to maintain
 
@@ -28,39 +28,29 @@
 ### Prerequisites
 
 - [Node.js 20+](https://nodejs.org/) (for local development)
-- [Podman](https://podman.io) or [Docker](https://docker.com) (for containerized deployment)
+- [Docker](https://docker.com) + [Colima](https://github.com/abiosoft/colima) (for containerized deployment on macOS)
 
 ### With Container (Recommended)
 
 ```bash
+# For macOS users: Install Colima + Docker
+brew install colima docker
+colima start
+
 # Build the image
-podman build -t aislidev .
+docker build -t aislidev .
 
 # Run the container
-podman run -d \
-  --name aislidev \
-  -p 13000:13000 \
-  -v ./data:/app/data:Z \
-  aislidev
-
-# Or use the deploy script
-./deploy.sh
-```
-
-<details>
-<summary>Using Docker instead of Podman</summary>
-
-```bash
-docker build -t aislidev .
 docker run -d \
   --name aislidev \
   -p 13000:13000 \
   -v ./data:/app/data \
   aislidev
+
+# Or use the deploy script (auto-detects Docker/Podman)
+./deploy.sh
 ```
 
-Note: Docker doesn't need the `:Z` flag for SELinux.
-</details>
 
 **Access the application**: http://localhost:13000
 

@@ -26,7 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Themes use relative paths from presentation directory: `../../themes/theme-xxx`
   - **Content and style separation**: Changing themes preserves all slide content
 
+### Removed
+
+- **Template Browser Feature** (incorrect implementation from v0.4.0)
+  - Removed Template Browser UI (button, modal, selection logic)
+  - Removed template-related API routes (`/api/files/templates`)
+  - Deleted incorrect template files (`data/templates/*.md`)
+  - **Rationale**: Template feature replaced entire content (wrong approach)
+  - Theme Switcher is the correct solution (content-style separation)
+
 ### Changed
+
+- **Simplified UI Architecture**
+  - Removed Template Browser to focus on Theme Switcher
+  - Clearer separation: Themes change style, not content
+
 
 - **Template vs Theme Clarification**
   - Template Browser remains for creating new presentations from templates

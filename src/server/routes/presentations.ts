@@ -187,10 +187,11 @@ const presentationsRoutes: FastifyPluginAsync<
     },
   );
 
-  fastify.post<{ Params: { id: string } }>(
+  fastify.post<{ Params: { id: string }; Body: { separateVClicks?: boolean } }>(
     "/presentations/:id/export",
     async (request, reply) => {
       const { id } = request.params;
+      const { separateVClicks = false } = request.body || {};
       const presentationDir = path.join(storageDir, id);
       const slidesPath = path.join(presentationDir, "slides.md");
       const exportsDir = path.join(presentationDir, "exports");
@@ -230,7 +231,7 @@ const presentationsRoutes: FastifyPluginAsync<
           `[Export ${id}] Using browser automation on port ${processInfo.port}`,
         );
 
-        await exporter.exportPPTX(processInfo.port, outputFile, 120000); // 2 min timeout
+        await exporter.exportPPTX(processInfo.port, outputFile, 120000, separateVClicks); // 2 min timeout
 
         // Verify file was created and has content
         let stats;

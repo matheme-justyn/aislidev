@@ -68,6 +68,7 @@ export class BrowserExporter {
     port: number,
     outputPath: string,
     timeout: number = 120000,
+    separateVClicks: boolean = false,
   ): Promise<string> {
     if (!this.browser) {
       await this.initialize();
@@ -109,14 +110,23 @@ export class BrowserExporter {
       // Create temp directory for screenshots
       await fs.mkdir(tempDir, { recursive: true });
 
-      // Screenshot each slide by navigating to each URL directly
-      // This ensures proper theme CSS and background image loading
+      // Screenshot each slide
+      // - If separateVClicks is false: Trigger all clicks, screenshot once (merged mode)
+      // - If separateVClicks is true: Screenshot each click state separately
       const screenshotPaths: string[] = [];
       for (let i = 1; i <= slideCount; i++) {
-        const screenshotPath = path.join(tempDir, `slide-${i}.png`);
-        await this.screenshotSlideByUrl(page, port, i, screenshotPath, timeout);
-        screenshotPaths.push(screenshotPath);
-        console.log(`[BrowserExporter] Captured slide ${i}/${slideCount}`);
+        if (separateVClicks) {
+          // Separate mode: Screenshot each click state as independent page
+          const clickPaths = await this.screenshotSlideWithClicks(page, port, i, tempDir, timeout);
+          screenshotPaths.push(...clickPaths);
+          console.log(`[BrowserExporter] Captured slide ${i}/${slideCount} (${clickPaths.length} click states)`);
+        } else {
+          // Merged mode: Trigger all clicks, screenshot once
+          const screenshotPath = path.join(tempDir, `slide-${i}.png`);
+          await this.screenshotSlideByUrl(page, port, i, screenshotPath, timeout);
+          screenshotPaths.push(screenshotPath);
+          console.log(`[BrowserExporter] Captured slide ${i}/${slideCount}`);
+        }
       }
       // Generate PPTX from screenshots
       console.log(
@@ -330,6 +340,85 @@ export class BrowserExporter {
       type: "png",
       fullPage: false,
     });
+  }
+
+
+  /**
+   * Screenshot a slide with each v-click state as separate pages
+   * Returns array of screenshot paths
+   */
+  private async screenshotSlideWithClicks(
+    page: Page,
+    port: number,
+    slideNumber: number,
+    tempDir: string,
+    timeout: number,
+  ): Promise<string[]> {
+    const slideUrl = `http://localhost:${port}/${slideNumber}`;
+    console.log(`[BrowserExporter] Loading slide ${slideNumber} for click separation: ${slideUrl}`);
+    
+    // Navigate to slide URL with clean environment
+    await this.gotoWithCleanEnv(page, slideUrl, { 
+      waitUntil: "networkidle", 
+      timeout: timeout 
+    });
+    
+    // Wait for Vue app and theme CSS to load
+    await page.waitForSelector('#app', { state: 'attached', timeout: 10000 });
+    await page.waitForTimeout(2000);
+    
+    // Get total clicks for this slide
+    const clickInfo = await page.evaluate(() => {
+      const slidev = (window as any).__slidev__;
+      if (!slidev || !slidev.nav) return { total: 0, current: 0 };
+      return {
+        total: slidev.nav.clicksTotal || 0,
+        current: slidev.nav.clicks || 0
+      };
+    });
+    
+    const totalStates = clickInfo.total + 1; // Initial state + each click state
+    console.log(`[BrowserExporter] Slide ${slideNumber}: ${totalStates} states (0 clicks + ${clickInfo.total} clicks)`);
+    
+    const screenshotPaths: string[] = [];
+    
+    // Screenshot initial state (before any clicks)
+    const initialPath = path.join(tempDir, `slide-${slideNumber}-click-0.png`);
+    await page.screenshot({
+      path: initialPath,
+      type: "png",
+      fullPage: false,
+    });
+    screenshotPaths.push(initialPath);
+    console.log(`[BrowserExporter]   State 0/${clickInfo.total}: ${initialPath}`);
+    
+    // Screenshot each click state
+    for (let clickIndex = 1; clickIndex <= clickInfo.total; clickIndex++) {
+      await page.keyboard.press('Space');
+      await page.waitForTimeout(500); // Wait for click animation
+      
+      // Verify click advanced
+      const currentClicks = await page.evaluate(() => {
+        return (window as any).__slidev__?.nav?.clicks || 0;
+      });
+      
+      // Safety: Stop if we've advanced to next slide
+      if (currentClicks > clickInfo.total) {
+        console.warn(`[BrowserExporter] Over-clicked on slide ${slideNumber}, stopping at state ${clickIndex - 1}`);
+        break;
+      }
+      
+      const clickPath = path.join(tempDir, `slide-${slideNumber}-click-${clickIndex}.png`);
+      await page.screenshot({
+        path: clickPath,
+        type: "png",
+        fullPage: false,
+      });
+      screenshotPaths.push(clickPath);
+      console.log(`[BrowserExporter]   State ${clickIndex}/${clickInfo.total}: ${clickPath}`);
+    }
+    
+    return screenshotPaths;
   }
 
 

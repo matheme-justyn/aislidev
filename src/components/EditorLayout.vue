@@ -121,12 +121,44 @@
         </div>
       </template>
     </n-modal>
+
+    <!-- Export PPTX Options Modal -->
+    <n-modal
+      v-model:show="showExportOptions"
+      preset="card"
+      title="Export to PPTX"
+      style="width: 450px"
+      :mask-closable="true"
+    >
+      <div class="export-options-content">
+        <div class="option-item">
+          <n-checkbox v-model:checked="separateVClicks">
+            將 v-click 分離為多頁
+          </n-checkbox>
+          <p class="option-hint">
+            預設：所有 v-click 內容顯示在同一頁<br />
+            勾選：每個 v-click 步驟匯出為獨立頁面
+          </p>
+        </div>
+        <div class="export-estimate">
+          <p class="estimate-text">
+            ⏱️ 預估時間：每頁約 6-7 秒
+          </p>
+        </div>
+      </div>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button @click="showExportOptions = false">取消</n-button>
+          <n-button type="primary" @click="confirmExport">確定匯出</n-button>
+        </div>
+      </template>
+    </n-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from "vue";
-import { NButton, NModal, NInputNumber, useMessage } from "naive-ui";
+import { NButton, NModal, NInputNumber, NCheckbox, useMessage } from "naive-ui";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import CodeMirrorEditor from "./CodeMirrorEditor.vue";
@@ -160,6 +192,8 @@ let autoSaveTimer: ReturnType<typeof setInterval> | null = null;
 
 // Export PPTX state
 const exportStatus = ref<"idle" | "exporting" | "exported">("idle");
+const showExportOptions = ref(false);
+const separateVClicks = ref(false);
 
 const saveButtonText = computed(() => {
   switch (saveStatus.value) {
@@ -317,19 +351,29 @@ const manualRefresh = () => {
   message.info("Preview refreshed");
 };
 
-const exportPPTX = async () => {
+const exportPPTX = () => {
   if (exportStatus.value === "exporting") return;
   if (!props.presentationId) {
     message.error("No presentation selected");
     return;
   }
+  showExportOptions.value = true;
+};
 
+const confirmExport = async () => {
+  showExportOptions.value = false;
   exportStatus.value = "exporting";
   message.info("Exporting to PPTX...");
 
   try {
     const response = await fetch(`/api/presentations/${props.presentationId}/export`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        separateVClicks: separateVClicks.value,
+      }),
     });
 
     if (!response.ok) {
@@ -337,10 +381,7 @@ const exportPPTX = async () => {
       throw new Error(errorData.message || "Export failed");
     }
 
-    // Server returns JSON with downloadUrl
     const data = await response.json();
-
-    // Download the actual PPTX file
     const fileResponse = await fetch(data.downloadUrl);
     if (!fileResponse.ok) {
       throw new Error("Failed to download exported file");
@@ -359,7 +400,6 @@ const exportPPTX = async () => {
     exportStatus.value = "exported";
     message.success("PPTX exported successfully");
 
-    // Reset status after 2 seconds
     setTimeout(() => {
       exportStatus.value = "idle";
     }, 2000);
@@ -503,5 +543,35 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* Export Options Modal */
+.export-options-content {
+  padding: 8px 0;
+}
+
+.option-item {
+  margin-bottom: 20px;
+}
+
+.option-hint {
+  margin-top: 8px;
+  margin-left: 24px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.export-estimate {
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.estimate-text {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
 }
 </style>

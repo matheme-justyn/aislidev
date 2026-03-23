@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-23
+
+### Added
+
+- **PPTX Export v-click Separation Option**
+  - Added export options modal with checkbox to separate v-click animations into multiple pages
+  - User can choose between merged mode (all clicks on one page) or separated mode (each click state as a page)
+  - Added time estimation display in modal (6-7 seconds per page)
+  - Implemented `screenshotSlideWithClicks()` method in BrowserExporter
+  - Backend API accepts `separateVClicks` parameter
+  - Frontend modal with Naive UI components (NCheckbox, NModal)
+
+- **Slidev Templates**
+  - Created 3 ready-to-use Slidev templates in `data/templates/`:
+    - `seriph-template.md` - Elegant presentation with Seriph theme
+    - `apple-basic-template.md` - Minimalist design inspired by Apple
+    - `minimal-template.md` - Clean, distraction-free template
+  - All templates include proper frontmatter, layouts, and v-click examples
+  - Templates accessible via existing template browser in UI
+
+### Changed
+
+- **BrowserExporter API**
+  - Added `separateVClicks` parameter to `exportPPTX()` method
+  - Modified screenshot loop to support both merged and separated modes
+  - Enhanced logging to show click state count per slide
+
 ## [0.3.5] - 2026-03-23
 
 ### Fixed

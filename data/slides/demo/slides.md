@@ -1,5 +1,5 @@
 ---
-theme: '../themes/creative-gradient-v2'
+theme: "@slidev/theme-apple-basic"
 background: https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=2070
 title: AISlidev 教學
 info: |

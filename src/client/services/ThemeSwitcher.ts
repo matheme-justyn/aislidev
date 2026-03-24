@@ -2,23 +2,27 @@
  * Theme Switcher Service
  * Handles theme switching by modifying only the frontmatter theme field
  * while preserving all slide content
+ * 
+ * Supports:
+ * - NPM themes: '@slidev/theme-seriph'
+ * - Local Slidev themes: '../themes/my-theme'
  */
 
 export class ThemeSwitcher {
   /**
    * Apply a theme to markdown content
    * @param markdown - Original markdown content
-   * @param themeName - Theme name to apply (e.g., 'default', 'seriph', 'professional-dark')
+   * @param themePath - Theme path (NPM package or relative path)
    * @returns Modified markdown with new theme
    */
-  static applyTheme(markdown: string, themeName: string): string {
+  static applyTheme(markdown: string, themePath: string): string {
     // Check if markdown has frontmatter
     const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
     const match = markdown.match(frontmatterRegex);
 
     if (!match) {
       // No frontmatter, add one with theme
-      return `---\ntheme: ${themeName}\n---\n\n${markdown}`;
+      return `---\ntheme: '${themePath}'\n---\n\n${markdown}`;
     }
 
     const [, frontmatterContent, slideContent] = match;
@@ -33,7 +37,7 @@ export class ThemeSwitcher {
       
       // Check if this line defines theme
       if (trimmedLine.startsWith('theme:')) {
-        newLines.push(`theme: ${themeName}`);
+        newLines.push(`theme: '${themePath}'`);
         themeFound = true;
       } else {
         newLines.push(line);
@@ -42,7 +46,7 @@ export class ThemeSwitcher {
 
     // If theme wasn't found, add it at the beginning
     if (!themeFound) {
-      newLines.unshift(`theme: ${themeName}`);
+      newLines.unshift(`theme: '${themePath}'`);
     }
 
     // Reconstruct markdown
@@ -52,7 +56,7 @@ export class ThemeSwitcher {
   /**
    * Get current theme from markdown
    * @param markdown - Markdown content
-   * @returns Current theme name or 'default' if not specified
+   * @returns Current theme name/path or 'default' if not specified
    */
   static getCurrentTheme(markdown: string): string {
     const frontmatterRegex = /^---\n([\s\S]*?)\n---/;
@@ -69,36 +73,31 @@ export class ThemeSwitcher {
   }
 
   /**
-   * Get list of available themes
-   * @returns Array of theme objects with name and display name
+   * Get list of available themes from server
+   * @returns Promise with array of theme objects
    */
-  static getAvailableThemes(): Array<{ name: string; display: string; description: string }> {
-    return [
-      {
-        name: 'default',
-        display: 'Default',
-        description: 'Slidev default theme - clean and versatile'
-      },
-      {
-        name: 'seriph',
-        display: 'Seriph',
-        description: 'Elegant serif font theme'
-      },
-      {
-        name: '../../themes/theme-professional-dark',
-        display: 'Professional Dark',
-        description: 'Dark theme optimized for business presentations'
-      },
-      {
-        name: '../../themes/theme-creative-gradient',
-        display: 'Creative Gradient',
-        description: 'Vibrant gradient theme for creative presentations'
-      },
-      {
-        name: '../../themes/theme-minimal-clean',
-        display: 'Minimal Clean',
-        description: 'Ultra-minimal theme focused on content'
+  static async getAvailableThemes(): Promise<
+    Array<{ 
+      name: string; 
+      display: string; 
+      description: string; 
+      type: 'npm' | 'custom' | 'local-slidev';
+      themePath?: string;
+    }> | null
+  > {
+    try {
+      const response = await fetch('/api/files/themes');
+      
+      if (!response.ok) {
+        console.error('Failed to fetch themes:', response.statusText);
+        return null;
       }
-    ];
+      
+      const data = await response.json();
+      return data.themes;
+    } catch (error) {
+      console.error('Failed to load themes:', error);
+      return null;
+    }
   }
 }

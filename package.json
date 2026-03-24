@@ -44,13 +44,14 @@
     "pptxgenjs": "^4.0.1",
     "puppeteer": "^24.38.0",
     "splitpanes": "^4.0.4",
-    "vue": "^3.5.27"
+    "vue": "^3.5.27",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "@slidev/theme-apple-basic": "latest"
   },
   "devDependencies": {
     "@slidev/cli": "^52.11.5",
     "@slidev/parser": "^52.12.0",
-    "@slidev/theme-default": "latest",
-    "@slidev/theme-seriph": "latest",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.5",
     "@types/supertest": "^7.2.0",

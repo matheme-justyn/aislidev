@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-03-24
+
+### Added
+
+- **Local Background Image in Template**
+  - Added `public/cover.jpg` (243KB) to basic-presentation template
+  - Template now includes built-in background image for offline usage
+  - Updated template documentation with `public/` directory explanation
+
+### Fixed
+
+- **Slidev Preview Integration** (ADR-003)
+  - Reverted to direct iframe access per ADR-003 design decision
+  - Fixed preview not displaying due to incorrect proxy approach
+  - Added `screen-wake-lock` permission to iframe for presentation mode
+  - Preview now correctly loads at `http://localhost:13030/` (direct access)
+  - Eliminated complex proxy rewriting that was causing Vite module resolution issues
+
+- **Theme System**
+  - Corrected theme relative paths in demo presentation (`../../themes/` instead of `../themes/`)
+  - Added `styles/index.ts` entry point to all Slidev themes for proper loading
+  - Fixed theme switching to update both `checkStatus()` and `startPresentation()` functions
+  - Corrected `storageDir` path to point to `data/slides`
+  - Added `display` field to `ThemeInfo` for proper theme name display
+  - Changed theme type from `'local'` to `'local-slidev'` for frontend compatibility
+  - Localized background images in demo presentation
+
+- **Container Deployment**
+  - Removed duplicate `Containerfile`, unified on `Dockerfile` for Docker deployment
+  - Fixed Docker build references to deleted directories
+
+- **File Management**
+  - Auto-load demo presentation on startup
+  - Fixed API paths for presentation status checks
+  - Trigger presentation ID update when opening presentations
+
+### Technical Notes
+
+- This release consolidates fixes from the theme preview debugging session
+- ADR-003 clarifies that Slidev preview should use direct access, not proxy
+- Port mapping (`-p 13030-13040:13030-13040`) enables direct browser access to Slidev
+
 ## [0.7.0] - 2026-03-24
 
 ### Added

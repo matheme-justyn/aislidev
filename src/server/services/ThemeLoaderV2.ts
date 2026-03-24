@@ -43,7 +43,7 @@ export class ThemeLoaderV2 {
           );
           const packageJson = JSON.parse(packageJsonContent);
 
-          const relativeThemePath = `../themes/${entry.name}`;
+          const relativeThemePath = `../../themes/${entry.name}`;
 
           const displayName = entry.name
             .split("-")

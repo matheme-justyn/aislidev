@@ -10,7 +10,7 @@
       allow="fullscreen"
       @load="onLoad"
     ></iframe>
-    
+
     <div v-else class="preview-placeholder">
       <p>{{ status }}</p>
     </div>
@@ -33,11 +33,11 @@ const slidevPort = ref<number | null>(null);
 const status = ref("正在啟動簡報...");
 const iframeKey = ref(0);
 let statusCheckInterval: ReturnType<typeof setInterval> | null = null;
-const currentSlideNo = ref<number>(1);  // 追蹤當前頁碼
+const currentSlideNo = ref<number>(1); // 追蹤當前頁碼
 
 const checkStatus = async () => {
   if (!props.presentationId) {
-    console.log('[Preview] No presentation ID');
+    console.log("[Preview] No presentation ID");
     status.value = "未選擇簡報";
     return;
   }
@@ -47,11 +47,11 @@ const checkStatus = async () => {
       `/api/presentations/${props.presentationId}/status`,
     );
     const data = await response.json();
-    console.log('[Preview] Status response:', data);
+    console.log("[Preview] Status response:", data);
 
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `http://localhost:${data.port}/`;  // 直接訪問 Slidev (繞過 proxy)
+      previewUrl.value = `/slidev/${data.port}/`;
       console.log(`[Preview] Preview URL set: ${previewUrl.value}`);
       status.value = "簡報已就緒";
       if (statusCheckInterval) {
@@ -62,11 +62,11 @@ const checkStatus = async () => {
       status.value = "正在啟動 Slidev...";
     } else {
       status.value = "正在啟動簡報...";
-      console.log('[Preview] Starting presentation...');
+      console.log("[Preview] Starting presentation...");
       startPresentation();
     }
   } catch (error) {
-    console.error('[Preview] Status check error:', error);
+    console.error("[Preview] Status check error:", error);
     status.value = "狀態檢查錯誤";
   }
 };
@@ -82,10 +82,10 @@ const startPresentation = async () => {
       { method: "POST" },
     );
     const data = await response.json();
-    
+
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `http://localhost:${data.port}/`;  // 直接訪問 Slidev (繞過 proxy)
+      previewUrl.value = `http://localhost:${data.port}/`; // 直接訪問 Slidev (繞過 proxy)
       status.value = "簡報已就緒";
     }
   } catch (error) {
@@ -101,16 +101,16 @@ const onLoad = () => {
 const reload = () => {
   // 保存當前頁碼
   const savedPageNo = currentSlideNo.value;
-  
+
   // 重新載入 iframe
   iframeKey.value++;
-  
+
   // 等待 iframe 載入後導航到保存的頁碼
   setTimeout(() => {
     if (savedPageNo > 1) {
       slidevBridge.navigate(savedPageNo);
     }
-  }, 1000);  // 給 Slidev 足夠的時間初始化
+  }, 1000); // 給 Slidev 足夠的時間初始化
 };
 
 defineExpose({ reload });
@@ -120,15 +120,15 @@ onMounted(() => {
   // 訂閱導航狀態更新
   const unsubscribe = slidevBridge.onNavigation((navState: NavState) => {
     currentSlideNo.value = navState.no;
-    console.log('[SlidevPreview] Navigation:', navState);
+    console.log("[SlidevPreview] Navigation:", navState);
   });
-  
+
   // 附加 iframe
-  const iframe = document.querySelector('.preview-frame') as HTMLIFrameElement;
+  const iframe = document.querySelector(".preview-frame") as HTMLIFrameElement;
   if (iframe) {
     slidevBridge.attach(iframe);
   }
-  
+
   // 清理
   onUnmounted(() => {
     unsubscribe();

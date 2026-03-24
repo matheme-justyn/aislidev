@@ -1,0 +1,16 @@
+{
+  "name": "slidev-theme-creative-gradient",
+  "version": "2.0.0",
+  "description": "紫色漸層創意風格，適合創新簡報 - Creative Gradient Theme for Slidev",
+  "author": "AISliDev",
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "creative",
+    "gradient"
+  ],
+  "slidev": {
+    "colorSchema": "dark",
+    "highlighter": "shiki"
+  }
+}

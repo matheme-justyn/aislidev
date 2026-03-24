@@ -213,6 +213,13 @@ await fastify.use((req, res, next) => {
                 body += chunk.toString("utf8");
               });
               proxyRes.on("end", () => {
+                // Add <base> tag to make all relative URLs work correctly
+                // This is crucial for Vite's dynamic imports
+                body = body.replace(
+                  /(<head[^>]*>)/i,
+                  `$1\n  <base href="/slidev/${port}/">`,
+                );
+
                 // Fix relative Vite paths by adding /slidev/${port} prefix
                 // /@fs/... → /slidev/${port}/@fs/...
                 // /@vite/... → /slidev/${port}/@vite/...

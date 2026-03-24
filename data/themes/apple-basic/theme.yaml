@@ -1,0 +1,9 @@
+# Slidev Apple Basic Theme (NPM Proxy)
+# 官方 Apple Basic 主題 - 簡潔的蘋果風格
+
+# NPM 主題代理 - 自動安裝 @slidev/theme-apple-basic
+npm: "@slidev/theme-apple-basic"
+
+# 可選：覆蓋部分配置
+# colors:
+#   primary: "#007aff"

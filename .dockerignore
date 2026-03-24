@@ -53,9 +53,9 @@ tmp
 temp
 *.tmp
 
-# Local development data
+# Local development data (exclude data dir, but keep data/themes)
+!data/themes
 storage
-data
 test-slidev
 
 # AI and development tools

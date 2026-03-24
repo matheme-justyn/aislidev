@@ -1,0 +1,39 @@
+# Creative Gradient Theme
+# 創意漸層主題 - 適合創新和創意簡報
+
+name: "Creative Gradient"
+description: "紫色漸層創意風格，適合創新簡報"
+author: "AISliDev"
+version: "1.0.0"
+
+colorSchema: dark
+
+colors:
+  primary: "#667eea"
+  accent: "#764ba2"
+  accentPink: "#ec4899"
+  accentBlue: "#3b82f6"
+  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+  backgroundLight: "rgba(255, 255, 255, 0.1)"
+  text: "#ffffff"
+  textSecondary: "#f0f0f0"
+  textMuted: "#d0d0d0"
+  codeBackground: "rgba(0, 0, 0, 0.3)"
+  codeForeground: "#ffffff"
+
+fonts:
+  sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+  mono: "'Fira Code', 'Cascadia Code', Consolas, Monaco, 'Courier New', monospace"
+
+fontSizes:
+  h1: 4.0
+  h2: 2.75
+  h3: 2.0
+  body: 1.5
+  code: 0.9
+
+spacing:
+  slidesPadding: 2.0
+  elementGap: 1.5
+
+customCSS: "custom.css"

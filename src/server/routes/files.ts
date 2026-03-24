@@ -1,6 +1,16 @@
 import { FastifyInstance } from "fastify";
 import { promises as fs } from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { ThemeLoader } from '../services/ThemeLoader.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Initialize ThemeLoader
+const projectRoot = path.resolve(__dirname, "../../..");
+const themeLoader = new ThemeLoader(path.join(projectRoot, "data/themes"));
 
 interface FilesRoutesOptions {
   storageDir: string;
@@ -38,6 +48,17 @@ export default async function filesRoutes(
     }
   });
 
+
+  // List available Slidev themes
+  fastify.get("/files/themes", async (_request, reply) => {
+    try {
+      const themes = await themeLoader.listThemes();
+      return { themes };
+    } catch (error) {
+      fastify.log.error(`Failed to list themes: ${error}`);
+      return reply.code(500).send({ error: "Failed to list themes" });
+    }
+  });
 
   // Read a specific presentation file
   fastify.get<{ Params: { filename: string } }>(

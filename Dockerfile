@@ -2,8 +2,8 @@
 # Multi-stage build for unified frontend + backend container
 # Optimized for Docker + Colima on macOS
 
-# Build stage - use Alpine for build (smaller, faster)
-FROM node:20-alpine AS builder
+# Build stage - use Debian slim for consistency with runtime
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -33,8 +33,10 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/themes ./themes
+COPY --from=builder /app/data ./data
 
-# Install Playwright browsers to shared location
+# Install Playwright browsers (Chromium) for PPTX export
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN npx playwright install chromium --with-deps && \
     chmod -R 755 /ms-playwright

@@ -5,7 +5,98 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 2026-03-23
+## [0.6.0] - 2026-03-24
+
+### Added
+
+- **Unified YAML Theme System**
+  - All themes now use `theme.yaml` configuration format
+  - Type-safe theme definitions with TypeScript interfaces
+  - Two theme types supported:
+    - **NPM Theme Proxy**: Simple `npm: "@slidev/theme-name"` syntax for automatic installation
+    - **Custom Theme**: Full YAML configuration with colors, fonts, spacing, and backgrounds
+  - Created `ThemeLoader` service for YAML parsing and validation
+  - Created `CSSGenerator` service for converting YAML configs to CSS
+  - Created `NPMThemeManager` service for automatic NPM theme installation
+
+- **Theme Configuration Options**
+  - Color schema support (light, dark, auto)
+  - Custom color definitions (primary, accent, background, text, code, border)
+  - Font configuration (sans, serif, mono, custom font files)
+  - Font size configuration (h1-h4, body, code) in rem units
+  - Spacing configuration (slides padding, element gap)
+  - Background images support (default, cover layouts)
+  - Custom CSS file support
+
+- **NPM Theme Integration**
+  - Automatic detection of NPM themes
+  - Auto-installation of missing NPM packages
+  - Style override support for NPM themes
+  - Created 2 NPM theme proxy examples:
+    - `seriph` - Proxy for @slidev/theme-seriph
+    - `apple-basic` - Proxy for @slidev/theme-apple-basic
+
+- **Migrated Existing Themes**
+  - Converted 3 existing themes to new YAML format:
+    - `professional-dark` - Professional dark theme
+    - `creative-gradient` - Creative gradient theme
+    - `minimal-clean` - Minimal clean theme
+  - All themes moved from `themes/` to `data/themes/`
+
+- **Documentation**
+  - Complete theme configuration guide at `docs/guides/THEME_CONFIGURATION.md`
+  - Quick start guide for using and creating themes
+  - Full YAML configuration reference
+  - NPM theme usage examples
+  - Theme creation step-by-step tutorial
+  - Troubleshooting section
+  - Advanced usage examples (responsive design, animations, theme variables)
+
+### Changed
+
+- **Theme Storage Location**
+  - Themes moved from `themes/` to `data/themes/`
+  - Better organization with data directory structure
+
+- **Theme Loading Architecture**
+  - Replaced package.json-based theme loading with YAML-based system
+  - Unified theme management across NPM and custom themes
+  - Backend API updated to use ThemeLoader service
+
+- **Container Build**
+  - Updated Dockerfile to copy `data/themes/` directory
+  - Updated .dockerignore to preserve `data/themes/`
+  - Maintained compatibility with existing deployment script
+
+### Technical Details
+
+- **New Services**
+  - `src/server/services/ThemeLoader.ts` (244 lines)
+  - `src/server/services/CSSGenerator.ts` (251 lines)
+  - `src/server/services/NPMThemeManager.ts` (244 lines)
+
+- **New Types**
+  - `src/shared/types/theme.ts` (176 lines)
+  - Complete TypeScript type definitions for theme configs
+
+- **Updated Files**
+  - `src/server/routes/files.ts` - Uses ThemeLoader for theme listing
+  - `Dockerfile` and `Containerfile` - Updated for data/themes/
+  - `.dockerignore` - Preserves data/themes/ directory
+
+### Migration Notes
+
+For users upgrading from v0.5.x:
+
+1. **Theme Location**: Existing themes in `themes/` directory will continue to work, but new YAML-based themes should be placed in `data/themes/`
+
+2. **Theme Format**: Old themes (package.json + TypeScript) still work. New themes use theme.yaml format (see THEME_CONFIGURATION.md)
+
+3. **NPM Themes**: Can now use NPM themes with a simple `theme.yaml` containing just `npm: "package-name"`
+
+4. **No Breaking Changes**: Existing presentations and themes continue to work without modification
+
+## [0.5.1] - 2026-03-23
 
 ### Added
 

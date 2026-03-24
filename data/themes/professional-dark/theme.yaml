@@ -1,0 +1,38 @@
+# Professional Dark Theme
+# 專業深色主題 - 適合技術簡報和企業演示
+
+name: "Professional Dark"
+description: "深色專業風格，適合技術簡報"
+author: "AISliDev"
+version: "1.0.0"
+
+colorSchema: dark
+
+colors:
+  primary: "#5d8aa8"
+  accent: "#4db8a8"
+  background: "#1a1a1a"
+  backgroundAlt: "#2d2d2d"
+  text: "#e8e8e8"
+  textSecondary: "#b8b8b8"
+  textMuted: "#888888"
+  codeBackground: "#2d2d2d"
+  codeForeground: "#e8e8e8"
+  border: "#404040"
+
+fonts:
+  sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+  mono: "'Fira Code', 'Cascadia Code', Consolas, Monaco, 'Courier New', monospace"
+
+fontSizes:
+  h1: 3.5
+  h2: 2.5
+  h3: 1.75
+  body: 1.25
+  code: 0.9
+
+spacing:
+  slidesPadding: 2.0
+  elementGap: 1.0
+
+customCSS: "custom.css"

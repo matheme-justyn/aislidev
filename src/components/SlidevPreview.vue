@@ -85,7 +85,7 @@ const startPresentation = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `http://localhost:${data.port}/`; // 直接訪問 Slidev (繞過 proxy)
+      previewUrl.value = `/slidev/${data.port}/`;
       status.value = "簡報已就緒";
     }
   } catch (error) {

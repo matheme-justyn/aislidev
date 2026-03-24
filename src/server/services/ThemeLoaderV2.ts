@@ -10,6 +10,7 @@ import * as path from "path";
 export interface ThemeInfo {
   id: string;
   name: string;
+  display: string;
   description: string;
   type: "local-slidev" | "npm";
   themePath: string;
@@ -44,9 +45,15 @@ export class ThemeLoaderV2 {
 
           const relativeThemePath = `../themes/${entry.name}`;
 
+          const displayName = entry.name
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+
           themes.push({
             id: entry.name,
             name: packageJson.name || entry.name,
+            display: displayName,
             description: packageJson.description || "",
             type: "local-slidev",
             themePath: relativeThemePath,

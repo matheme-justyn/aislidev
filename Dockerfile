@@ -33,7 +33,6 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/themes ./themes
 COPY --from=builder /app/data ./data
 
 # Install Playwright browsers (Chromium) for PPTX export

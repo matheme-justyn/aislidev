@@ -28,11 +28,18 @@ const presentations = ref<any[]>([]);
 // Load presentations list on mount
 onMounted(async () => {
   try {
-    const response = await fetch("/api/presentations");
+    const response = await fetch("/api/files/presentations");
     if (response.ok) {
-      presentations.value = await response.json();
-      // Load first presentation if available
-      if (presentations.value.length > 0) {
+      const data = await response.json();
+      presentations.value = data.presentations || [];
+
+      const demoPresentation = presentations.value.find((p) => p.id === "demo");
+      if (demoPresentation && demoPresentation.valid) {
+        await loadPresentation("demo");
+      } else if (
+        presentations.value.length > 0 &&
+        presentations.value[0].valid
+      ) {
         await loadPresentation(presentations.value[0].id);
       }
     }
@@ -40,7 +47,6 @@ onMounted(async () => {
     console.error("Failed to load presentations:", error);
   }
 
-  // Listen for presentation selection from FileExplorer
   window.addEventListener("select-presentation", (event: Event) => {
     const customEvent = event as CustomEvent;
     loadPresentation(customEvent.detail.id);
@@ -48,16 +54,19 @@ onMounted(async () => {
 });
 
 const loadPresentation = async (id: string) => {
-  console.log('[App] Loading presentation:', id);
+  console.log("[App] Loading presentation:", id);
   try {
-    const response = await fetch(`/api/presentations/${id}`);
+    const response = await fetch(`/api/files/presentations/${id}`);
     if (response.ok) {
       const data = await response.json();
       presentationId.value = id;
       content.value = data.content || "";
-      console.log('[App] Presentation loaded successfully:', { id, contentLength: content.value.length });
+      console.log("[App] Presentation loaded successfully:", {
+        id,
+        contentLength: content.value.length,
+      });
     } else {
-      console.error('[App] Failed to fetch presentation:', response.status);
+      console.error("[App] Failed to fetch presentation:", response.status);
     }
   } catch (error) {
     console.error("[App] Failed to load presentation:", error);

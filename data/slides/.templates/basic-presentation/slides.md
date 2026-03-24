@@ -1,6 +1,6 @@
 ---
 theme: "@slidev/theme-default"
-background: https://images.unsplash.com/photo-1517694712202-14dd9538aa97
+background: /cover.jpg
 layout: cover
 highlighter: shiki
 lineNumbers: true

@@ -6,7 +6,9 @@
 
 ```
 basic-presentation/
-└── slides.md        # 簡報內容（必須）
+├── slides.md        # 簡報內容（必須）
+└── public/
+    └── cover.jpg    # 封面背景圖片
 ```
 
 ## 必要檔案
@@ -20,6 +22,14 @@ Slidev 簡報的主要檔案，包含：
 - **投影片分隔** - 使用 `---` 分隔每一頁
 
 ## 選用檔案
+
+### public/
+
+放置靜態資源檔案（圖片、字體等），Slidev 會自動從 `public/` 目錄提供這些檔案：
+
+```markdown
+background: /cover.jpg # 會自動從 public/cover.jpg 載入
+```
 
 ### images/ 或 assets/
 
@@ -45,7 +55,7 @@ Slidev 簡報的主要檔案，包含：
 ---
 theme: "@slidev/theme-default" # 主題（必須用引號包裹）
 layout: cover # 首頁佈局
-background: https://... # 背景圖片 URL
+background: /cover.jpg # 背景圖片（從 public/ 目錄載入）
 highlighter: shiki # 代碼高亮工具
 lineNumbers: true # 顯示代碼行號
 ---

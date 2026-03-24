@@ -1,6 +1,6 @@
 ---
-theme: "@slidev/theme-apple-basic"
-background: /cover.jpg
+theme: '../themes/minimal-clean-v2'
+background: https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=2070
 title: AISlidev 教學
 info: |
   ## AISlidev - AI 驅動的簡報平台

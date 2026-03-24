@@ -89,7 +89,6 @@
       <FileBrowser type="presentations" @select="onPresentationSelect" />
     </n-modal>
 
-
     <!-- Settings Modal -->
     <n-modal
       v-model:show="showSettings"
@@ -140,9 +139,7 @@
           </p>
         </div>
         <div class="export-estimate">
-          <p class="estimate-text">
-            ⏱️ 預估時間：每頁約 6-7 秒
-          </p>
+          <p class="estimate-text">⏱️ 預估時間：每頁約 6-7 秒</p>
         </div>
       </div>
       <template #footer>
@@ -162,22 +159,20 @@
       :mask-closable="true"
     >
       <div class="theme-switcher-content">
-        <p class="theme-hint">
-          選擇主題來改變視覺樣式。您的內容將保持不變。
-        </p>
-        
+        <p class="theme-hint">選擇主題來改變視覺樣式。您的內容將保持不變。</p>
+
         <!-- Loading state -->
         <div v-if="loadingThemes" class="theme-loading">
           <div class="theme-loading-spinner">⏳</div>
           <div>載入主題中...</div>
         </div>
-        
+
         <!-- Error state -->
         <div v-else-if="themeLoadError" class="theme-error">
           <div class="theme-error-icon">⚠️</div>
           <div>{{ themeLoadError }}</div>
         </div>
-        
+
         <!-- Theme grid -->
         <div v-else-if="availableThemes.length > 0" class="theme-grid">
           <div
@@ -189,15 +184,29 @@
           >
             <div class="theme-card-header">
               <span class="theme-name">{{ theme.display }}</span>
-              <span v-if="theme.type === 'npm'" class="theme-badge theme-badge-npm">NPM</span>
-              <span v-else-if="theme.type === 'local-slidev'" class="theme-badge theme-badge-local">Local</span>
-              <span v-else-if="theme.type === 'custom'" class="theme-badge theme-badge-custom">Custom</span>
-              <span v-if="currentTheme === theme.name" class="theme-active-mark">✓</span>
+              <span
+                v-if="theme.type === 'npm'"
+                class="theme-badge theme-badge-npm"
+                >NPM</span
+              >
+              <span
+                v-else-if="theme.type === 'local-slidev'"
+                class="theme-badge theme-badge-local"
+                >Local</span
+              >
+              <span
+                v-else-if="theme.type === 'custom'"
+                class="theme-badge theme-badge-custom"
+                >Custom</span
+              >
+              <span v-if="currentTheme === theme.name" class="theme-active-mark"
+                >✓</span
+              >
             </div>
             <div class="theme-description">{{ theme.description }}</div>
           </div>
         </div>
-        
+
         <!-- Empty state -->
         <div v-else class="theme-empty">
           <div class="theme-empty-icon">📦</div>
@@ -275,10 +284,20 @@ const showTutorial = ref(false);
 const showTutorialDetail = ref(false);
 const currentTutorialSection = ref<TutorialSection | null>(null);
 // Theme Switcher state
-const availableThemes = ref<Array<{ name: string; display: string; description: string; type: string; themePath?: string }>>([]);
+const availableThemes = ref<
+  Array<{
+    name: string;
+    display: string;
+    description: string;
+    type: string;
+    themePath?: string;
+  }>
+>([]);
 const loadingThemes = ref(false);
 const themeLoadError = ref<string | null>(null);
-const currentTheme = computed(() => ThemeSwitcher.getCurrentTheme(localContent.value));
+const currentTheme = computed(() =>
+  ThemeSwitcher.getCurrentTheme(localContent.value),
+);
 
 const saveButtonText = computed(() => {
   switch (saveStatus.value) {
@@ -308,91 +327,113 @@ const onPresentationSelect = async (filename: string) => {
     const response = await fetch(`/api/files/presentations/${filename}`);
 
     if (!response.ok) {
-      throw new Error('Failed to load presentation');
+      throw new Error("Failed to load presentation");
     }
 
     const data = await response.json();
 
-    // Load the presentation content
     localContent.value = data.content;
-    emit('update:content', data.content);
+    emit("update:content", data.content);
+
+    window.dispatchEvent(
+      new CustomEvent("select-presentation", {
+        detail: { id: filename },
+      }),
+    );
+
     message.success(`Presentation opened: ${filename}`);
 
-    // Close modal
     showFileExplorer.value = false;
 
-    // Auto-reload preview
     setTimeout(() => {
       previewRef.value?.reload();
     }, 500);
   } catch (error) {
-    console.error('Failed to load presentation:', error);
-    message.error('Failed to load presentation');
+    console.error("Failed to load presentation:", error);
+    message.error("Failed to load presentation");
   }
 };
 
 // Select template from server
 
-
 // Load available themes from server
 const loadThemes = async () => {
   loadingThemes.value = true;
   themeLoadError.value = null;
-  
+
   try {
     const themes = await ThemeSwitcher.getAvailableThemes();
     availableThemes.value = themes;
   } catch (error) {
-    console.error('Failed to load themes:', error);
-    themeLoadError.value = 'Failed to load themes';
+    console.error("Failed to load themes:", error);
+    themeLoadError.value = "Failed to load themes";
     // Fallback to built-in themes
     availableThemes.value = [
-      { name: 'default', display: 'Default', description: 'Slidev default theme', type: 'builtin' },
-      { name: 'seriph', display: 'Seriph', description: 'Elegant serif theme', type: 'builtin' }
+      {
+        name: "default",
+        display: "Default",
+        description: "Slidev default theme",
+        type: "builtin",
+      },
+      {
+        name: "seriph",
+        display: "Seriph",
+        description: "Elegant serif theme",
+        type: "builtin",
+      },
     ];
   } finally {
     loadingThemes.value = false;
   }
 };
 // Select theme and apply to current content
-const selectTheme = async (theme: { name: string; display: string; description: string; type: string; themePath?: string }) => {
+const selectTheme = async (theme: {
+  name: string;
+  display: string;
+  description: string;
+  type: string;
+  themePath?: string;
+}) => {
   try {
     // Determine the theme path to use in frontmatter
     let themePathForFrontmatter: string;
-    
-    if (theme.type === 'npm') {
+
+    if (theme.type === "npm") {
       // NPM theme: use the NPM package name
       themePathForFrontmatter = theme.themePath || theme.name;
-    } else if (theme.type === 'local-slidev') {
+    } else if (theme.type === "local-slidev") {
       // Local Slidev theme: use relative path
       themePathForFrontmatter = theme.themePath || `../themes/${theme.name}`;
     } else {
       // v1 custom theme: just use name (fallback, shouldn't happen)
       themePathForFrontmatter = theme.name;
     }
-    
+
     // Apply theme to current markdown (only changes theme in frontmatter)
-    const newContent = ThemeSwitcher.applyTheme(localContent.value, themePathForFrontmatter);
-    
+    const newContent = ThemeSwitcher.applyTheme(
+      localContent.value,
+      themePathForFrontmatter,
+    );
+
     // Update local content
     localContent.value = newContent;
-    emit('update:content', newContent);
-    
+    emit("update:content", newContent);
+
     // Save immediately
     await performSave();
-    
+
     message.success(`Theme changed to: ${theme.display}`);
-    
+
     // Close modal
     showThemeSwitcher.value = false;
-    
+
     // Wait for Slidev to recompile with new theme
     setTimeout(() => {
       previewRef.value?.reload();
     }, 2000);
   } catch (error) {
-    console.error('Failed to switch theme:', error);
-    message.error('Failed to switch theme');
+    console.error("Failed to switch theme:", error);
+    message.error("Failed to switch theme");
   }
 };
 
@@ -480,15 +521,18 @@ const confirmExport = async () => {
   message.info("Exporting to PPTX...");
 
   try {
-    const response = await fetch(`/api/presentations/${props.presentationId}/export`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `/api/presentations/${props.presentationId}/export`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          separateVClicks: separateVClicks.value,
+        }),
       },
-      body: JSON.stringify({
-        separateVClicks: separateVClicks.value,
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -503,7 +547,7 @@ const confirmExport = async () => {
 
     const blob = await fileResponse.blob();
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${props.presentationId}.pptx`;
     document.body.appendChild(a);
@@ -523,7 +567,6 @@ const confirmExport = async () => {
     exportStatus.value = "idle";
   }
 };
-
 
 const saveSettings = () => {
   // Save to localStorage
@@ -564,7 +607,6 @@ watch(
   },
 );
 
-
 // Load settings on mount
 onMounted(async () => {
   const saved = localStorage.getItem("aislidev-autosave-interval");
@@ -572,7 +614,7 @@ onMounted(async () => {
     autoSaveInterval.value = parseInt(saved);
   }
   startAutoSaveTimer();
-  
+
   // Load available themes from server
   await loadThemes();
 });

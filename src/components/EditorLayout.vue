@@ -30,6 +30,15 @@
         <n-button
           size="small"
           type="tertiary"
+          @click="showTutorial = true"
+          class="toolbar-btn"
+          title="使用教學"
+        >
+          📚 Tutorial
+        </n-button>
+        <n-button
+          size="small"
+          type="tertiary"
           @click="showSettings = true"
           class="toolbar-btn"
         >
@@ -154,22 +163,45 @@
     >
       <div class="theme-switcher-content">
         <p class="theme-hint">
-          Choose a theme to change the visual style. Your content will remain unchanged.
+          選擇主題來改變視覺樣式。您的內容將保持不變。
         </p>
-        <div class="theme-grid">
+        
+        <!-- Loading state -->
+        <div v-if="loadingThemes" class="theme-loading">
+          <div class="theme-loading-spinner">⏳</div>
+          <div>載入主題中...</div>
+        </div>
+        
+        <!-- Error state -->
+        <div v-else-if="themeLoadError" class="theme-error">
+          <div class="theme-error-icon">⚠️</div>
+          <div>{{ themeLoadError }}</div>
+        </div>
+        
+        <!-- Theme grid -->
+        <div v-else-if="availableThemes.length > 0" class="theme-grid">
           <div
             v-for="theme in availableThemes"
             :key="theme.name"
             class="theme-card"
-            :class="{ active: currentTheme === theme.name }"
-            @click="selectTheme(theme.name)"
+            :class="{ 'theme-card-active': currentTheme === theme.name }"
+            @click="selectTheme(theme)"
           >
             <div class="theme-card-header">
-              <h3>{{ theme.display }}</h3>
-              <span v-if="currentTheme === theme.name" class="active-badge">✓</span>
+              <span class="theme-name">{{ theme.display }}</span>
+              <span v-if="theme.type === 'npm'" class="theme-badge theme-badge-npm">NPM</span>
+              <span v-else-if="theme.type === 'local-slidev'" class="theme-badge theme-badge-local">Local</span>
+              <span v-else-if="theme.type === 'custom'" class="theme-badge theme-badge-custom">Custom</span>
+              <span v-if="currentTheme === theme.name" class="theme-active-mark">✓</span>
             </div>
-            <p class="theme-description">{{ theme.description }}</p>
+            <div class="theme-description">{{ theme.description }}</div>
           </div>
+        </div>
+        
+        <!-- Empty state -->
+        <div v-else class="theme-empty">
+          <div class="theme-empty-icon">📦</div>
+          <div>沒有可用的主題</div>
         </div>
       </div>
       <template #footer>
@@ -178,6 +210,21 @@
         </div>
       </template>
     </n-modal>
+
+    <!-- Tutorial Modal -->
+    <TutorialModal
+      :is-open="showTutorial"
+      @close="showTutorial = false"
+      @open-detail="onOpenTutorialDetail"
+    />
+
+    <!-- Tutorial Detail -->
+    <TutorialDetail
+      :is-open="showTutorialDetail"
+      :section="currentTutorialSection"
+      @close="closeTutorialDetail"
+      @back="backToTutorialList"
+    />
   </div>
 </template>
 
@@ -189,8 +236,10 @@ import "splitpanes/dist/splitpanes.css";
 import CodeMirrorEditor from "./CodeMirrorEditor.vue";
 import SlidevPreview from "./SlidevPreview.vue";
 import FileBrowser from "./FileBrowser.vue";
+import TutorialModal from "./TutorialModal.vue";
+import TutorialDetail from "./TutorialDetail.vue";
 import { ThemeSwitcher } from "../client/services/ThemeSwitcher";
-
+import type { TutorialSection } from "../client/data/tutorialContent";
 interface Props {
   presentationId: string;
   content: string;
@@ -221,8 +270,14 @@ const exportStatus = ref<"idle" | "exporting" | "exported">("idle");
 const showExportOptions = ref(false);
 const separateVClicks = ref(false);
 
+// Tutorial state
+const showTutorial = ref(false);
+const showTutorialDetail = ref(false);
+const currentTutorialSection = ref<TutorialSection | null>(null);
 // Theme Switcher state
-const availableThemes = ThemeSwitcher.getAvailableThemes();
+const availableThemes = ref<Array<{ name: string; display: string; description: string; type: string; themePath?: string }>>([]);
+const loadingThemes = ref(false);
+const themeLoadError = ref<string | null>(null);
 const currentTheme = computed(() => ThemeSwitcher.getCurrentTheme(localContent.value));
 
 const saveButtonText = computed(() => {
@@ -278,11 +333,46 @@ const onPresentationSelect = async (filename: string) => {
 
 // Select template from server
 
-// Select theme and apply to current content
-const selectTheme = async (themeName: string) => {
+
+// Load available themes from server
+const loadThemes = async () => {
+  loadingThemes.value = true;
+  themeLoadError.value = null;
+  
   try {
+    const themes = await ThemeSwitcher.getAvailableThemes();
+    availableThemes.value = themes;
+  } catch (error) {
+    console.error('Failed to load themes:', error);
+    themeLoadError.value = 'Failed to load themes';
+    // Fallback to built-in themes
+    availableThemes.value = [
+      { name: 'default', display: 'Default', description: 'Slidev default theme', type: 'builtin' },
+      { name: 'seriph', display: 'Seriph', description: 'Elegant serif theme', type: 'builtin' }
+    ];
+  } finally {
+    loadingThemes.value = false;
+  }
+};
+// Select theme and apply to current content
+const selectTheme = async (theme: { name: string; display: string; description: string; type: string; themePath?: string }) => {
+  try {
+    // Determine the theme path to use in frontmatter
+    let themePathForFrontmatter: string;
+    
+    if (theme.type === 'npm') {
+      // NPM theme: use the NPM package name
+      themePathForFrontmatter = theme.themePath || theme.name;
+    } else if (theme.type === 'local-slidev') {
+      // Local Slidev theme: use relative path
+      themePathForFrontmatter = theme.themePath || `../themes/${theme.name}`;
+    } else {
+      // v1 custom theme: just use name (fallback, shouldn't happen)
+      themePathForFrontmatter = theme.name;
+    }
+    
     // Apply theme to current markdown (only changes theme in frontmatter)
-    const newContent = ThemeSwitcher.applyTheme(localContent.value, themeName);
+    const newContent = ThemeSwitcher.applyTheme(localContent.value, themePathForFrontmatter);
     
     // Update local content
     localContent.value = newContent;
@@ -291,7 +381,7 @@ const selectTheme = async (themeName: string) => {
     // Save immediately
     await performSave();
     
-    message.success(`Theme changed to: ${themeName.split('/').pop()}`);
+    message.success(`Theme changed to: ${theme.display}`);
     
     // Close modal
     showThemeSwitcher.value = false;
@@ -476,12 +566,15 @@ watch(
 
 
 // Load settings on mount
-onMounted(() => {
+onMounted(async () => {
   const saved = localStorage.getItem("aislidev-autosave-interval");
   if (saved) {
     autoSaveInterval.value = parseInt(saved);
   }
   startAutoSaveTimer();
+  
+  // Load available themes from server
+  await loadThemes();
 });
 
 // Cleanup on unmount
@@ -493,6 +586,23 @@ onUnmounted(() => {
     clearInterval(autoSaveTimer);
   }
 });
+
+// Tutorial methods
+function onOpenTutorialDetail(section: TutorialSection) {
+  currentTutorialSection.value = section;
+  showTutorial.value = false;
+  showTutorialDetail.value = true;
+}
+
+function closeTutorialDetail() {
+  showTutorialDetail.value = false;
+  currentTutorialSection.value = null;
+}
+
+function backToTutorialList() {
+  showTutorialDetail.value = false;
+  showTutorial.value = true;
+}
 </script>
 
 <style scoped>
@@ -633,7 +743,7 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.theme-card.active {
+.theme-card-active {
   border-color: #18a058;
   background: #e6f4ea;
   box-shadow: 0 2px 8px rgba(24, 160, 88, 0.2);
@@ -664,5 +774,60 @@ onUnmounted(() => {
   font-size: 13px;
   color: #666;
   line-height: 1.5;
+}
+
+/* Loading, Error, Empty states */
+.theme-loading,
+.theme-error,
+.theme-empty {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.theme-loading-spinner,
+.theme-error-icon,
+.theme-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.theme-error {
+  color: #ef4444;
+}
+
+/* Theme card elements */
+.theme-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.theme-badge {
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.theme-badge-npm {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.theme-badge-local {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+}
+
+.theme-badge-custom {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.theme-active-mark {
+  color: #18a058;
+  font-size: 20px;
+  font-weight: bold;
 }
 </style>

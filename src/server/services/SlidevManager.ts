@@ -33,12 +33,11 @@ export class SlidevManager {
     const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
 
     // Don't generate custom vite.config.ts - let Slidev use its default config
-    // This ensures UnoCSS and theme plugins are properly loaded
-    // The Slidev CLI will auto-detect and use its internal vite configuration
-
+    // Custom base URL breaks Vue initialization
+    // Slidev is designed to be accessed directly without proxy
     const slidevProcess = spawn(
       "npx",
-      ["@slidev/cli", "slides.md", "--port", port.toString(), "--base", `/slidev/${port}/`, "--log", "info"],  // 使用官方支援的 @slidev/cli 套件名稱（npx slidev 不被支援）
+      ["@slidev/cli", "slides.md", "--port", port.toString(), "--remote", "--log", "info"],  // 加上 --remote 啟用 0.0.0.0 綁定
       {
         cwd: presentationDir,
         stdio: ["pipe", "pipe", "pipe"],

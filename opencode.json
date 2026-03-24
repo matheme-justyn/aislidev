@@ -7,11 +7,6 @@
     "reserved": 20000
   },
   "provider": {
-    "anthropic": {
-      "options": {
-        "timeout": 900000
-      }
-    }
   },
   "mcp": {
     "filesystem": {

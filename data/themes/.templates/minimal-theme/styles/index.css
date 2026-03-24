@@ -1,0 +1,38 @@
+/* {{THEME_NAME}} Theme Styles */
+
+:root {
+  /* Primary Colors */
+  --slidev-theme-primary: {{PRIMARY_COLOR}};
+  --slidev-theme-accent: {{ACCENT_COLOR}};
+  
+  /* Background & Text */
+  --slidev-theme-background: {{BACKGROUND_COLOR}};
+  --slidev-theme-text: {{TEXT_COLOR}};
+  
+  /* Code Highlighting */
+  --slidev-code-background: {{CODE_BG_COLOR}};
+  --slidev-code-foreground: {{CODE_FG_COLOR}};
+}
+
+/* Global Layout Styles */
+.slidev-layout {
+  background: var(--slidev-theme-background);
+  color: var(--slidev-theme-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--slidev-theme-primary);
+}
+
+/* Links */
+a {
+  color: var(--slidev-theme-accent);
+}
+
+/* Code Blocks */
+pre, code {
+  background: var(--slidev-code-background);
+  color: var(--slidev-code-foreground);
+}

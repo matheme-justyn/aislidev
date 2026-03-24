@@ -1,0 +1,161 @@
+/* Professional Dark Theme */
+/* 專業深色主題 - 適合技術簡報和企業演示 */
+
+:root {
+  /* Primary Colors */
+  --slidev-theme-primary: #5d8aa8;
+  --slidev-theme-accent: #4db8a8;
+  
+  /* Background & Text */
+  --slidev-theme-background: #1a1a1a;
+  --slidev-theme-background-alt: #2d2d2d;
+  --slidev-theme-text: #e8e8e8;
+  --slidev-theme-text-secondary: #b8b8b8;
+  --slidev-theme-text-muted: #888888;
+  
+  /* Code Highlighting */
+  --slidev-code-background: #2d2d2d;
+  --slidev-code-foreground: #e8e8e8;
+  
+  /* Borders */
+  --slidev-theme-border: #404040;
+  
+  /* Font Sizes */
+  --slidev-font-size-h1: 3.5rem;
+  --slidev-font-size-h2: 2.5rem;
+  --slidev-font-size-h3: 1.75rem;
+  --slidev-font-size-body: 1.25rem;
+  --slidev-font-size-code: 0.9em;
+  
+  /* Spacing */
+  --slidev-slides-padding: 2rem;
+  --slidev-element-gap: 1rem;
+}
+
+/* Global Layout Styles */
+.slidev-layout {
+  background: var(--slidev-theme-background);
+  color: var(--slidev-theme-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  padding: var(--slidev-slides-padding);
+}
+
+/* Headings */
+h1 {
+  color: var(--slidev-theme-primary);
+  font-size: var(--slidev-font-size-h1);
+  font-weight: 700;
+  margin-bottom: var(--slidev-element-gap);
+}
+
+h2 {
+  color: var(--slidev-theme-primary);
+  font-size: var(--slidev-font-size-h2);
+  font-weight: 600;
+  margin-bottom: calc(var(--slidev-element-gap) * 0.8);
+}
+
+h3 {
+  color: var(--slidev-theme-text);
+  font-size: var(--slidev-font-size-h3);
+  font-weight: 600;
+  margin-bottom: calc(var(--slidev-element-gap) * 0.6);
+}
+
+/* Paragraphs and Lists */
+p {
+  font-size: var(--slidev-font-size-body);
+  line-height: 1.6;
+  margin-bottom: var(--slidev-element-gap);
+}
+
+ul, ol {
+  font-size: var(--slidev-font-size-body);
+  line-height: 1.8;
+  margin-left: 1.5em;
+}
+
+li {
+  margin-bottom: calc(var(--slidev-element-gap) * 0.5);
+}
+
+/* Links */
+a {
+  color: var(--slidev-theme-accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Code Blocks */
+pre {
+  background: var(--slidev-code-background) !important;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: var(--slidev-element-gap) 0;
+}
+
+code {
+  font-family: 'Fira Code', 'Cascadia Code', Consolas, Monaco, 'Courier New', monospace;
+  font-size: var(--slidev-font-size-code);
+  background: var(--slidev-code-background);
+  color: var(--slidev-code-foreground);
+  padding: 0.2em 0.4em;
+  border-radius: 0.3em;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--slidev-theme-accent);
+  padding-left: 1rem;
+  margin: var(--slidev-element-gap) 0;
+  color: var(--slidev-theme-text-secondary);
+  font-style: italic;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--slidev-element-gap) 0;
+}
+
+th, td {
+  border: 1px solid var(--slidev-theme-border);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+th {
+  background: var(--slidev-theme-background-alt);
+  color: var(--slidev-theme-primary);
+  font-weight: 600;
+}
+
+/* Strong and Emphasis */
+strong {
+  color: var(--slidev-theme-primary);
+  font-weight: 700;
+}
+
+em {
+  color: var(--slidev-theme-accent);
+  font-style: italic;
+}
+
+/* Horizontal Rules */
+hr {
+  border: none;
+  border-top: 2px solid var(--slidev-theme-border);
+  margin: calc(var(--slidev-element-gap) * 2) 0;
+}

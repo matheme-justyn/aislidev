@@ -183,20 +183,27 @@ export class ThemeLoader {
     name: string;
     display: string;
     description: string;
-    type: 'npm' | 'custom';
+    type: 'npm' | 'custom' | 'local-slidev';
+    themePath?: string;
   }>> {
     try {
       const themes: Array<{
         name: string;
         display: string;
         description: string;
-        type: 'npm' | 'custom';
+        type: 'npm' | 'custom' | 'local-slidev';
+        themePath?: string;
       }> = [];
       
       // Scan themes directory
       const themeNames = await fs.readdir(this.themesDir);
       
       for (const themeName of themeNames) {
+        // Skip hidden files and templates
+        if (themeName.startsWith('.')) {
+          continue;
+        }
+        
         const themePath = path.join(this.themesDir, themeName);
         
         try {
@@ -207,7 +214,29 @@ export class ThemeLoader {
             continue;
           }
           
-          // Load theme config
+          // Check for Slidev v2 theme (package.json + styles/)
+          const packageJsonPath = path.join(themePath, 'package.json');
+          const stylesPath = path.join(themePath, 'styles');
+          
+          try {
+            await fs.access(packageJsonPath);
+            await fs.access(stylesPath);
+            
+            // This is a Slidev v2 theme
+            const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+            themes.push({
+              name: themeName,
+              display: packageJson.name?.replace(/^slidev-theme-/, '') || themeName,
+              description: packageJson.description || `Local Slidev theme: ${themeName}`,
+              type: 'local-slidev',
+              themePath: `../themes/${themeName}`,
+            });
+            continue;
+          } catch {
+            // Not a Slidev v2 theme, try v1 YAML format
+          }
+          
+          // Try loading v1 YAML theme
           const config = await ThemeLoader.loadTheme(themePath);
           
           // Extract metadata
@@ -221,6 +250,7 @@ export class ThemeLoader {
                 .join(' '),
               description: `NPM Theme: ${config.npm}`,
               type: 'npm',
+              themePath: config.npm,
             });
           } else if (ThemeLoader.isCustomTheme(config)) {
             themes.push({

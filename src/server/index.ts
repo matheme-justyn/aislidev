@@ -134,7 +134,6 @@ const slidevProxies = new Map();
 
 // Vite special paths proxy (/@fs/, /@vite/, etc.)
 // Extract target port from Referer header
-let lastUsedPort: number | null = null;
 
 await fastify.use((req, res, next) => {
   const url = req.url || '';
@@ -150,7 +149,6 @@ await fastify.use((req, res, next) => {
     
     if (refererMatch) {
       const port = parseInt(refererMatch[1]);
-      lastUsedPort = port;  // Remember this port
       console.log(`[Vite Proxy] Proxying to port ${port}`);
       
       // Get or create proxy for this port
@@ -186,8 +184,47 @@ await fastify.use((req, res, next) => {
       const proxy = createProxyMiddleware({
         target: `http://localhost:${port}`,
         changeOrigin: true,
-        ws: true, // Enable WebSocket proxying
-        
+        ws: true,
+        pathRewrite: (path) => path.replace(`/slidev/${port}`, ''),
+        selfHandleResponse: true,
+        on: {
+          proxyRes: (proxyRes: any, _req: any, res: any) => {
+            const contentType = proxyRes.headers['content-type'] || '';
+            
+            // Only intercept HTML responses
+            if (contentType.includes('text/html')) {
+              let body = '';
+              proxyRes.on('data', (chunk: any) => {
+                body += chunk.toString('utf8');
+              });
+              proxyRes.on('end', () => {
+                // Fix relative Vite paths by adding /slidev/${port} prefix
+                // /@fs/... → /slidev/${port}/@fs/...
+                // /@vite/... → /slidev/${port}/@vite/...
+                // /@id/... → /slidev/${port}/@id/...
+                body = body.replace(/(<script[^>]*src=")(\/@[^"]*)/gi, `$1/slidev/${port}$2`);
+                body = body.replace(/(<link[^>]*href=")(\/@[^"]*)/gi, `$1/slidev/${port}$2`);
+                body = body.replace(/(<img[^>]*src=")(\/@[^"]*)/gi, `$1/slidev/${port}$2`);
+                // Set response headers
+                res.statusCode = proxyRes.statusCode || 200;
+                Object.keys(proxyRes.headers).forEach(key => {
+                  if (key.toLowerCase() !== 'content-length') {
+                    res.setHeader(key, proxyRes.headers[key]);
+                  }
+                });
+                res.setHeader('Content-Length', Buffer.byteLength(body));
+                res.end(body);
+              });
+            } else {
+              // For non-HTML, forward directly
+              res.statusCode = proxyRes.statusCode || 200;
+              Object.keys(proxyRes.headers).forEach(key => {
+                res.setHeader(key, proxyRes.headers[key]);
+              });
+              proxyRes.pipe(res);
+            }
+          },
+        },
       });
       slidevProxies.set(port, proxy);
       

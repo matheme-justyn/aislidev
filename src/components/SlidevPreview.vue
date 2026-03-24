@@ -7,7 +7,7 @@
       :key="iframeKey"
       class="preview-frame"
       frameborder="0"
-      allow="fullscreen"
+      allow="fullscreen; screen-wake-lock"
       @load="onLoad"
     ></iframe>
 

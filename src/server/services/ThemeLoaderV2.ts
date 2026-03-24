@@ -11,7 +11,7 @@ export interface ThemeInfo {
   id: string;
   name: string;
   description: string;
-  type: "local" | "npm";
+  type: "local-slidev" | "npm";
   themePath: string;
 }
 
@@ -48,7 +48,7 @@ export class ThemeLoaderV2 {
             id: entry.name,
             name: packageJson.name || entry.name,
             description: packageJson.description || "",
-            type: "local",
+            type: "local-slidev",
             themePath: relativeThemePath,
           });
         } catch (error) {

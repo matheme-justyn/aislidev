@@ -1,9 +1,0 @@
-# Slidev Seriph Theme (NPM Proxy)
-# 官方 Seriph 主題 - 優雅的襯線字體風格
-
-# NPM 主題代理 - 自動安裝 @slidev/theme-seriph
-npm: "@slidev/theme-seriph"
-
-# 可選：覆蓋部分配置
-# colors:
-#   primary: "#5d8aa8"

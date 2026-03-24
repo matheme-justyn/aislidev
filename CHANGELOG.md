@@ -5,7 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - 2026-03-24
+## [0.7.0] - 2026-03-24
+
+### Added
+
+- **Theme System v2 - Slidev Native Integration**
+  - Complete rewrite using Slidev's native theme mechanism
+  - Direct NPM theme support via frontmatter: `theme: '@slidev/theme-seriph'`
+  - Pre-installed official themes in container (default, seriph, apple-basic)
+  - Local theme creation with `package.json` + `styles/index.css` structure
+  - Full compatibility with Slidev theme ecosystem
+  - Theme templates in `data/themes/.templates/`
+
+- **Documentation**
+  - New `docs/guides/THEME_SYSTEM_V2.md` - Complete v2 theme system guide
+  - Updated tutorial content to reflect v2 theme system
+  - Migration guide from v1 to v2
+
+### Changed
+
+- **Theme Architecture** (BREAKING)
+  - Replaced YAML-based theme system with Slidev native structure
+  - Themes now use `package.json` (metadata) + `styles/index.css` (CSS variables)
+  - Local themes use relative paths: `theme: '../themes/my-theme'`
+  - NPM themes specified directly in frontmatter, no proxy files needed
+
+- **Theme Configuration**
+  - Replaced YAML color configs with CSS variables (e.g., `--slidev-theme-primary`)
+  - Removed `ThemeLoader`, `CSSGenerator`, `NPMThemeManager` services
+  - Simplified theme loading to use Slidev's built-in mechanisms
+
+- **Project Cleanup**
+  - Removed obsolete v1 YAML themes (archived in `data/themes/.archive-v1/`)
+  - Removed outdated theme directories (`themes/`, `slidev-themes/`)
+  - Removed AI tool configs (`.claude/`, `.roo/`)
+  - Removed obsolete documentation (`THEME_CONFIGURATION.md`)
+  - Updated `.gitignore` for temporary files
+
+### Fixed
+
+- **YAML Syntax Error**: NPM theme names with `@` now properly quoted in frontmatter
+- **Theme Switching**: Theme changes correctly update `slides.md` frontmatter
+- **Container Themes**: Official themes pre-installed to avoid runtime installation issues
+
+### Deprecated
+
+- **v1 YAML Theme System** (v0.6.0): No longer supported, migrate to v2
+
+### Migration Guide (v0.6.0 → v2)
+
+**NPM Themes:**
+
+- Before (v1): Create `theme.yaml` with `npm: "@slidev/theme-seriph"`
+- After (v2): Use directly in `slides.md`: `theme: '@slidev/theme-seriph'`
+
+**Local Themes:**
+
+- Before (v1): `theme.yaml` with YAML config
+- After (v2): `package.json` + `styles/index.css` with CSS variables
+
+See `docs/guides/THEME_SYSTEM_V2.md` for complete migration instructions.
+
+## [0.6.0] - 2026-03-24 [DEPRECATED]
+
+> **⚠️ DEPRECATED**: This version's YAML theme system is deprecated. Migrate to v2 (see Unreleased section above).
 
 ### Added
 
@@ -132,7 +195,6 @@ For users upgrading from v0.5.x:
   - Removed Template Browser to focus on Theme Switcher
   - Clearer separation: Themes change style, not content
 
-
 - **Template vs Theme Clarification**
   - Template Browser remains for creating new presentations from templates
   - Theme Switcher is for changing visual style of existing presentations
@@ -158,6 +220,7 @@ For users upgrading from v0.5.x:
   - Each template has **unique visual style**: different color schemes, typography, and layouts
   - All templates use CSS variables and scoped styles for customization
   - Templates accessible via existing template browser in UI
+
 ### Changed
 
 - **BrowserExporter API**
@@ -201,7 +264,6 @@ For users upgrading from v0.5.x:
   - Added background image usage guide with `layout: cover` requirement
   - Added troubleshooting section for common export issues
 
-
 ## [0.3.3] - 2026-03-23
 
 ### Summary
@@ -232,7 +294,6 @@ For users upgrading from v0.5.x:
   - Removed custom `vite.config.ts` generation for Slidev instances
   - Changed `NODE_ENV` from `production` to `development` for Slidev
   - Allows Slidev CLI to auto-load default plugins (UnoCSS, Vue, themes)
-
 
 ## [0.3.2] - 2026-03-18
 
@@ -286,6 +347,7 @@ For users upgrading from v0.5.x:
 ### Contributors
 
 Special thanks to **@tony140407** for PR #2:
+
 - Identified all three PPTX export issues independently
 - Provided complete, well-structured PR with clear descriptions
 - Followed Conventional Commits format
@@ -296,6 +358,7 @@ This contribution significantly improved the PPTX export feature!
 ### Known Issues
 
 ⚠️ **PPTX Background Images Still Show White** (ongoing investigation)
+
 - PR #2 fixed URL routing and UX, but background loading issue remains
 - Root cause: Playwright in Express service process cannot load external CSS `background-image`
 - Standalone test scripts work (844KB), service fails (97KB)
@@ -379,20 +442,22 @@ This contribution significantly improved the PPTX export feature!
 ```typescript
 const browser = await chromium.launch({
   headless: true,
-  channel: 'chromium', // CRITICAL: Forces full Chrome binary
+  channel: "chromium", // CRITICAL: Forces full Chrome binary
   args: [
-    '--disable-web-security',
-    '--disable-features=IsolateOrigins,site-per-process',
-    '--no-sandbox',
+    "--disable-web-security",
+    "--disable-features=IsolateOrigins,site-per-process",
+    "--no-sandbox",
   ],
 });
 ```
 
 **Why This Matters**:
+
 - `headless: true` alone → uses `chromium-headless-shell` (stripped binary, no external CSS backgrounds)
 - `headless: true` + `channel: 'chromium'` → uses full Chrome in headless mode (proper rendering)
 
 **File Size Diagnostic**:
+
 - Background loaded correctly: ~845 KB per screenshot
 - White background (broken): ~97 KB per screenshot
 
@@ -467,7 +532,8 @@ This measurement was crucial for debugging and verifying the fix.
 
 **For users**: No action required. PPTX export now works correctly with actual content!
 
-**For developers**: 
+**For developers**:
+
 - Containerfile includes Playwright Chromium installation with `--with-deps`
 - Debian bookworm-slim base image required (glibc for Playwright)
 - Export timeout set to 120 seconds (configurable)
@@ -487,12 +553,12 @@ This measurement was crucial for debugging and verifying the fix.
 - **No text editing**: Slides are images, not editable text in PowerPoint
 - **Requires Playwright**: +180MB container image size
 
-**Mitigation**: These trade-offs are acceptable for working functionality.
----
+## **Mitigation**: These trade-offs are acceptable for working functionality.
 
 ## [0.2.0] - 2026-03-10
 
 ### Added
+
 - **Server-side File Browser** - Replace local file picker with server-side file system browser
   - Created `FileBrowser.vue` component for browsing `data/` directory structure
   - Added `/api/files/presentations` endpoint to list presentation files
@@ -526,6 +592,7 @@ This measurement was crucial for debugging and verifying the fix.
   - Loading indicators for file operations
 
 ### Changed
+
 - **Template Selection UX** - Changed from dropdown list to file browser modal
   - Users browse actual template files in `data/templates/` directory
   - More intuitive file management workflow
@@ -534,10 +601,12 @@ This measurement was crucial for debugging and verifying the fix.
 - **Toolbar Layout** - Right-aligned Export PPTX and Refresh buttons for better visual hierarchy
 
 ### Removed
+
 - **Hardcoded Template List** - Removed `constants/templates.ts` with static template definitions
 - **Old TemplateModal Component** - Removed dropdown-based `TemplateModal.vue`, replaced by `FileBrowser.vue`
 
 ### Fixed
+
 - **WebSocket Connection Failures** - Slidev HMR and `@server-reactive` endpoints now work correctly
   - Root cause: Previous fetch-based proxy couldn't handle WebSocket upgrade requests
   - Solution: Implemented proper WebSocket proxy with upgrade event handling
@@ -546,11 +615,13 @@ This measurement was crucial for debugging and verifying the fix.
 - **Demo Theme** - Updated `data/aislidev-demo/slides.md` to use `theme: default` (was using removed theme)
 
 ### Documentation
+
 - **ADR-005** - WebSocket Proxy for Slidev (architecture decision record)
 - **DATA_DIRECTORY.md** - User guide for `data/` folder structure and usage
 - **ADR Index** - Updated `docs/adr/README.md` with ADR-005 entry
 
 ### Known Issues
+
 - Some `/@server-reactive/nav` requests return 404 (missing `/slidev/:port/` prefix)
   - Does not affect main functionality (HMR, preview, navigation all work)
   - Cosmetic console warning only
@@ -559,6 +630,7 @@ This measurement was crucial for debugging and verifying the fix.
 ## [0.1.5] - 2026-03-06
 
 ### Added
+
 - **Guting Slidev Themes** - Three professional presentation themes for Guting (National Cybersecurity Institute)
   - **guting-lightweight** - Quick start theme with 4 essential layouts (cover, default, vertical-text, vertical-title)
   - **guting-standard** ⭐ - Complete professional theme with 23 layouts covering all presentation needs
@@ -573,6 +645,7 @@ This measurement was crucial for debugging and verifying the fix.
   - Themes automatically load with correct layouts and styling
 
 ### Changed
+
 - **Git Ignore** - Added `*.pptx` to exclude PowerPoint source files from version control
 
 ---
@@ -580,9 +653,11 @@ This measurement was crucial for debugging and verifying the fix.
 ## [0.1.4] - 2026-03-03
 
 ### Summary
+
 **Critical fix**: Resolved Slidev iframe preview display issue - right panel now correctly shows presentations through proxy routing with proper Vite @fs path handling.
 
 ### Fixed
+
 - **Slidev iframe preview** - Fixed blank/404 errors when loading Slidev presentations in right panel
   - Root cause: Vite's `@fs` requires double slash (`@fs//`) for absolute paths, and requests must include Slidev's `--base` path
   - Implemented proxy routing architecture: `/slidev/:port/*` routes forward to Slidev Vite server with base path
@@ -598,14 +673,17 @@ This measurement was crucial for debugging and verifying the fix.
   - Modified `SlidevManager.ts` to include base parameter
 
 ### Added
+
 - **Dynamic port allocation** - Added `get-port` package for automatic Slidev port assignment (13030-13040 range)
 - **Simplified preview component** - Removed overlay/buttons from `SlidevPreview.vue`, focusing on core iframe functionality
 
 ### Changed
+
 - **Editor layout** - Adjusted panel arrangement for better preview visibility
 - **Presentation routes** - Updated API endpoints to support new proxy architecture
 
 ### Planned
+
 - AI-assisted content generation
 - Advanced presentation management features
 
@@ -614,10 +692,12 @@ This measurement was crucial for debugging and verifying the fix.
 ## [0.1.3] - 2026-03-03
 
 ### Summary
+
 **Critical fix**: Resolved Slidev preview iframe rendering failure caused by missing compile-time constants in dev mode.
 
 ### Fixed
-- **Slidev preview rendering** - Fixed "__DEV__ is not defined" and "__SLIDEV_HASH_ROUTE__ is not defined" errors
+
+- **Slidev preview rendering** - Fixed "**DEV** is not defined" and "**SLIDEV_HASH_ROUTE** is not defined" errors
   - Root cause: Vite's `define` config behaves differently in dev vs build mode
   - In dev mode, Vite expects runtime environment to provide constants, but browser has no global variables
   - Created custom Vite plugin (`forceSlidevConstantsPlugin`) to force-replace all Slidev constants during transform phase
@@ -628,6 +708,7 @@ This measurement was crucial for debugging and verifying the fix.
 - **Build process** - Added `copy:templates` script to ensure non-TypeScript files are included in dist
 
 ### Documentation
+
 - **ADR-004**: Created comprehensive technical documentation for Slidev Vite dev mode fix
   - Detailed root cause analysis with Vite define mechanism explanation
   - Complete solution implementation guide
@@ -637,6 +718,7 @@ This measurement was crucial for debugging and verifying the fix.
 - Updated ADR index in `docs/adr/README.md` and `AGENTS.md`
 
 ### Technical Details
+
 - **Problem**: Slidev subprocesses run in dev server mode (`npx slidev`)
   - Vite's `define` config in dev mode expects runtime globals, doesn't compile constants
   - `@slidev/client/env.ts` directly references constants like `__DEV__`, `__SLIDEV_HASH_ROUTE__`, etc.
@@ -649,9 +731,11 @@ This measurement was crucial for debugging and verifying the fix.
 - **Verification**: Browser Console clean, preview panel renders correctly, multiple presentations work
 
 ### Changed
+
 - **README.md**: Updated version badge from 0.1.0 to 0.1.2 (sync with package.json)
 
 ### Chores
+
 - Added `.gitattributes` to exclude build outputs from GitHub language statistics
 
 ---
@@ -659,9 +743,11 @@ This measurement was crucial for debugging and verifying the fix.
 ## [0.1.2] - 2026-02-26
 
 ### Summary
+
 Critical bug fix for Slidev presentation startup in container environments.
 
 ### Fixed
+
 - **Slidev startup detection** - Fixed timeout issue preventing presentations from starting
   - Increased `waitForReady` timeout from 10s to 30s for container environments
   - Updated ready signal detection to match Slidev v52.11.5 output format
@@ -671,7 +757,8 @@ Critical bug fix for Slidev presentation startup in container environments.
   - Better debugging information when presentation fails to start
 
 ### Technical Details
-- Slidev v52.11.5 outputs "public slide show   > http://localhost:PORT/" instead of "ready in" or "Local:"
+
+- Slidev v52.11.5 outputs "public slide show > http://localhost:PORT/" instead of "ready in" or "Local:"
 - Container environments require longer startup times compared to local development
 - Added comprehensive logging for Slidev process lifecycle events
 
@@ -680,9 +767,11 @@ Critical bug fix for Slidev presentation startup in container environments.
 ## [0.1.1] - 2026-02-26
 
 ### Summary
+
 Infrastructure improvements: integrated my-vibe-scaffolding template, standardized project structure, and improved documentation for AI agent compatibility.
 
 ### Added
+
 - **Scaffolding infrastructure** from my-vibe-scaffolding v1.6.0
   - Version management system with pre-push hook
   - GitHub templates (issue, PR, CI placeholder)
@@ -693,6 +782,7 @@ Infrastructure improvements: integrated my-vibe-scaffolding template, standardiz
 - **Project configuration** (config.toml, opencode.json)
 
 ### Changed
+
 - **AGENTS.md**: Simplified to English-only format (1056 → 850 lines)
   - Removed 187 lines of Chinese HTML comments
   - Updated language convention to English-only
@@ -706,6 +796,7 @@ Infrastructure improvements: integrated my-vibe-scaffolding template, standardiz
 - **SECURITY.md**: Rewritten for AISliDev project (was scaffolding template)
 
 ### Project Structure
+
 ```
 aislidev/
 ├── .template/          # Scaffolding infrastructure (reference only)
@@ -722,12 +813,14 @@ aislidev/
 ```
 
 ### Documentation
+
 - Standardized ADR location following industry best practices
 - Improved AGENTS.md for universal AI comprehension
 - Added comprehensive contribution guidelines
 - Added security policy and reporting procedures
 
 ### References
+
 - [my-vibe-scaffolding](https://github.com/matheme-justyn/my-vibe-scaffolding) v1.6.0
 - [ADR community standard](https://adr.github.io/)
 
@@ -736,9 +829,11 @@ aislidev/
 ## [0.1.0] - 2026-02-11
 
 ### Summary
+
 Lightweight containerization architecture with Fastify server implementation. This is the first functional release with a working web server and environment configuration system.
 
 ### Added
+
 - **Lightweight containerization architecture** (single container with Podman/Docker support)
 - **Fastify-based web server** with TypeScript
 - **Environment configuration system** (.env support with dotenv)
@@ -751,17 +846,20 @@ Lightweight containerization architecture with Fastify server implementation. Th
   - ADR-002: Lightweight containerization architecture
 
 ### Changed
+
 - **Simplified README.md** to be human-friendly and concise (under 250 lines)
 - Added Slidev features explanation for users unfamiliar with Slidev
 - Simplified deployment section (Podman-focused)
 
 ### Documentation
+
 - Created ADR-002 documenting lightweight containerization decision
 - Added comprehensive port configuration guide
 - Established documentation maintenance standards
 - Updated ADR index with new ADR-002
 
 ### Technical Details
+
 - Node.js 20+ with ES modules
 - Fastify for web framework
 - TypeScript for type safety
@@ -773,9 +871,11 @@ Lightweight containerization architecture with Fastify server implementation. Th
 ## [0.0.1] - 2026-02-11
 
 ### Summary
+
 Initial project framework setup. No functional features yet - this release establishes the development infrastructure and documentation standards.
 
 ### Added
+
 - Initial project setup with AI-first development framework
 - Claude Code integration (CLAUDE.md, agents, skills structure)
 - Architecture Decision Records (ADR) system
@@ -785,10 +885,12 @@ Initial project framework setup. No functional features yet - this release estab
 - CHANGELOG.md following Keep a Changelog format
 
 ### Changed
+
 - Project reset from v1 architecture
 - New documentation-driven approach
 
 ### Documentation
+
 - Created comprehensive CLAUDE.md configuration
 - Established ADR-001 for version control strategy
 - Added MEMORY_GUIDE.md for Claude Code memory system
@@ -799,11 +901,13 @@ Initial project framework setup. No functional features yet - this release estab
 ## v1 (Archived - No Official Release)
 
 ### Summary
+
 First version using frontend/backend separation with containerization. **Archived due to architectural issues.**
 
 See `ARCHIVE_v1_design.md` for complete v1 documentation and lessons learned.
 
 ### Key Issues (v1)
+
 - Slidev iframe integration problems
 - Over-engineered architecture
 - Complex port management
@@ -814,9 +918,11 @@ See `ARCHIVE_v1_design.md` for complete v1 documentation and lessons learned.
 ## Version Format
 
 Following Semantic Versioning:
+
 - **MAJOR.MINOR.PATCH** (e.g., 1.2.3)
 
 Version bumps triggered by:
+
 - **MAJOR**: Breaking changes (incompatible API changes)
 - **MINOR**: New features (backward-compatible)
 - **PATCH**: Bug fixes (backward-compatible)

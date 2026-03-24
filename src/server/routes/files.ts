@@ -3,14 +3,13 @@ import { promises as fs } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { ThemeLoader } from '../services/ThemeLoader.js';
+import { ThemeLoaderV2 } from "../services/ThemeLoaderV2.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Initialize ThemeLoader
 const projectRoot = path.resolve(__dirname, "../../..");
-const themeLoader = new ThemeLoader(path.join(projectRoot, "data/themes"));
+const themeLoader = new ThemeLoaderV2(path.join(projectRoot, "data/themes"));
 
 interface FilesRoutesOptions {
   storageDir: string;
@@ -48,7 +47,6 @@ export default async function filesRoutes(
     }
   });
 
-
   // List available Slidev themes
   fastify.get("/files/themes", async (_request, reply) => {
     try {
@@ -81,5 +79,4 @@ export default async function filesRoutes(
       }
     },
   );
-
 }

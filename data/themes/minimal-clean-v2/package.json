@@ -1,0 +1,17 @@
+{
+  "name": "slidev-theme-minimal-clean",
+  "version": "2.0.0",
+  "description": "淺色極簡風格，適合學術演示 - Minimal Clean Theme for Slidev",
+  "author": "AISliDev",
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "minimal",
+    "clean",
+    "academic"
+  ],
+  "slidev": {
+    "colorSchema": "light",
+    "highlighter": "shiki"
+  }
+}

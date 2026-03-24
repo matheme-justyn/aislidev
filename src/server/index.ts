@@ -206,36 +206,50 @@ await fastify.use((req, res, next) => {
           proxyRes: (proxyRes: any, _req: any, res: any) => {
             const contentType = proxyRes.headers["content-type"] || "";
 
-            // Only intercept HTML responses
-            if (contentType.includes("text/html")) {
+            // Intercept HTML and JavaScript responses to rewrite paths
+            if (
+              contentType.includes("text/html") ||
+              contentType.includes("application/javascript") ||
+              contentType.includes("text/javascript") ||
+              contentType.includes("application/x-javascript")
+            ) {
               let body = "";
               proxyRes.on("data", (chunk: any) => {
                 body += chunk.toString("utf8");
               });
               proxyRes.on("end", () => {
-                // Add <base> tag to make all relative URLs work correctly
-                // This is crucial for Vite's dynamic imports
-                body = body.replace(
-                  /(<head[^>]*>)/i,
-                  `$1\n  <base href="/slidev/${port}/">`,
-                );
+                if (contentType.includes("text/html")) {
+                  // HTML: Add <base> tag and rewrite script/link tags
+                  body = body.replace(
+                    /(<head[^>]*>)/i,
+                    `$1\n  <base href="/slidev/${port}/">`,
+                  );
+                  body = body.replace(
+                    /(<script[^>]*src=")(\/@[^"]*)/gi,
+                    `$1/slidev/${port}$2`,
+                  );
+                  body = body.replace(
+                    /(<link[^>]*href=")(\/@[^"]*)/gi,
+                    `$1/slidev/${port}$2`,
+                  );
+                  body = body.replace(
+                    /(<img[^>]*src=")(\/@[^"]*)/gi,
+                    `$1/slidev/${port}$2`,
+                  );
+                } else {
+                  // JavaScript: Rewrite import statements
+                  // from "/@fs/..." -> from "/slidev/${port}/@fs/..."
+                  // import ... from "/@fs/..." -> import ... from "/slidev/${port}/@fs/..."
+                  body = body.replace(
+                    /(\bfrom\s+["'])(\/@[^"']*)(["'])/g,
+                    `$1/slidev/${port}$2$3`,
+                  );
+                  body = body.replace(
+                    /(\bimport\s*\(\s*["'])(\/@[^"']*)(["']\s*\))/g,
+                    `$1/slidev/${port}$2$3`,
+                  );
+                }
 
-                // Fix relative Vite paths by adding /slidev/${port} prefix
-                // /@fs/... → /slidev/${port}/@fs/...
-                // /@vite/... → /slidev/${port}/@vite/...
-                // /@id/... → /slidev/${port}/@id/...
-                body = body.replace(
-                  /(<script[^>]*src=")(\/@[^"]*)/gi,
-                  `$1/slidev/${port}$2`,
-                );
-                body = body.replace(
-                  /(<link[^>]*href=")(\/@[^"]*)/gi,
-                  `$1/slidev/${port}$2`,
-                );
-                body = body.replace(
-                  /(<img[^>]*src=")(\/@[^"]*)/gi,
-                  `$1/slidev/${port}$2`,
-                );
                 // Set response headers
                 res.statusCode = proxyRes.statusCode || 200;
                 Object.keys(proxyRes.headers).forEach((key) => {
@@ -247,7 +261,7 @@ await fastify.use((req, res, next) => {
                 res.end(body);
               });
             } else {
-              // For non-HTML, forward directly
+              // For other content types, forward directly
               res.statusCode = proxyRes.statusCode || 200;
               Object.keys(proxyRes.headers).forEach((key) => {
                 res.setHeader(key, proxyRes.headers[key]);

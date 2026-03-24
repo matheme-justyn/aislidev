@@ -51,8 +51,9 @@ const checkStatus = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      // Use absolute URL to ensure correct base path in iframe
-      previewUrl.value = `${window.location.origin}/slidev/${data.port}/`;
+      // Direct access to Slidev (ADR-003: No proxy for preview)
+      // Port mapping in container: -p 13030-13040:13030-13040
+      previewUrl.value = `http://localhost:${data.port}/`;
       console.log(`[Preview] Preview URL set: ${previewUrl.value}`);
       status.value = "簡報已就緒";
       if (statusCheckInterval) {
@@ -86,8 +87,8 @@ const startPresentation = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      // Use absolute URL to ensure correct base path in iframe
-      previewUrl.value = `${window.location.origin}/slidev/${data.port}/`;
+      // Direct access to Slidev (ADR-003: No proxy for preview)
+      previewUrl.value = `http://localhost:${data.port}/`;
       status.value = "簡報已就緒";
     }
   } catch (error) {

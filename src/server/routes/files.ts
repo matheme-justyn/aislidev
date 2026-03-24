@@ -53,12 +53,10 @@ export default async function filesRoutes(
   const { storageDir } = options;
 
   fastify.get("/files/presentations", async (_request, reply) => {
-    const slidesDir = path.join(storageDir, "slides");
-
     try {
-      await fs.mkdir(slidesDir, { recursive: true });
+      await fs.mkdir(storageDir, { recursive: true });
 
-      const entries = await fs.readdir(slidesDir, { withFileTypes: true });
+      const entries = await fs.readdir(storageDir, { withFileTypes: true });
 
       const presentations: PresentationInfo[] = [];
 
@@ -66,7 +64,7 @@ export default async function filesRoutes(
         if (!entry.isDirectory()) continue;
         if (entry.name.startsWith(".")) continue;
 
-        const presentationPath = path.join(slidesDir, entry.name);
+        const presentationPath = path.join(storageDir, entry.name);
         const validation = await validatePresentation(presentationPath);
 
         presentations.push({
@@ -99,10 +97,10 @@ export default async function filesRoutes(
     "/files/presentations/:presentationId",
     async (request, reply) => {
       const { presentationId } = request.params;
-      const presentationPath = path.join(storageDir, "slides", presentationId);
+      const presentationPath = path.join(storageDir, presentationId);
       const slidesPath = path.join(presentationPath, "slides.md");
 
-      if (!slidesPath.startsWith(path.join(storageDir, "slides"))) {
+      if (!slidesPath.startsWith(storageDir)) {
         return reply.code(403).send({ error: "Access denied" });
       }
 

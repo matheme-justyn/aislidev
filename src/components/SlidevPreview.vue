@@ -51,7 +51,8 @@ const checkStatus = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `/slidev/${data.port}/`;
+      // Use absolute URL to ensure correct base path in iframe
+      previewUrl.value = `${window.location.origin}/slidev/${data.port}/`;
       console.log(`[Preview] Preview URL set: ${previewUrl.value}`);
       status.value = "簡報已就緒";
       if (statusCheckInterval) {
@@ -85,7 +86,8 @@ const startPresentation = async () => {
 
     if (data.port) {
       slidevPort.value = data.port;
-      previewUrl.value = `/slidev/${data.port}/`;
+      // Use absolute URL to ensure correct base path in iframe
+      previewUrl.value = `${window.location.origin}/slidev/${data.port}/`;
       status.value = "簡報已就緒";
     }
   } catch (error) {

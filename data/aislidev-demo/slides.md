@@ -9,7 +9,6 @@ class: text-center
 drawings:
   persist: false
 transition: slide-left
-routerMode: history
 mdc: true
 ---
 
@@ -31,8 +30,9 @@ AI 驅動的簡報平台 <span class="text-sm opacity-60">AI-Powered Presentatio
 </div>
 
 ---
-transition: fade-out
----
+
+## transition: fade-out
+
 # 什麼是 AISlidev？
 
 <span class="text-sm opacity-60">What is AISlidev?</span>
@@ -93,8 +93,10 @@ npm run dev
 ```
 
 ---
+
 layout: two-cols
 layoutClass: gap-16
+
 ---
 
 # 核心功能
@@ -148,17 +150,19 @@ layoutClass: gap-16
 </v-clicks>
 
 ---
+
 layout: center
 class: text-center
+
 ---
 
 # Markdown 語法
 
 <span class="text-sm opacity-60">Markdown Syntax</span>
 
-<div class="grid grid-cols-2 gap-4 mt-10 max-h-[60vh]">
+<div class="grid grid-cols-2 gap-4 mt-10">
 
-<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
+<div v-click class="p-4 bg-gray-800 rounded">
 
 ### 基本語法
 
@@ -176,7 +180,7 @@ class: text-center
 
 </div>
 
-<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
+<div v-click class="p-4 bg-gray-800 rounded">
 
 ### 分頁語法
 
@@ -192,7 +196,7 @@ layout: center
 
 </div>
 
-<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
+<div v-click class="p-4 bg-gray-800 rounded">
 
 ### 程式碼區塊
 
@@ -206,7 +210,7 @@ const hello = "world";
 
 </div>
 
-<div v-click class="p-4 bg-gray-800 rounded h-full overflow-y-auto">
+<div v-click class="p-4 bg-gray-800 rounded">
 
 ### 點擊動畫
 
@@ -271,8 +275,10 @@ h1 { color: #42b883; }
 </v-clicks>
 
 ---
+
 layout: center
 class: text-center
+
 ---
 
 # 進階功能
@@ -332,8 +338,10 @@ class: text-center
 </div>
 
 ---
+
 layout: center
 class: text-center
+
 ---
 
 # 技術架構
@@ -408,8 +416,10 @@ aislidev/
 </v-clicks>
 
 ---
+
 layout: two-cols
 layoutClass: gap-16
+
 ---
 
 # 常見問題
@@ -463,8 +473,10 @@ layoutClass: gap-16
 </v-clicks>
 
 ---
+
 layout: center
 class: text-center
+
 ---
 
 # 資源連結
@@ -496,8 +508,10 @@ class: text-center
 </div>
 
 ---
+
 layout: end
 class: text-center
+
 ---
 
 # 感謝觀看！

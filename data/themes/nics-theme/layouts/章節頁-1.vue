@@ -36,7 +36,7 @@
   top: 0px;
   width: 747px;
   height: 726px;
-  background-image: url('../layout-21-image-1.png');
+  background-image: url('/layout-21-image-1.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -49,7 +49,7 @@
   top: 20px;
   width: 313px;
   height: 92px;
-  background-image: url('../layout-21-image-2.png');
+  background-image: url('/layout-21-image-2.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

@@ -19,7 +19,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--slidev-theme-light, #FFFFFF);
+  background-color: var(--slidev-theme-light, #ffffff);
 }
 
 .content-area {
@@ -36,7 +36,7 @@
   top: 20px;
   width: 313px;
   height: 92px;
-  background-image: url('../layout-1-image-1.png');
+  background-image: url('/layout-1-image-1.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -49,7 +49,7 @@
   top: 0px;
   width: 408px;
   height: 720px;
-  background-image: url('../layout-1-image-2.png');
+  background-image: url('/layout-1-image-2.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -62,7 +62,7 @@
   top: 379px;
   width: 303px;
   height: 4px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   pointer-events: none;
 }
 </style>

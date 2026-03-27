@@ -37,7 +37,7 @@
   top: 662px;
   width: 166px;
   height: 33px;
-  background-image: url('../layout-7-image-1.png');
+  background-image: url('/layout-7-image-1.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

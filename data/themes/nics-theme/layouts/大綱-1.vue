@@ -39,7 +39,7 @@
   top: 221px;
   width: 64px;
   height: 79px;
-  background-image: url('../layout-17-image-1.png');
+  background-image: url('/layout-17-image-1.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -52,7 +52,7 @@
   top: 413px;
   width: 64px;
   height: 79px;
-  background-image: url('../layout-17-image-2.png');
+  background-image: url('/layout-17-image-2.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -65,7 +65,7 @@
   top: 413px;
   width: 64px;
   height: 79px;
-  background-image: url('../layout-17-image-3.png');
+  background-image: url('/layout-17-image-3.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -78,7 +78,7 @@
   top: 221px;
   width: 64px;
   height: 79px;
-  background-image: url('../layout-17-image-4.png');
+  background-image: url('/layout-17-image-4.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -91,7 +91,7 @@
   top: 0px;
   width: 262px;
   height: 698px;
-  background-image: url('../layout-17-image-5.png');
+  background-image: url('/layout-17-image-5.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

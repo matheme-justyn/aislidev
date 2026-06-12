@@ -1,46 +1,66 @@
+<!--
+  Layout: 空白投影片_1
+  
+  Usage:
+  ```md
+  ---
+  layout: 空白投影片-1
+  ---
+  
+  # 主標題
+  
+  ::subtitle::
+  subtitle 內容
+  ```
+-->
+
 <script setup lang="ts">
-// Layout: 空白投影片_1
-// Generated from PPTX theme analysis
+const props = defineProps({
+  class: { type: String },
+  layoutClass: { type: String }
+})
 </script>
 
 <template>
-  <div class="slidev-layout nics-空白投影片-1">
-    <div class="bg-layer-1"></div>
-    <div class="shape-1"></div>
-    <div class="shape-2"></div>
-    <div class="content-area">
+  <div class="slidev-layout nics-空白投影片-1" :class="props.layoutClass">
+    <!-- 背景圖片 1 -->
+    <div 
+      class="bg-image-1" 
+      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-22-image-1.png'})` }"
+    />
+
+    <!-- 裝飾形狀 1 -->
+    <div class="shape-1" />
+    <!-- 主標題區域 -->
+    <div class="title-area" :class="props.class">
       <slot />
+    </div>
+    <!-- subtitle 區域 -->
+    <div class="subtitle-area" :class="props.class">
+      <slot name="subtitle" />
     </div>
   </div>
 </template>
 
 <style scoped>
-.nics-空白投影片-1 {
+.slidev-layout {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--slidev-theme-light, #FFFFFF);
+  background-color: var(--slidev-theme-light, #ffffff);
 }
 
-.content-area {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  z-index: 10;
-}
-
-.bg-layer-1 {
+.bg-image-1 {
   position: absolute;
   left: 46px;
   top: 637px;
   width: 180px;
   height: 53px;
-  background-image: url('/layout-15-image-1.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
+  z-index: 0;
 }
 
 .shape-1 {
@@ -51,15 +71,23 @@
   height: 2px;
   background-color: #FFFFFF;
   pointer-events: none;
+  z-index: 1;
+}
+.title-area {
+  position: absolute;
+  left: 9.16%;
+  top: 11.90%;
+  width: 114.68%;
+  height: 8.22%;
+  z-index: 2;
 }
 
-.shape-2 {
+.subtitle-area {
   position: absolute;
-  left: 0px;
-  top: 698px;
-  width: 1280px;
-  height: 22px;
-  background-color: #009694;
-  pointer-events: none;
+  left: 9.16%;
+  top: 23.79%;
+  width: 114.68%;
+  height: 58.57%;
+  z-index: 2;
 }
 </style>

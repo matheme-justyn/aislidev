@@ -1,10 +1,10 @@
 <!--
-  Layout: 封面(公開使用)_1
+  Layout: 內頁&流程表_1
   
   Usage:
   ```md
   ---
-  layout: 封面公開使用-1
+  layout: 內頁流程表-1
   ---
   
   # 主標題
@@ -20,6 +20,12 @@
 
   ::extra::
   extra 內容
+
+  ::body-5::
+  body-5 內容
+
+  ::body-6::
+  body-6 內容
   ```
 -->
 
@@ -31,16 +37,11 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="slidev-layout nics-封面公開使用-1" :class="props.layoutClass">
+  <div class="slidev-layout nics-內頁流程表-1" :class="props.layoutClass">
     <!-- 背景圖片 1 -->
     <div 
       class="bg-image-1" 
-      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-1-image-1.png'})` }"
-    />
-    <!-- 背景圖片 2 -->
-    <div 
-      class="bg-image-2" 
-      :style="{ backgroundImage: `url(${props.bgImage2 || '/layout-1-image-2.png'})` }"
+      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-20-image-1.png'})` }"
     />
 
     <!-- 裝飾形狀 1 -->
@@ -65,6 +66,14 @@ const props = defineProps({
     <div class="extra-area" :class="props.class">
       <slot name="extra" />
     </div>
+    <!-- body-5 區域 -->
+    <div class="body-5-area" :class="props.class">
+      <slot name="body-5" />
+    </div>
+    <!-- body-6 區域 -->
+    <div class="body-6-area" :class="props.class">
+      <slot name="body-6" />
+    </div>
   </div>
 </template>
 
@@ -78,23 +87,10 @@ const props = defineProps({
 
 .bg-image-1 {
   position: absolute;
-  left: 71px;
-  top: 20px;
-  width: 313px;
-  height: 92px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bg-image-2 {
-  position: absolute;
-  left: 873px;
-  top: 0px;
-  width: 408px;
-  height: 720px;
+  left: 46px;
+  top: 637px;
+  width: 180px;
+  height: 53px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -104,56 +100,74 @@ const props = defineProps({
 
 .shape-1 {
   position: absolute;
-  left: 238px;
-  top: 379px;
-  width: 303px;
-  height: 4px;
+  left: 246px;
+  top: 671px;
+  width: 941px;
+  height: 2px;
   background-color: #FFFFFF;
   pointer-events: none;
   z-index: 1;
 }
 .title-area {
   position: absolute;
-  left: 8.27%;
-  top: 38.64%;
-  width: 58.40%;
-  height: 13.45%;
+  left: 9.16%;
+  top: 11.90%;
+  width: 109.42%;
+  height: 8.22%;
   z-index: 2;
 }
 
 .subtitle-area {
   position: absolute;
-  left: 56.66%;
-  top: 50.36%;
-  width: 10.00%;
-  height: 4.49%;
+  left: 53.14%;
+  top: 55.25%;
+  width: 22.84%;
+  height: 29.50%;
   z-index: 2;
 }
 
 .content-area {
   position: absolute;
-  left: 9.08%;
-  top: 50.72%;
-  width: 17.97%;
-  height: 4.49%;
+  left: 95.75%;
+  top: 55.25%;
+  width: 22.84%;
+  height: 29.50%;
   z-index: 2;
 }
 
 .footer-area {
   position: absolute;
-  left: 8.81%;
-  top: 59.53%;
-  width: 39.25%;
-  height: 5.83%;
+  left: 11.09%;
+  top: 55.25%;
+  width: 22.84%;
+  height: 29.50%;
   z-index: 2;
 }
 
 .extra-area {
   position: absolute;
-  left: 8.81%;
-  top: 64.75%;
-  width: 39.25%;
-  height: 5.83%;
+  left: 10.83%;
+  top: 46.37%;
+  width: 24.95%;
+  height: 7.27%;
+  z-index: 2;
+}
+
+.body-5-area {
+  position: absolute;
+  left: 52.89%;
+  top: 46.37%;
+  width: 24.95%;
+  height: 7.27%;
+  z-index: 2;
+}
+
+.body-6-area {
+  position: absolute;
+  left: 95.49%;
+  top: 46.37%;
+  width: 24.95%;
+  height: 7.27%;
   z-index: 2;
 }
 </style>

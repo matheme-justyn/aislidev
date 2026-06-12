@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-03-27
+
+### Added
+
+- **PPTX Theme Extraction System (MVP)**
+  - Complete PPTX parsing and Slidev theme generation pipeline
+  - Extracted NICS presentation template with 23 layout variants
+  - Generated 36 background images (PNG format, 2KB-102KB each)
+  - Extracted 10 theme colors and font settings (Microsoft JhengHei / Arial)
+  - Created 23 Vue layout components with precise positioning
+  - Added theme structure: package.json, styles/, layouts/, setup/
+
+### Fixed
+
+- **NICS Theme Asset Organization**
+  - Moved background images from theme root to proper structure (theme/public/ and slides/public/)
+  - Updated all 23 Vue layout components to reference images from root path (/) instead of /theme/
+  - Added required setup/main.ts and setup/shiki.ts for Slidev theme compatibility
+  - Resolved image loading issues caused by local theme path resolution
+
+### Documentation
+
+- **Local Theme Limitations**
+  - Documented Slidev design limitation: /theme/ path mapping only works for npm-installed themes
+  - Local themes (relative paths) require assets in slides' public/ folder
+  - Evidence from librarian research: GitHub issues #2431, #2495, #2486
+  - Provided workaround: Copy theme assets to presentation's public folder
+
+### Known Limitations
+
+- Background images must reside in `slides/public/` for local themes to work
+- Alternative solution: Publish theme as npm package for automatic /theme/ mapping
+- This is a Slidev framework design choice, not a bug in AISliDev
+
 ## [0.8.0] - 2026-03-24
 
 ### Added

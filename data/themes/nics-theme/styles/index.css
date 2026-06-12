@@ -1,0 +1,52 @@
+@import '@slidev/client/styles/layouts-base.css';
+
+:root {
+  /* 主題顏色 */
+  --slidev-theme-primary: #C2C823;
+  --slidev-theme-accent: #93CFBF;
+  --slidev-theme-accent-3: #E1DF71;
+  --slidev-theme-accent-4: #8BC560;
+  --slidev-theme-accent-5: #4FB9A0;
+  --slidev-theme-accent-6: #368EA5;
+  
+  /* 深淺色 */
+  --slidev-theme-dark: #242424;
+  --slidev-theme-dark-2: #009594;
+  --slidev-theme-light: #FFFFFF;
+  --slidev-theme-light-2: #FFFFFF;
+  
+  /* 字型 */
+  --slidev-theme-font-heading: "微軟正黑體", "Arial", sans-serif;
+  --slidev-theme-font-body: "微軟正黑體", "Arial", sans-serif;
+}
+
+body {
+  font-family: var(--slidev-theme-font-body);
+  color: var(--slidev-theme-dark);
+  background-color: var(--slidev-theme-light);
+}
+
+.slidev-layout {
+  font-family: var(--slidev-theme-font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--slidev-theme-font-heading);
+  color: var(--slidev-theme-primary);
+}
+
+a {
+  color: var(--slidev-theme-accent);
+}
+
+code {
+  background-color: var(--slidev-theme-accent-3);
+  color: var(--slidev-theme-dark);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+
+.slidev-layout {
+  background-color: #FFFFFF;
+}

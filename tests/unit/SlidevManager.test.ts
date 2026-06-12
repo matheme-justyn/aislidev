@@ -148,7 +148,7 @@ describe("SlidevManager", () => {
 
     expect(mocks.spawnMock).toHaveBeenCalledWith(
       "npx",
-      ["@slidev/cli", "slides.md", "--port", "13031", "--log", "info"],
+      ["@slidev/cli", "slides.md", "--port", "13031", "--remote", "--log", "info"],
       expect.objectContaining({
         cwd: path.join(storageDir, "deck-1"),
         detached: false,

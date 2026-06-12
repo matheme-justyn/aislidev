@@ -15,6 +15,9 @@ interface FilesRoutesOptions {
   storageDir: string;
 }
 
+const PRESENTATIONS_DIR = "presentations";
+const TEMPLATES_DIR = "templates";
+
 interface PresentationInfo {
   id: string;
   name: string;
@@ -54,32 +57,39 @@ export default async function filesRoutes(
 
   fastify.get("/files/presentations", async (_request, reply) => {
     try {
-      await fs.mkdir(storageDir, { recursive: true });
-
-      const entries = await fs.readdir(storageDir, { withFileTypes: true });
-
-      const presentations: PresentationInfo[] = [];
-
-      for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
-        if (entry.name.startsWith(".")) continue;
-
-        const presentationPath = path.join(storageDir, entry.name);
-        const validation = await validatePresentation(presentationPath);
-
-        presentations.push({
-          id: entry.name,
+      const presentationsDir = path.join(storageDir, PRESENTATIONS_DIR);
+      await fs.mkdir(presentationsDir, { recursive: true });
+      const entries = await fs.readdir(presentationsDir, { withFileTypes: true });
+      const files = entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+        .map((entry) => ({
           name: entry.name,
-          path: `slides/${entry.name}`,
-          valid: validation.valid,
-          errors: validation.errors.length > 0 ? validation.errors : undefined,
-        });
-      }
+          path: path.join(presentationsDir, entry.name),
+        }));
 
-      return { presentations };
+      return { files };
     } catch (error) {
       fastify.log.error(`Failed to list presentations: ${error}`);
       return reply.code(500).send({ error: "Failed to list presentations" });
+    }
+  });
+
+  fastify.get("/files/templates", async (_request, reply) => {
+    try {
+      const templatesDir = path.join(storageDir, TEMPLATES_DIR);
+      await fs.mkdir(templatesDir, { recursive: true });
+      const entries = await fs.readdir(templatesDir, { withFileTypes: true });
+      const files = entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+        .map((entry) => ({
+          name: entry.name,
+          path: path.join(templatesDir, entry.name),
+        }));
+
+      return { files };
+    } catch (error) {
+      fastify.log.error(`Failed to list templates: ${error}`);
+      return reply.code(500).send({ error: "Failed to list templates" });
     }
   });
 
@@ -94,22 +104,43 @@ export default async function filesRoutes(
   });
 
   fastify.get<{ Params: { presentationId: string } }>(
-    "/files/presentations/:presentationId",
+    "/files/presentations/:filename",
     async (request, reply) => {
-      const { presentationId } = request.params;
-      const presentationPath = path.join(storageDir, presentationId);
-      const slidesPath = path.join(presentationPath, "slides.md");
+      const { filename } = request.params as { filename: string };
+      const presentationsDir = path.join(storageDir, PRESENTATIONS_DIR);
+      const slidesPath = path.join(presentationsDir, filename);
 
-      if (!slidesPath.startsWith(storageDir)) {
+      if (!slidesPath.startsWith(presentationsDir)) {
         return reply.code(403).send({ error: "Access denied" });
       }
 
       try {
         const content = await fs.readFile(slidesPath, "utf-8");
-        return { presentationId, content };
+        return { filename, content };
       } catch (error) {
         fastify.log.error(`Failed to read presentation: ${error}`);
         return reply.code(404).send({ error: "Presentation not found" });
+      }
+    },
+  );
+
+  fastify.get<{ Params: { filename: string } }>(
+    "/files/templates/:filename",
+    async (request, reply) => {
+      const { filename } = request.params;
+      const templatesDir = path.join(storageDir, TEMPLATES_DIR);
+      const filePath = path.join(templatesDir, filename);
+
+      if (!filePath.startsWith(templatesDir)) {
+        return reply.code(403).send({ error: "Access denied" });
+      }
+
+      try {
+        const content = await fs.readFile(filePath, "utf-8");
+        return { filename, content };
+      } catch (error) {
+        fastify.log.error(`Failed to read template: ${error}`);
+        return reply.code(404).send({ error: "Template not found" });
       }
     },
   );

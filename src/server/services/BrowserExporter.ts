@@ -93,8 +93,8 @@ export class BrowserExporter {
       await this.gotoWithCleanEnv(page, slideUrl, { waitUntil: "networkidle", timeout: 30000 });
 
       // Wait for Vue app and theme CSS to load
-      await page.waitForSelector('#app', { state: 'attached' });
-      await page.waitForSelector('.slidev-layout', { state: 'visible' });
+      await page.locator('#app').waitFor({ state: 'attached' });
+      await page.locator('.slidev-layout').waitFor({ state: 'visible' });
       await page.waitForTimeout(2000);
 
       // Get slide count from Slidev's API (most reliable)
@@ -211,7 +211,7 @@ export class BrowserExporter {
     });
     
     // Wait for Vue app and theme CSS to load
-    await page.waitForSelector('#app', { state: 'attached', timeout: 10000 });
+    await page.locator('#app').waitFor({ state: 'attached', timeout: 10000 });
     
     // Wait for Slidev theme CSS to be fully applied
     // Check for computed background color to ensure theme is loaded
@@ -364,7 +364,7 @@ export class BrowserExporter {
     });
     
     // Wait for Vue app and theme CSS to load
-    await page.waitForSelector('#app', { state: 'attached', timeout: 10000 });
+    await page.locator('#app').waitFor({ state: 'attached', timeout: 10000 });
     await page.waitForTimeout(2000);
     
     // Get total clicks for this slide

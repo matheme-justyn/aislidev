@@ -1,0 +1,148 @@
+{
+  "theme": {
+    "name": "資安院_簡報母片",
+    "colors": {
+      "accent1": "#C2C823",
+      "accent2": "#93CFBF",
+      "accent3": "#E1DF71",
+      "accent4": "#8BC560",
+      "accent5": "#4FB9A0",
+      "accent6": "#368EA5",
+      "dk1": "#242424",
+      "dk2": "#009594",
+      "lt1": "#FFFFFF",
+      "lt2": "#FFFFFF"
+    }
+  },
+  "master": {
+    "background": "yes"
+  },
+  "layouts": [
+    {
+      "name": "封面(公開使用)_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "章節頁_4",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "章節頁_5",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖片_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖片_2",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖片_3",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖片_4",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖表_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖表_2",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖表_3",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&圖表_4",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "封面(內部使用)_2",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "內頁&流程表_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "簡報底圖",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "空白投影片_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "封底_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "大綱_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "1_大綱_2",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "前言_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "前言_2",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "章節頁_1",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "章節頁_2",
+      "type": "custom",
+      "hasBackground": false
+    },
+    {
+      "name": "章節頁_3",
+      "type": "custom",
+      "hasBackground": false
+    }
+  ],
+  "fonts": {
+    "schemeName": "Office",
+    "heading": {
+      "latin": "Arial",
+      "ea": ""
+    },
+    "body": {
+      "latin": "Arial",
+      "ea": ""
+    }
+  }
+}

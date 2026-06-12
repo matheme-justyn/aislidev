@@ -1,14 +1,25 @@
 # AISlidev
 
-> AI-powered Slidev presentation platform
+> Archived AI-powered Slidev presentation platform
 
-[![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)](./CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-archived-lightgrey.svg)](./ARCHIVE.md)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![AI-First](https://img.shields.io/badge/development-AI--First-purple.svg)](./AGENTS.md)
 
 [繁體中文](./README.zh-TW.md)
 
 ---
+
+## Archive Status
+
+AISlidev is no longer under active development and is being preserved as a read-only historical project.
+
+- The original product direction is considered superseded by newer AI design workflows such as Claude Design
+- The repository is kept mainly for reference, prior experiments, and possible asset reuse
+- New development, issue triage, and maintenance are considered closed
+
+See [ARCHIVE.md](./ARCHIVE.md) for the shutdown rationale and expectations.
 
 ## Features
 

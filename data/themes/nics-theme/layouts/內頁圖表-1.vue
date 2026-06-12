@@ -1,10 +1,10 @@
 <!--
-  Layout: 封底_1
+  Layout: 內頁&圖表_1
   
   Usage:
   ```md
   ---
-  layout: 封底-1
+  layout: 內頁圖表-1
   ---
   
   # 主標題
@@ -14,6 +14,9 @@
 
   ::content::
   content 內容
+
+  ::footer::
+  footer 內容
   ```
 -->
 
@@ -25,18 +28,15 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="slidev-layout nics-封底-1" :class="props.layoutClass">
+  <div class="slidev-layout nics-內頁圖表-1" :class="props.layoutClass">
     <!-- 背景圖片 1 -->
     <div 
       class="bg-image-1" 
-      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-23-image-1.png'})` }"
-    />
-    <!-- 背景圖片 2 -->
-    <div 
-      class="bg-image-2" 
-      :style="{ backgroundImage: `url(${props.bgImage2 || '/layout-23-image-2.png'})` }"
+      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-16-image-1.png'})` }"
     />
 
+    <!-- 裝飾形狀 1 -->
+    <div class="shape-1" />
     <!-- 主標題區域 -->
     <div class="title-area" :class="props.class">
       <slot />
@@ -48,6 +48,10 @@ const props = defineProps({
     <!-- content 區域 -->
     <div class="content-area" :class="props.class">
       <slot name="content" />
+    </div>
+    <!-- footer 區域 -->
+    <div class="footer-area" :class="props.class">
+      <slot name="footer" />
     </div>
   </div>
 </template>
@@ -62,10 +66,10 @@ const props = defineProps({
 
 .bg-image-1 {
   position: absolute;
-  left: 890px;
-  top: 0px;
-  width: 394px;
-  height: 720px;
+  left: 46px;
+  top: 637px;
+  width: 180px;
+  height: 53px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -73,43 +77,49 @@ const props = defineProps({
   z-index: 0;
 }
 
-.bg-image-2 {
+.shape-1 {
   position: absolute;
-  left: 62px;
-  top: 20px;
-  width: 346px;
-  height: 96px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  left: 246px;
+  top: 671px;
+  width: 941px;
+  height: 2px;
+  background-color: #FFFFFF;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
-
 .title-area {
   position: absolute;
-  left: 9.17%;
-  top: 46.52%;
-  width: 68.81%;
-  height: 23.84%;
+  left: 9.39%;
+  top: 18.62%;
+  width: 41.73%;
+  height: 8.22%;
   z-index: 2;
 }
 
 .subtitle-area {
   position: absolute;
-  left: 9.17%;
-  top: 37.37%;
-  width: 68.81%;
-  height: 4.94%;
+  left: 56.99%;
+  top: 82.50%;
+  width: 42.13%;
+  height: 4.49%;
   z-index: 2;
 }
 
 .content-area {
   position: absolute;
-  left: 8.90%;
-  top: 89.39%;
-  width: 41.01%;
-  height: 4.48%;
+  left: 57.95%;
+  top: 22.36%;
+  width: 64.56%;
+  height: 55.29%;
+  z-index: 2;
+}
+
+.footer-area {
+  position: absolute;
+  left: 9.39%;
+  top: 29.52%;
+  width: 41.73%;
+  height: 49.24%;
   z-index: 2;
 }
 </style>

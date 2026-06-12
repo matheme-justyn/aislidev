@@ -1,10 +1,10 @@
 <!--
-  Layout: 前言_1
+  Layout: 1_大綱_2
   
   Usage:
   ```md
   ---
-  layout: 前言-1
+  layout: 1-大綱-2
   ---
   
   # 主標題
@@ -22,16 +22,11 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="slidev-layout nics-前言-1" :class="props.layoutClass">
+  <div class="slidev-layout nics-1-大綱-2" :class="props.layoutClass">
     <!-- 背景圖片 1 -->
     <div 
       class="bg-image-1" 
-      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-5-image-1.png'})` }"
-    />
-    <!-- 背景圖片 2 -->
-    <div 
-      class="bg-image-2" 
-      :style="{ backgroundImage: `url(${props.bgImage2 || '/layout-5-image-2.png'})` }"
+      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-4-image-1.png'})` }"
     />
 
     <!-- 主標題區域 -->
@@ -55,23 +50,10 @@ const props = defineProps({
 
 .bg-image-1 {
   position: absolute;
-  left: 0px;
-  top: 486px;
-  width: 1280px;
-  height: 215px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bg-image-2 {
-  position: absolute;
-  left: 71px;
-  top: 20px;
-  width: 313px;
-  height: 92px;
+  left: -4px;
+  top: 0px;
+  width: 262px;
+  height: 698px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -81,19 +63,19 @@ const props = defineProps({
 
 .title-area {
   position: absolute;
-  left: 9.16%;
-  top: 20.45%;
-  width: 114.68%;
-  height: 8.22%;
+  left: 40.64%;
+  top: 14.99%;
+  width: 75.25%;
+  height: 7.52%;
   z-index: 2;
 }
 
 .subtitle-area {
   position: absolute;
-  left: 9.16%;
-  top: 40.57%;
-  width: 114.68%;
-  height: 24.87%;
+  left: 40.64%;
+  top: 26.73%;
+  width: 75.25%;
+  height: 59.39%;
   z-index: 2;
 }
 </style>

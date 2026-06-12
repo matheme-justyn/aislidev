@@ -32,7 +32,12 @@ export class SlidevManager {
     // Allocate port first (needed for dynamic vite.config.ts generation)
     const port = config.port || (await getPort({ port: [13030, 13031, 13032, 13033, 13034, 13035, 13036, 13037, 13038, 13039, 13040] }));
 
-    // Don't generate custom vite.config.ts - let Slidev use its default config
+    // Mirror the shared Slidev Vite config into each presentation directory
+    const projectRoot = path.resolve(__dirname, "../../..");
+    const sharedViteConfigPath = path.join(projectRoot, "slidev-vite.config.ts");
+    const viteConfigPath = path.join(presentationDir, "vite.config.ts");
+    const viteConfigContent = await fs.readFile(sharedViteConfigPath, "utf-8");
+    await fs.writeFile(viteConfigPath, viteConfigContent, "utf-8");
     // Custom base URL breaks Vue initialization
     // Slidev is designed to be accessed directly without proxy
     const slidevProcess = spawn(

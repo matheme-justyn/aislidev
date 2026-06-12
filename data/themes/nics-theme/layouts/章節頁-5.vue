@@ -1,68 +1,115 @@
+<!--
+  Layout: 章節頁_5
+  
+  Usage:
+  ```md
+  ---
+  layout: 章節頁-5
+  ---
+  
+  # 主標題
+  
+  ::subtitle::
+  subtitle 內容
+
+  ::content::
+  content 內容
+  ```
+-->
+
 <script setup lang="ts">
-// Layout: 章節頁_5
-// Generated from PPTX theme analysis
+const props = defineProps({
+  class: { type: String },
+  layoutClass: { type: String }
+})
 </script>
 
 <template>
-  <div class="slidev-layout nics-章節頁-5">
-    <div class="bg-layer-1"></div>
-    <div class="bg-layer-2"></div>
-    <div class="shape-1"></div>
-    <div class="content-area">
+  <div class="slidev-layout nics-章節頁-5" :class="props.layoutClass">
+    <!-- 背景圖片 1 -->
+    <div 
+      class="bg-image-1" 
+      :style="{ backgroundImage: `url(${props.bgImage1 || '/layout-11-image-1.png'})` }"
+    />
+    <!-- 背景圖片 2 -->
+    <div 
+      class="bg-image-2" 
+      :style="{ backgroundImage: `url(${props.bgImage2 || '/layout-11-image-2.png'})` }"
+    />
+
+    <!-- 主標題區域 -->
+    <div class="title-area" :class="props.class">
       <slot />
+    </div>
+    <!-- subtitle 區域 -->
+    <div class="subtitle-area" :class="props.class">
+      <slot name="subtitle" />
+    </div>
+    <!-- content 區域 -->
+    <div class="content-area" :class="props.class">
+      <slot name="content" />
     </div>
   </div>
 </template>
 
 <style scoped>
-.nics-章節頁-5 {
+.slidev-layout {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--slidev-theme-light, #FFFFFF);
+  background-color: var(--slidev-theme-light, #ffffff);
 }
 
-.content-area {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  z-index: 10;
-}
-
-.bg-layer-1 {
+.bg-image-1 {
   position: absolute;
   left: 626px;
   top: 19px;
   width: 657px;
   height: 679px;
-  background-image: url('/layout-3-image-1.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
+  z-index: 0;
 }
 
-.bg-layer-2 {
+.bg-image-2 {
   position: absolute;
   left: 71px;
   top: 20px;
   width: 313px;
   height: 92px;
-  background-image: url('/layout-3-image-2.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
+  z-index: 0;
 }
 
-.shape-1 {
+.title-area {
   position: absolute;
-  left: 0px;
-  top: 698px;
-  width: 1280px;
-  height: 22px;
-  background-color: #009694;
-  pointer-events: none;
+  left: 8.65%;
+  top: 37.43%;
+  width: 58.40%;
+  height: 12.79%;
+  z-index: 2;
+}
+
+.subtitle-area {
+  position: absolute;
+  left: 9.34%;
+  top: 52.13%;
+  width: 57.33%;
+  height: 14.83%;
+  z-index: 2;
+}
+
+.content-area {
+  position: absolute;
+  left: 9.34%;
+  top: 30.14%;
+  width: 58.48%;
+  height: 5.30%;
+  z-index: 2;
 }
 </style>

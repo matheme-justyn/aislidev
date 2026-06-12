@@ -14,7 +14,9 @@ const mocks = vi.hoisted(() => {
   const pageCloseMock = vi.fn();
   const pageKeyboardPressMock = vi.fn();
   const pageUrlMock = vi.fn();
+  const pageEvaluateMock = vi.fn();
   const locatorTextContentMock = vi.fn();
+  const locatorWaitForMock = vi.fn();
 
   const mkdirMock = vi.fn();
   const rmMock = vi.fn();
@@ -38,7 +40,9 @@ const mocks = vi.hoisted(() => {
     pageCloseMock,
     pageKeyboardPressMock,
     pageUrlMock,
+    pageEvaluateMock,
     locatorTextContentMock,
+    locatorWaitForMock,
     mkdirMock,
     rmMock,
     statMock,
@@ -83,7 +87,9 @@ describe("BrowserExporter", () => {
     mocks.pageCloseMock.mockResolvedValue(undefined);
     mocks.pageKeyboardPressMock.mockResolvedValue(undefined);
     mocks.pageUrlMock.mockReturnValue("http://localhost:13030/1");
+    mocks.pageEvaluateMock.mockResolvedValue(2);
     mocks.locatorTextContentMock.mockResolvedValue("1 / 2");
+    mocks.locatorWaitForMock.mockResolvedValue(undefined);
 
     const pageMock = {
       setViewportSize: mocks.pageSetViewportSizeMock,
@@ -97,7 +103,9 @@ describe("BrowserExporter", () => {
         press: mocks.pageKeyboardPressMock,
       },
       url: mocks.pageUrlMock,
+      evaluate: mocks.pageEvaluateMock,
       locator: vi.fn(() => ({
+        waitFor: mocks.locatorWaitForMock,
         first: vi.fn(() => ({
           textContent: mocks.locatorTextContentMock,
         })),
@@ -128,15 +136,15 @@ describe("BrowserExporter", () => {
     }));
   });
 
-  it("creates fresh browser for each export (no singleton reuse)", async () => {
+  it("reuses a single browser across exports", async () => {
     const exporter = new BrowserExporter();
 
     // Run two exports
     await exporter.exportPPTX(13030, "/tmp/export1.pptx", 5000);
     await exporter.exportPPTX(13030, "/tmp/export2.pptx", 5000);
 
-    // Browser should be launched twice (fresh instance per export)
-    expect(mocks.chromiumLaunchMock).toHaveBeenCalledTimes(2);
+    // Browser is initialized once and reused across exports
+    expect(mocks.chromiumLaunchMock).toHaveBeenCalledTimes(1);
     expect(mocks.chromiumLaunchMock).toHaveBeenCalledWith({
       channel: 'chromium',
       headless: true,
@@ -144,12 +152,10 @@ describe("BrowserExporter", () => {
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
       ]),
     });
 
-    // Browser should be closed twice (once per export)
-    expect(mocks.browserCloseMock).toHaveBeenCalledTimes(2);
+    expect(mocks.browserCloseMock).not.toHaveBeenCalled();
   });
 
   it("exports pptx by screenshoting slides with inline logic", async () => {
@@ -161,7 +167,7 @@ describe("BrowserExporter", () => {
     expect(result).toBe(outputPath);
 
     // Fresh page created for each slide (2 slides detected)
-    expect(mocks.browserNewPageMock).toHaveBeenCalledTimes(3); // 1 for detection + 2 for screenshots
+    expect(mocks.browserNewPageMock).toHaveBeenCalledTimes(1);
 
     // Navigate to slides with networkidle
     expect(mocks.pageGotoMock).toHaveBeenCalledWith(
@@ -202,11 +208,11 @@ describe("BrowserExporter", () => {
     expect(mocks.statMock).toHaveBeenCalledWith(outputPath);
     
     // Pages closed after screenshots
-    expect(mocks.pageCloseMock).toHaveBeenCalled();
+    expect(mocks.pageCloseMock).toHaveBeenCalledTimes(1);
   });
 
   it("fails when no slides are detected and cleans up temp resources", async () => {
-    mocks.locatorTextContentMock.mockResolvedValue("1 / 0");
+    mocks.pageEvaluateMock.mockResolvedValue(0);
 
     const exporter = new BrowserExporter();
 

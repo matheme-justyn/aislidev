@@ -1,14 +1,25 @@
 # AISlidev
 
-> AI 驅動的 Slidev 簡報平台
+> 已封存的 AI 驅動 Slidev 簡報平台
 
-[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](./CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-archived-lightgrey.svg)](./ARCHIVE.md)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 [![AI-First](https://img.shields.io/badge/development-AI--First-purple.svg)](./AGENTS.md)
 
 [English](./README.md)
 
 ---
+
+## 專案狀態
+
+AISlidev 已停止主動開發，現以唯讀歷史專案方式保留。
+
+- 原本想解決的產品方向，現階段已大致可由 Claude Design 這類新一代 AI 設計工作流取代
+- 此 repo 主要保留作為過往實驗、主題資產與技術探索參考
+- 不再接受新的功能開發、issue 維護或持續營運承諾
+
+收尾原因與後續預期請見 [ARCHIVE.md](./ARCHIVE.md)。
 
 ## 功能特色
 
